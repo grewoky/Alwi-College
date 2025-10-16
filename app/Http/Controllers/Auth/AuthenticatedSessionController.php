@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\DB;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -22,15 +23,24 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
-    {
-        $request->authenticate();
+    public function store(LoginRequest $request)
+{
+    $request->authenticate();
+    $request->session()->regenerate();
 
-        $request->session()->regenerate();
+    $u = Auth::user();
+    $roles = DB::table('model_has_roles')
+        ->join('roles','roles.id','=','model_has_roles.role_id')
+        ->where('model_has_roles.model_type', get_class($u))
+        ->where('model_has_roles.model_id', $u->id)
+        ->pluck('roles.name')->toArray();
 
-        return redirect()->intended(route('dashboard', absolute: false));
-    }
+    if (in_array('admin',$roles))   return redirect()->route('admin.dashboard');
+    if (in_array('teacher',$roles)) return redirect()->route('teacher.dashboard');
+    if (in_array('student',$roles)) return redirect()->route('student.dashboard');
 
+    return redirect()->route('dashboard'); // fallback
+}
     /**
      * Destroy an authenticated session.
      */

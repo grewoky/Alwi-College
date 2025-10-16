@@ -8,6 +8,11 @@ use App\Http\Controllers\InfoFileController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PaymentController;
 
+use App\Http\Controllers\LessonController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\TripController;
+use App\Http\Controllers\DashboardController;
+
 
 
 // Halaman welcome
@@ -19,6 +24,7 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
 
 // Contoh rute tes role
 Route::middleware(['auth','role:admin'])->get('/admin-only', fn()=> 'ADMIN OK');
@@ -58,6 +64,49 @@ Route::middleware('auth')->get('/debug/master', function () {
 
 // ================== ROUTE INFO ==================
 
+// Redirect universal: /dashboard -> ke dashboard sesuai role
+Route::middleware('auth')->get('/dashboard', function () {
+    $u = \Illuminate\Support\Facades\Auth::user();
+    $roles = \Illuminate\Support\Facades\DB::table('model_has_roles')
+        ->join('roles','roles.id','=','model_has_roles.role_id')
+        ->where('model_has_roles.model_type', get_class($u))
+        ->where('model_has_roles.model_id', $u->id)
+        ->pluck('roles.name')->toArray();
+
+    if (in_array('admin',$roles))   return redirect()->route('admin.dashboard');
+    if (in_array('teacher',$roles)) return redirect()->route('teacher.dashboard');
+    if (in_array('student',$roles)) return redirect()->route('student.dashboard');
+
+    abort(403,'Role tidak dikenali');
+})->name('dashboard');
+
+// ADMIN area
+Route::middleware(['auth','role:admin'])->prefix('admin')->group(function () {
+    Route::get('/', [DashboardController::class,'admin'])->name('admin.dashboard');
+    // (sudah ada sebelumnya)
+    Route::get('/lessons/generate', [\App\Http\Controllers\LessonController::class,'showGenerate'])->name('lessons.generate.form');
+    Route::post('/lessons/generate', [\App\Http\Controllers\LessonController::class,'generate'])->name('lessons.generate');
+    Route::get('/trips', [\App\Http\Controllers\TripController::class,'index'])->name('trips.index');
+    Route::get('/payments', [\App\Http\Controllers\PaymentController::class,'listAll'])->name('pay.list');
+});
+
+// TEACHER area
+Route::middleware(['auth','role:teacher'])->prefix('teacher')->group(function () {
+    Route::get('/', [DashboardController::class,'teacher'])->name('teacher.dashboard');
+    Route::get('/lessons', [\App\Http\Controllers\LessonController::class,'index'])->name('teacher.lessons');
+    Route::get('/lessons/{lesson}', [\App\Http\Controllers\AttendanceController::class,'show'])->name('attendance.show');
+    Route::post('/lessons/{lesson}', [\App\Http\Controllers\AttendanceController::class,'store'])->name('attendance.store');
+});
+
+// STUDENT area
+Route::middleware(['auth','role:student'])->prefix('student')->group(function () {
+    Route::get('/', [DashboardController::class,'student'])->name('student.dashboard');
+    Route::get('/info', [\App\Http\Controllers\InfoFileController::class,'index'])->name('info.index');
+    Route::post('/info', [\App\Http\Controllers\InfoFileController::class,'store'])->name('info.store');
+    Route::get('/payment', [\App\Http\Controllers\PaymentController::class,'index'])->name('pay.index');
+    Route::post('/payment', [\App\Http\Controllers\PaymentController::class,'store'])->name('pay.store');
+});
+
 // SISWA: upload bukti + riwayat
 Route::middleware(['auth','role:student'])->group(function(){
     Route::get('/payment', [PaymentController::class,'index'])->name('pay.index');
@@ -92,6 +141,24 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// ADMIN
+Route::middleware(['auth','role:admin'])->group(function(){
+  Route::get('/admin/lessons/generate', [LessonController::class,'showGenerate'])->name('lessons.generate.form');
+  Route::post('/admin/lessons/generate', [LessonController::class,'generate'])->name('lessons.generate');
+  Route::get('/admin/trips', [TripController::class,'index'])->name('trips.index');
+});
+
+// GURU
+Route::middleware(['auth','role:teacher'])->group(function(){
+  Route::get('/teacher/lessons', [LessonController::class,'index'])->name('teacher.lessons');
+  Route::get('/teacher/lessons/{lesson}', [AttendanceController::class,'show'])->name('attendance.show');
+  Route::post('/teacher/lessons/{lesson}', [AttendanceController::class,'store'])->name('attendance.store');
+});
+
+// SISWA
+Route::middleware(['auth','role:student'])->get('/student/attendance', [AttendanceController::class,'studentSummary'])->name('student.attendance');
+
 
 // Auth routes (Breeze)
 require __DIR__.'/auth.php';
