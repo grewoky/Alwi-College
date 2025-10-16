@@ -5,13 +5,43 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\InfoFile;
 use App\Models\Student;
-use Illuminate\Support\Facades\Auth;      // ⬅️ penting
+use Illuminate\Support\Facades\Auth;  
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;    // ⬅️ penting
 
 class InfoFileController extends Controller
 {
+    private function assertStudentUser(): void
+{
+    $u = Auth::user();
+    $isStudent = DB::table('model_has_roles')
+        ->join('roles','roles.id','=','model_has_roles.role_id')
+        ->where('model_has_roles.model_type', get_class($u))
+        ->where('model_has_roles.model_id', $u->id)
+        ->where('roles.name','student')
+        ->exists();
+
+    abort_unless($isStudent, 403, 'Unauthorized.');
+}
+
+    public function destroy(InfoFile $info)
+    {
+    // Hapus file fisik (jika ada)
+    if ($info->file_path && Storage::disk('public')->exists($info->file_path)) {
+        Storage::disk('public')->delete($info->file_path);
+    }
+
+    // Hapus record di DB
+    $info->delete();
+
+    return back()->with('ok', 'File berhasil dihapus.');
+}
+
     // Halaman pelajar: form upload + daftar file miliknya
     public function index()
     {
+            $this->assertStudentUser(); // ⬅️ tambahkan
+
         $student = Student::firstOrCreate(['user_id' => Auth::id()]); // ⬅️ pakai Auth::id()
         $files = InfoFile::where('student_id', $student->id)->latest()->get();
         return view('info.index', compact('files'));

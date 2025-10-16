@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\DB;            // ⬅️ pakai Facade
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Controllers\InfoFileController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PaymentController;
+
 
 
 // Halaman welcome
@@ -56,6 +58,19 @@ Route::middleware('auth')->get('/debug/master', function () {
 
 // ================== ROUTE INFO ==================
 
+// SISWA: upload bukti + riwayat
+Route::middleware(['auth','role:student'])->group(function(){
+    Route::get('/payment', [PaymentController::class,'index'])->name('pay.index');
+    Route::post('/payment', [PaymentController::class,'store'])->name('pay.store');
+});
+
+// ADMIN: daftar & verifikasi
+Route::middleware(['auth','role:admin'])->group(function(){
+    Route::get('/admin/payments', [PaymentController::class,'listAll'])->name('pay.list');
+    Route::post('/admin/payments/{payment}/verify', [PaymentController::class,'verify'])->name('pay.verify');
+    Route::delete('/admin/payments/{payment}', [PaymentController::class,'destroy'])->name('pay.destroy');
+});
+
 // SISWA (upload & lihat file miliknya)
 Route::middleware(['auth','role:student'])->group(function(){
     Route::get('/info', [InfoFileController::class,'index'])->name('info.index');
@@ -66,6 +81,10 @@ Route::middleware(['auth','role:student'])->group(function(){
 Route::middleware(['auth','role:teacher|admin'])->group(function(){
     Route::get('/info/all', [InfoFileController::class,'listAll'])->name('info.list');
     Route::get('/info/{info}/download', [InfoFileController::class,'download'])->name('info.download');
+});
+
+Route::middleware(['auth','role:admin'])->group(function () {
+    Route::delete('/info/{info}', [InfoFileController::class,'destroy'])->name('info.destroy');
 });
 
 Route::middleware('auth')->group(function () {
