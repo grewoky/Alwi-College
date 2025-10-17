@@ -19,7 +19,7 @@
             <!-- Header dengan nama aplikasi -->
             <div class="mb-6 text-center">
                 <h1 class="text-3xl font-bold text-blue-600">🎓 Alwi College</h1>
-                <p class="text-gray-600 mt-1">Sistem Manajemen Pendidikan</p>
+                <p class="text-gray-600 mt-1">Bimbingan Belajar</p>
             </div>
 
             <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">

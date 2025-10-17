@@ -28,7 +28,7 @@
 
   <!-- Quick Actions -->
   <div class="grid md:grid-cols-2 gap-6">
-    <a href="{{ route('teacher.lessons') }}" class="bg-white border border-gray-200 rounded-lg p-6 shadow-md hover:shadow-lg transition-all hover:scale-105 transform">
+    <a href="{{ route('lessons.teacher') }}" class="bg-white border border-gray-200 rounded-lg p-6 shadow-md hover:shadow-lg transition-all hover:scale-105 transform">
       <div class="flex items-start gap-4">
         <div class="text-4xl">📝</div>
         <div>
@@ -38,12 +38,12 @@
       </div>
     </a>
 
-    <a href="{{ route('info.list') }}" class="bg-white border border-gray-200 rounded-lg p-6 shadow-md hover:shadow-lg transition-all hover:scale-105 transform">
+    <a href="{{ route('attendance.teacher') }}" class="bg-white border border-gray-200 rounded-lg p-6 shadow-md hover:shadow-lg transition-all hover:scale-105 transform">
       <div class="flex items-start gap-4">
-        <div class="text-4xl">📋</div>
+        <div class="text-4xl">✓</div>
         <div>
-          <h3 class="text-lg font-bold text-gray-900 mb-1">Info Siswa</h3>
-          <p class="text-gray-600 text-sm">Akses & unduh berkas dari siswa.</p>
+          <h3 class="text-lg font-bold text-gray-900 mb-1">Absensi</h3>
+          <p class="text-gray-600 text-sm">Rekap kehadiran & laporan siswa.</p>
         </div>
       </div>
     </a>
