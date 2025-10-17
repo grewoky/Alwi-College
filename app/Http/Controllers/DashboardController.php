@@ -37,6 +37,14 @@ class DashboardController extends Controller
         $student = \App\Models\Student::firstOrCreate(['user_id'=>Auth::id()]);
         $presentCount = \App\Models\Attendance::where('student_id',$student->id)->where('status','present')->count();
         $lastPayment = \App\Models\Payment::where('student_id',$student->id)->latest()->first();
-        return view('dashboard.student', compact('presentCount','lastPayment'));
+        
+        // Get all payments for the student
+        $payments = \App\Models\Payment::where('student_id',$student->id)->get();
+        
+        // Get total students and teachers for about section
+        $totalStudents = \App\Models\Student::count();
+        $totalTeachers = \App\Models\Teacher::count();
+        
+        return view('dashboard.student', compact('presentCount','lastPayment','payments','totalStudents','totalTeachers'));
     }
 }

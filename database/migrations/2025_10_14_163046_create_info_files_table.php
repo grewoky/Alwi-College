@@ -14,7 +14,11 @@ return new class extends Migration
     Schema::create('info_files', function (Illuminate\Database\Schema\Blueprint $t) {
         $t->id();
         $t->foreignId('student_id')->constrained()->cascadeOnDelete();
+        $t->string('school')->nullable();
+        $t->string('class_name')->nullable();
+        $t->string('subject')->nullable();
         $t->string('title');
+        $t->string('material')->nullable();
         $t->string('file_path');
         $t->timestamps();
     });

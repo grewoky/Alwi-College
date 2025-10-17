@@ -6,7 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class InfoFile extends Model
 {
-    protected $fillable = ['student_id','title','file_path'];
+    protected $fillable = [
+        'student_id',
+        'title',
+        'file_path',
+        'school',
+        'class_name',
+        'subject',
+        'material'
+    ];
 
     public function student()
     {

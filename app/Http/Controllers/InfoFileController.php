@@ -51,8 +51,12 @@ class InfoFileController extends Controller
     public function store(Request $r)
     {
         $r->validate([
-            'title' => 'required|max:120',
-            'file'  => 'required|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
+            'school'    => 'nullable|max:120',
+            'class_name' => 'nullable|max:50',
+            'subject'   => 'nullable|max:120',
+            'title'     => 'required|max:120',
+            'material'  => 'nullable|max:255',
+            'file'      => 'required|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
         ]);
 
         $student = Student::firstOrCreate(['user_id' => Auth::id()]); // ⬅️ pakai Auth::id()
@@ -60,7 +64,11 @@ class InfoFileController extends Controller
 
         InfoFile::create([
             'student_id' => $student->id,
+            'school'     => $r->school,
+            'class_name' => $r->class_name,
+            'subject'    => $r->subject,
             'title'      => $r->title,
+            'material'   => $r->material,
             'file_path'  => $path,
         ]);
 
