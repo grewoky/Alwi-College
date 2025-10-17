@@ -7,6 +7,7 @@ use App\Models\Lesson;
 use App\Models\Attendance;
 use App\Models\Student;
 use App\Models\Teacher;
+use App\Models\ClassRoom;
 use App\Models\TeacherTrip;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -78,5 +79,179 @@ class AttendanceController extends Controller
             ->where('student_id',$student->id)->pluck('status')->first();
 
         return view('attendance.student', compact('presentCount','todayStatus'));
+    }
+
+    // Student view: list absensi mereka
+    public function studentView()
+    {
+        $user = Auth::user();
+        
+        // Get student data
+        $student = Student::where('user_id', $user->id)->firstOrFail();
+        
+        // Get student's classroom
+        $classRoom = $student->classRoom;
+        
+        // Get all attendance records for this student
+        $attendances = Attendance::where('student_id', $student->id)
+            ->with(['lesson' => ['subject', 'teacher']])
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+        
+        // Calculate statistics
+        $totalSessions = $attendances->total();
+        $hadir = $attendances->where('status', 'present')->count();
+        $tidakHadir = $attendances->where('status', 'alpha')->count();
+        $izin = $attendances->where('status', 'izin')->count();
+        $sakit = $attendances->where('status', 'sakit')->count();
+        
+        return view('attendance.student-view', compact(
+            'student',
+            'classRoom',
+            'attendances',
+            'totalSessions',
+            'hadir',
+            'tidakHadir',
+            'izin',
+            'sakit'
+        ));
+    }
+
+    // Teacher view: list classes
+    public function teacherView()
+    {
+        $user = Auth::user();
+        $teacher = Teacher::where('user_id', $user->id)->firstOrFail();
+        
+        // Get classes taught by this teacher
+        $lessons = Lesson::where('teacher_id', $teacher->id)
+            ->with('classRoom')
+            ->get();
+        
+        $classRooms = $lessons->pluck('classRoom')->unique('id')->sortBy('name');
+        
+        // Group by classroom prefix (A23, B22, etc)
+        $groupedClasses = $classRooms->groupBy(function($classroom) {
+            return substr($classroom->name, 0, 1); // Group by prefix (A, B, etc)
+        })->sortKeys();
+        
+        return view('attendance.teacher-view', compact(
+            'teacher',
+            'classRooms',
+            'groupedClasses'
+        ));
+    }
+
+    // Admin view: all attendance
+    public function adminView()
+    {
+        // Get classrooms with school and students
+        $classRooms = ClassRoom::with(['school', 'students.user'])->orderBy('school_id')->orderBy('grade')->get();
+        
+        // Group by School -> then by Grade (Kelas 10, 11, 12)
+        $groupedBySchool = $classRooms->groupBy(function($classroom) {
+            return $classroom->school->name;
+        });
+        
+        $groupedClasses = [];
+        foreach ($groupedBySchool as $schoolName => $classrooms) {
+            $groupedClasses[$schoolName] = $classrooms->groupBy('grade')->sortKeys();
+        }
+        
+        // Get attendance summary
+        $attendanceSummary = Attendance::selectRaw('student_id, status, COUNT(*) as count')
+            ->groupBy('student_id', 'status')
+            ->get();
+        
+        return view('attendance.admin-view', compact(
+            'classRooms',
+            'groupedClasses',
+            'attendanceSummary'
+        ));
+    }
+
+    // Get attendance data for a specific class (API endpoint)
+    public function getClassAttendance($classRoomId)
+    {
+        $classRoom = ClassRoom::findOrFail($classRoomId);
+        $students = $classRoom->students()
+            ->with(['attendances' => function($query) {
+                $query->whereDate('created_at', today());
+            }])
+            ->get();
+        
+        return response()->json([
+            'classRoom' => $classRoom,
+            'students' => $students,
+        ]);
+    }
+
+    // Mark attendance for a class (show form dan process)
+    public function markAttendance($classRoomId)
+    {
+        $user = Auth::user();
+        $teacher = Teacher::where('user_id', $user->id)->firstOrFail();
+        
+        // Get classroom and its students
+        $classRoom = ClassRoom::findOrFail($classRoomId);
+        $students = $classRoom->students()->with('user')->orderBy('id')->get();
+        
+        // Get today's lesson
+        $lesson = Lesson::where('teacher_id', $teacher->id)
+            ->where('class_room_id', $classRoomId)
+            ->whereDate('date', today())
+            ->first();
+        
+        return view('attendance.mark', compact(
+            'classRoom',
+            'students',
+            'lesson'
+        ));
+    }
+
+    // Store mark attendance
+    public function storeMarkAttendance(Request $request, $classRoomId)
+    {
+        $user = Auth::user();
+        $teacher = Teacher::where('user_id', $user->id)->firstOrFail();
+        
+        // Validate
+        $validated = $request->validate([
+            'attendances' => 'required|array',
+            'attendances.*' => 'in:present,alpha,izin,sakit',
+        ]);
+        
+        $classRoom = ClassRoom::findOrFail($classRoomId);
+        
+        // Get or create lesson for today
+        $lesson = Lesson::firstOrCreate(
+            [
+                'date' => today(),
+                'class_room_id' => $classRoomId,
+                'teacher_id' => $teacher->id,
+            ],
+            [
+                'subject_id' => null,
+                'start_time' => now()->format('H:i:s'),
+                'end_time' => now()->addHours(1)->format('H:i:s'),
+            ]
+        );
+        
+        // Save attendance records
+        foreach ($validated['attendances'] as $studentId => $status) {
+            Attendance::updateOrCreate(
+                [
+                    'lesson_id' => $lesson->id,
+                    'student_id' => $studentId,
+                ],
+                [
+                    'status' => $status,
+                    'marked_by' => $user->id,
+                    'marked_at' => now(),
+                ]
+            );
+        }
+        
+        return back()->with('ok', 'Absensi berhasil dicatat!');
     }
 }

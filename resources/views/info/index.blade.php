@@ -2,39 +2,6 @@
   <x-slot name="title">Info • Unggah Kisi-kisi</x-slot>
 
   <div class="min-h-screen bg-gray-50">
-    <!-- Navbar -->
-    <nav class="bg-white border-b border-gray-200 shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-          <div class="flex items-center gap-8">
-            <div class="flex-shrink-0">
-              <h1 class="text-xl font-bold text-blue-600">Alwi College</h1>
-            </div>
-            <div class="hidden md:flex items-center gap-1">
-              <a href="{{ route('dashboard') }}" class="px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition">
-                <span>📊 Dashboard</span>
-              </a>
-              <a href="#jadwal" class="px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition">
-                <span>📅 Jadwal Les</span>
-              </a>
-              <a href="{{ route('info.index') }}" class="px-4 py-2 rounded-lg text-blue-600 bg-blue-50 font-medium transition">
-                <span>📋 Info</span>
-              </a>
-              <a href="#absensi" class="px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium transition">
-                <span>✓ Absensi</span>
-              </a>
-            </div>
-          </div>
-          <div class="flex md:hidden">
-            <button class="p-2 rounded-lg hover:bg-gray-100">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-    </nav>
 
     <!-- Page Content -->
     <div class="py-8">

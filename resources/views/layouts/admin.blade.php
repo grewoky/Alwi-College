@@ -9,8 +9,8 @@
 <body class="h-full bg-gray-50 text-gray-900">
 <div class="min-h-full">
 
-  {{-- Navbar Component (Menggantikan topbar dan sidebar) --}}
-  <x-app-navbar />
+  {{-- Admin Navbar Component --}}
+  <x-admin-navbar />
 
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
     @if (session('ok'))

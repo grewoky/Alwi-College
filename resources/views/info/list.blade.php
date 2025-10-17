@@ -15,16 +15,27 @@ if ($u) {
 }
 @endphp
 
-<x-app-layout>
+<x-admin-layout>
   <x-slot name="title">Daftar Info File • Admin</x-slot>
 
   <div class="py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
       <!-- Page Header -->
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Daftar File dari Siswa</h1>
-        <p class="text-gray-600">Kelola semua file kisi-kisi dan materi yang diunggah oleh siswa</p>
+      <div class="mb-8 flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">Daftar File dari Siswa</h1>
+          <p class="text-gray-600">Kelola semua file kisi-kisi dan materi yang diunggah oleh siswa</p>
+        </div>
+        @if(!$files->isEmpty() && $isAdmin)
+          <a href="{{ route('info.downloadAll') }}"
+             class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+            Download Semua
+          </a>
+        @endif
       </div>
 
       <!-- Success Message -->
@@ -166,4 +177,4 @@ if ($u) {
 
     </div>
   </div>
-</x-app-layout>
+</x-admin-layout>

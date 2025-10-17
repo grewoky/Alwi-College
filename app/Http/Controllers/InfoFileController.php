@@ -87,4 +87,42 @@ class InfoFileController extends Controller
     {
         return response()->download(storage_path('app/public/'.$info->file_path));
     }
+
+    // Download semua files sebagai ZIP
+    public function downloadAll()
+    {
+        $files = InfoFile::all();
+        
+        if ($files->isEmpty()) {
+            return back()->with('error', 'Tidak ada file untuk didownload');
+        }
+
+        $zip = new \ZipArchive();
+        $zipFileName = 'info-files-' . now()->format('Ymd-His') . '.zip';
+        $zipFilePath = storage_path('app/temp/' . $zipFileName);
+
+        // Create temp directory if not exists
+        if (!file_exists(storage_path('app/temp'))) {
+            mkdir(storage_path('app/temp'), 0755, true);
+        }
+
+        if ($zip->open($zipFilePath, \ZipArchive::CREATE) === true) {
+            foreach ($files as $file) {
+                $filePath = storage_path('app/public/' . $file->file_path);
+                
+                if (file_exists($filePath)) {
+                    // Add file dengan folder structure: Student_Name/filename
+                    $studentName = $file->student->user->name ?? 'Unknown';
+                    $localName = $studentName . '/' . basename($filePath);
+                    $zip->addFile($filePath, $localName);
+                }
+            }
+            $zip->close();
+
+            // Download dan delete temporary file
+            return response()->download($zipFilePath, $zipFileName)->deleteFileAfterSend(true);
+        }
+
+        return back()->with('error', 'Gagal membuat file ZIP');
+    }
 }

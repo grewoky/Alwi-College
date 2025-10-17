@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-admin-layout>
 <div class="p-6 max-w-6xl mx-auto">
   <h1 class="text-2xl font-bold mb-4">Verifikasi Pembayaran</h1>
 
@@ -83,4 +83,4 @@
     {{ $payments->links() }}
   </div>
 </div>
-</x-app-layout>
+</x-admin-layout>

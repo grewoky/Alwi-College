@@ -10,18 +10,18 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-{
-    Schema::create('teacher_trips', function (Illuminate\Database\Schema\Blueprint $t) {
-        $t->id();
-        $t->foreignId('teacher_id')->constrained()->cascadeOnDelete();
-        $t->date('date');
-        $t->unsignedTinyInteger('teaching_sessions')->default(0); // +1 per absensi, max 3/hari
-        $t->boolean('sunday_bonus')->default(false);              // bonus Minggu
-        $t->timestamps();
+    {
+        Schema::create('teacher_trips', function (Blueprint $t) {
+            $t->id();
+            $t->foreignId('teacher_id')->constrained()->cascadeOnDelete();
+            $t->date('date');
+            $t->unsignedTinyInteger('teaching_sessions')->default(0); // +1 per absensi, max 3/hari
+            $t->boolean('sunday_bonus')->default(false);              // bonus Minggu
+            $t->timestamps();
 
-        $t->unique(['teacher_id','date']);
-    });
-}
+            $t->unique(['teacher_id','date']);
+        });
+    }
 
 
     /**

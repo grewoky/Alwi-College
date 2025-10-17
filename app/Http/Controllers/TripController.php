@@ -34,4 +34,62 @@ class TripController extends Controller
 
         return view('trips.index', compact('teachers','from','to'));
     }
+
+    // Show teacher trip details
+    public function show(Teacher $teacher, Request $r)
+    {
+        $from = $r->input('from', now()->startOfMonth()->toDateString());
+        $to   = $r->input('to',   now()->toDateString());
+
+        $trips = TeacherTrip::where('teacher_id', $teacher->id)
+            ->whereBetween('date', [$from, $to])
+            ->orderBy('date', 'desc')
+            ->get();
+
+        $totalTrips = $trips->sum(fn($t) => min(3, $t->teaching_sessions + ($t->sunday_bonus ? 3 : 0)));
+
+        return view('trips.show', compact('teacher', 'trips', 'totalTrips', 'from', 'to'));
+    }
+
+    // Store new trip (manual entry)
+    public function store(Teacher $teacher, Request $r)
+    {
+        $r->validate([
+            'date'              => 'required|date',
+            'teaching_sessions' => 'required|integer|min:0|max:3',
+            'sunday_bonus'      => 'nullable|boolean',
+        ]);
+
+        TeacherTrip::create([
+            'teacher_id'        => $teacher->id,
+            'date'              => $r->date,
+            'teaching_sessions' => $r->teaching_sessions,
+            'sunday_bonus'      => $r->boolean('sunday_bonus'),
+        ]);
+
+        return back()->with('ok', 'Trip berhasil ditambahkan');
+    }
+
+    // Update trip
+    public function update(TeacherTrip $trip, Request $r)
+    {
+        $r->validate([
+            'teaching_sessions' => 'required|integer|min:0|max:3',
+            'sunday_bonus'      => 'nullable|boolean',
+        ]);
+
+        $trip->update([
+            'teaching_sessions' => $r->teaching_sessions,
+            'sunday_bonus'      => $r->boolean('sunday_bonus'),
+        ]);
+
+        return back()->with('ok', 'Trip berhasil diperbarui');
+    }
+
+    // Delete trip
+    public function destroy(TeacherTrip $trip)
+    {
+        $trip->delete();
+        return back()->with('ok', 'Trip berhasil dihapus');
+    }
 }

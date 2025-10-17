@@ -15,10 +15,14 @@ class LessonController extends Controller
 {
     public function showGenerate()
     {
+        $classrooms = ClassRoom::with('school')->orderBy('school_id')->orderBy('grade')->get();
+        $teachersList = Teacher::with('user')->orderBy('id')->get();
+        $subjectsList = Subject::orderBy('name')->get();
+        
         return view('lessons.generate', [
-            'classes'  => ClassRoom::with('school')->orderBy('school_id')->orderBy('grade')->get(),
-            'subjects' => Subject::orderBy('name')->get(),
-            'teachers' => Teacher::with('user')->orderBy('id')->get(),
+            'classrooms'  => $classrooms,
+            'teachersList' => $teachersList,
+            'subjectsList' => $subjectsList,
         ]);
     }
 
@@ -36,7 +40,7 @@ class LessonController extends Controller
         $end   = new Carbon($r->end_date);
 
         DB::transaction(function() use ($r, $start, $end) {
-            for ($d = $start->copy(); $d->lte($end); $d->addDays(2)) {
+            for ($d = $start->copy(); $d->lte($end); $d->addDay()) {
                 Lesson::firstOrCreate(
                     [
                         'date'          => $d->toDateString(),
@@ -52,7 +56,7 @@ class LessonController extends Controller
             }
         });
 
-        return back()->with('ok','Jadwal berhasil digenerate per 2 hari.');
+        return back()->with('ok','Jadwal berhasil digenerate setiap hari dari tanggal ' . $start->format('d M Y') . ' sampai ' . $end->format('d M Y'));
     }
 
     public function index(Request $r)
@@ -77,5 +81,116 @@ class LessonController extends Controller
                 'date'      => $r->date,
             ],
         ]);
+    }
+
+    // View jadwal untuk student
+    public function studentView(Request $r)
+    {
+        $user = Auth::user();
+        $student = \App\Models\Student::where('user_id', $user->id)->firstOrFail();
+        
+        // Get lessons for student's class
+        $q = Lesson::with(['teacher.user', 'subject', 'classRoom'])
+            ->where('class_room_id', $student->class_room_id)
+            ->orderBy('date', 'asc');
+        
+        if ($r->filled('date')) {
+            $q->whereDate('date', $r->date);
+        }
+        
+        $lessons = $q->paginate(15)->withQueryString();
+        
+        return view('lessons.student-view', compact('student', 'lessons'));
+    }
+
+    // View jadwal untuk admin/guru
+    public function adminView(Request $r)
+    {
+        $q = Lesson::with(['teacher.user', 'subject', 'classRoom'])
+            ->orderBy('date', 'desc');
+        
+        if ($r->filled('teacher_id')) {
+            $q->where('teacher_id', $r->teacher_id);
+        }
+        
+        if ($r->filled('class_room_id')) {
+            $q->where('class_room_id', $r->class_room_id);
+        }
+        
+        if ($r->filled('date')) {
+            $q->whereDate('date', $r->date);
+        }
+        
+        $lessons = $q->paginate(20)->withQueryString();
+        $teachers = Teacher::with('user')->orderBy('id')->get();
+        $classes = ClassRoom::orderBy('name')->get();
+        
+        return view('lessons.admin-view', compact(
+            'lessons',
+            'teachers',
+            'classes'
+        ));
+    }
+
+    // Edit jadwal individual
+    public function editLesson(Lesson $lesson)
+    {
+        $subjectsList = Subject::orderBy('name')->get();
+        return view('lessons.edit', compact('lesson', 'subjectsList'));
+    }
+
+    // Update jadwal individual
+    public function updateLesson(Lesson $lesson, Request $r)
+    {
+        $r->validate([
+            'subject_id' => 'nullable|exists:subjects,id',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time'   => 'nullable|date_format:H:i',
+        ]);
+
+        $lesson->update([
+            'subject_id' => $r->subject_id,
+            'start_time' => $r->start_time,
+            'end_time'   => $r->end_time,
+        ]);
+
+        return back()->with('ok', 'Jadwal berhasil diperbarui');
+    }
+
+    // Delete jadwal individual
+    public function deleteLesson(Lesson $lesson)
+    {
+        $lesson->delete();
+        return back()->with('ok', 'Jadwal berhasil dihapus');
+    }
+
+    // Admin dashboard - jadwal yang di-upload
+    public function adminDashboard()
+    {
+        // Statistik jadwal total
+        $totalLessons = Lesson::count();
+        $totalTeachers = Lesson::distinct('teacher_id')->count();
+        $totalClasses = Lesson::distinct('class_room_id')->count();
+        
+        // Jadwal per status
+        $lessonsWithoutTime = Lesson::whereNull('start_time')->orWhereNull('end_time')->count();
+        
+        // Jadwal terbaru
+        $recentLessons = Lesson::with(['teacher.user', 'subject', 'classRoom'])
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+        
+        // Jadwal per guru
+        $teachersLessonCount = Teacher::withCount(['lessons'])->orderBy('lessons_count', 'desc')->get();
+
+        return view('lessons.admin-dashboard', compact(
+            'totalLessons',
+            'totalTeachers',
+            'totalClasses',
+            'lessonsWithoutTime',
+            'recentLessons',
+            'teachersLessonCount'
+        ));
     }
 }
