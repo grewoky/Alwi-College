@@ -18,7 +18,7 @@
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm font-semibold text-green-600 uppercase">Trip Bulan Ini</p>
-          <p class="text-4xl font-bold text-green-900 mt-2">{{ $thisMonthTrips }} / 12</p>
+          <p class="text-4xl font-bold text-green-900 mt-2">{{ $thisMonthTrips }} / 90</p>
           <p class="text-sm text-green-700 mt-1">poin perbulan</p>
         </div>
         <div class="text-5xl">🚗</div>

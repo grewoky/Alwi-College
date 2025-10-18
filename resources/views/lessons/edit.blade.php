@@ -40,15 +40,37 @@
         <!-- Time Range -->
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-bold text-gray-900 mb-3">Jam Mulai (HH:MM)</label>
-            <input type="time" name="start_time" value="{{ $lesson->start_time }}" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
+            <label class="block text-sm font-bold text-gray-900 mb-3">Jam Mulai</label>
+            <select name="start_time" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
+              <option value="">-- Pilih Jam Mulai --</option>
+              @php
+                $times = [];
+                for ($hour = 9; $hour < 20; $hour++) {
+                  $times[] = sprintf("%02d:00", $hour);
+                  $times[] = sprintf("%02d:30", $hour);
+                }
+                $times[] = "20:00";
+              @endphp
+              @foreach($times as $time)
+                <option value="{{ $time }}" @if($lesson->start_time == $time) selected @endif>
+                  {{ $time }} WIB
+                </option>
+              @endforeach
+            </select>
             @error('start_time')
               <span class="text-red-600 text-sm mt-1">{{ $message }}</span>
             @enderror
           </div>
           <div>
-            <label class="block text-sm font-bold text-gray-900 mb-3">Jam Selesai (HH:MM)</label>
-            <input type="time" name="end_time" value="{{ $lesson->end_time }}" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
+            <label class="block text-sm font-bold text-gray-900 mb-3">Jam Selesai</label>
+            <select name="end_time" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
+              <option value="">-- Pilih Jam Selesai --</option>
+              @foreach($times as $time)
+                <option value="{{ $time }}" @if($lesson->end_time == $time) selected @endif>
+                  {{ $time }} WIB
+                </option>
+              @endforeach
+            </select>
             @error('end_time')
               <span class="text-red-600 text-sm mt-1">{{ $message }}</span>
             @enderror

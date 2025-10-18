@@ -193,4 +193,40 @@ class LessonController extends Controller
             'teachersLessonCount'
         ));
     }
+
+    // View jadwal untuk teacher (hanya kelas yang dia ajar)
+    public function teacherView(Request $r)
+    {
+        $user = Auth::user();
+        $teacher = Teacher::where('user_id', $user->id)->firstOrFail();
+        
+        // Get lessons hanya untuk guru yang login
+        $q = Lesson::with(['subject', 'classRoom.school'])
+            ->where('teacher_id', $teacher->id)
+            ->orderBy('date', 'desc');
+        
+        if ($r->filled('date')) {
+            $q->whereDate('date', $r->date);
+        }
+        
+        if ($r->filled('class_room_id')) {
+            $q->where('class_room_id', $r->class_room_id);
+        }
+        
+        $lessons = $q->paginate(20)->withQueryString();
+        
+        // Get classes yang diajari guru ini untuk filter
+        $teacherClasses = ClassRoom::whereIn('id', function($query) use ($teacher) {
+            $query->select('class_room_id')
+                  ->from('lessons')
+                  ->where('teacher_id', $teacher->id)
+                  ->distinct();
+        })->orderBy('name')->get();
+        
+        return view('lessons.teacher-view', compact(
+            'teacher',
+            'lessons',
+            'teacherClasses'
+        ));
+    }
 }

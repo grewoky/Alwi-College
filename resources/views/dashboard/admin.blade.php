@@ -48,7 +48,7 @@
         <div class="text-4xl">🚗</div>
         <div>
           <h3 class="text-lg font-bold text-green-900 mb-2">Rekap Trip Guru</h3>
-          <p class="text-sm text-green-700">Kelola 12 poin/bulan & hitung sisa.</p>
+          <p class="text-sm text-green-700">Kelola 90 poin/bulan & hitung sisa.</p>
         </div>
       </div>
     </a>

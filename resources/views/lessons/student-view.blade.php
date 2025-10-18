@@ -12,13 +12,13 @@
 
             <!-- Filter -->
             <div class="mb-6 flex gap-4 flex-wrap">
-                <form method="GET" action="{{ route('lessons.index') }}" class="flex gap-2">
+                <form method="GET" action="{{ route('lessons.student') }}" class="flex gap-2">
                     <input type="date" name="date" value="{{ request('date') }}" 
                            class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600 focus:border-transparent">
                     <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold">
                         🔍 Filter
                     </button>
-                    <a href="{{ route('lessons.index') }}" class="px-6 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 font-bold">
+                    <a href="{{ route('lessons.student') }}" class="px-6 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 font-bold">
                         ⟲ Reset
                     </a>
                 </form>
