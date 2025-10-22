@@ -53,8 +53,13 @@ Route::middleware(['auth','role:admin'])->prefix('admin')->group(function () {
     
     // ADMIN INFO (Lihat file yang diupload siswa)
     Route::get('/info', [InfoFileController::class,'listAll'])->name('info.admin.list');
+    Route::get('/info/options', [InfoFileController::class,'showDownloadOptions'])->name('info.download.options');
     Route::get('/info/{info}/download', [InfoFileController::class,'download'])->name('info.download');
+    Route::get('/info/{info}/download-details', [InfoFileController::class,'downloadWithDetails'])->name('info.download.details');
+    Route::post('/info/download-by-type', [InfoFileController::class,'downloadByType'])->name('info.download.by-type');
+    Route::post('/info/download-selected', [InfoFileController::class,'downloadSelected'])->name('info.download.selected');
     Route::get('/info/download-all/zip', [InfoFileController::class,'downloadAll'])->name('info.downloadAll');
+    Route::get('/info/stats', [InfoFileController::class,'getFileStats'])->name('info.stats');
     Route::delete('/info/{info}', [InfoFileController::class,'destroy'])->name('info.destroy');
     
     // ADMIN TRIP GURU (Track trip guru)

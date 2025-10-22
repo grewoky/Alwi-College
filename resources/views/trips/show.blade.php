@@ -169,10 +169,17 @@
 </div>
 
 <script>
+  // Get base route for trips update from Laravel
+  const baseRoute = "{{ route('trips.update', ['trip' => 'TRIP_ID']) }}";
+  
   function editTrip(tripId, sessions, bonus) {
     document.getElementById('editSessions').value = sessions;
     document.getElementById('editBonus').checked = bonus == 1;
-    document.getElementById('editForm').action = `/admin/trips/${tripId}`;
+    
+    // Replace TRIP_ID with actual ID
+    const actionUrl = baseRoute.replace('TRIP_ID', tripId);
+    document.getElementById('editForm').action = actionUrl;
+    
     document.getElementById('editModal').style.display = 'flex';
   }
 

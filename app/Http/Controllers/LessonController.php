@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth; // ⬅️ penting
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Models\Lesson;
 use App\Models\ClassRoom;
@@ -39,24 +40,40 @@ class LessonController extends Controller
         $start = new Carbon($r->start_date);
         $end   = new Carbon($r->end_date);
 
-        DB::transaction(function() use ($r, $start, $end) {
-            for ($d = $start->copy(); $d->lte($end); $d->addDay()) {
-                Lesson::firstOrCreate(
-                    [
-                        'date'          => $d->toDateString(),
-                        'class_room_id' => $r->class_room_id,
-                        'teacher_id'    => $r->teacher_id,
-                    ],
-                    [
-                        'subject_id'    => $r->subject_id,
-                        'start_time'    => null,
-                        'end_time'      => null,
-                    ]
-                );
-            }
-        });
+        try {
+            $created = 0;
+            $skipped = 0;
 
-        return back()->with('ok','Jadwal berhasil digenerate setiap hari dari tanggal ' . $start->format('d M Y') . ' sampai ' . $end->format('d M Y'));
+            DB::transaction(function() use ($r, $start, $end, &$created, &$skipped) {
+                for ($d = $start->copy(); $d->lte($end); $d->addDay()) {
+                    // Check if lesson already exists
+                    $existingLesson = Lesson::where('date', $d->toDateString())
+                        ->where('class_room_id', $r->class_room_id)
+                        ->where('teacher_id', $r->teacher_id)
+                        ->first();
+                    
+                    if (!$existingLesson) {
+                        Lesson::create([
+                            'date'          => $d->toDateString(),
+                            'class_room_id' => $r->class_room_id,
+                            'teacher_id'    => $r->teacher_id,
+                            'subject_id'    => $r->subject_id,
+                            'start_time'    => null,
+                            'end_time'      => null,
+                        ]);
+                        $created++;
+                    } else {
+                        $skipped++;
+                    }
+                }
+            });
+
+            $msg = "Jadwal berhasil digenerate ({$created} baru, {$skipped} sudah ada) dari tanggal " . $start->format('d M Y') . " sampai " . $end->format('d M Y');
+            return back()->with('ok', $msg);
+        } catch (\Exception $e) {
+            Log::error('Lesson generation failed: ' . $e->getMessage());
+            return back()->with('error', 'Gagal membuat jadwal: ' . $e->getMessage());
+        }
     }
 
     public function index(Request $r)
@@ -142,26 +159,55 @@ class LessonController extends Controller
     // Update jadwal individual
     public function updateLesson(Lesson $lesson, Request $r)
     {
+        // Enhanced validation
         $r->validate([
             'subject_id' => 'nullable|exists:subjects,id',
             'start_time' => 'nullable|date_format:H:i',
             'end_time'   => 'nullable|date_format:H:i',
         ]);
-
-        $lesson->update([
-            'subject_id' => $r->subject_id,
-            'start_time' => $r->start_time,
-            'end_time'   => $r->end_time,
-        ]);
-
-        return back()->with('ok', 'Jadwal berhasil diperbarui');
+        
+        // Validate time logic if both times provided
+        if ($r->filled('start_time') && $r->filled('end_time')) {
+            if ($r->start_time >= $r->end_time) {
+                return back()
+                    ->withInput()
+                    ->withErrors(['end_time' => 'Jam selesai harus lebih besar dari jam mulai']);
+            }
+        }
+        
+        try {
+            $lesson->update([
+                'subject_id' => $r->subject_id,
+                'start_time' => $r->start_time,
+                'end_time'   => $r->end_time,
+            ]);
+            
+            return back()->with('ok', 'Jadwal berhasil diperbarui');
+        } catch (\Exception $e) {
+           
+            return back()->with('error', 'Gagal memperbarui jadwal');
+        }
     }
 
     // Delete jadwal individual
     public function deleteLesson(Lesson $lesson)
     {
-        $lesson->delete();
-        return back()->with('ok', 'Jadwal berhasil dihapus');
+        try {
+            $lessonInfo = [
+                'date' => $lesson->date,
+                'class' => $lesson->classRoom->name ?? 'Unknown',
+                'teacher' => $lesson->teacher->user->name ?? 'Unknown',
+            ];
+            
+            $lesson->delete();
+            
+           
+            
+            return back()->with('ok', 'Jadwal berhasil dihapus');
+        } catch (\Exception $e) {
+           
+            return back()->with('error', 'Gagal menghapus jadwal');
+        }
     }
 
     // Admin dashboard - jadwal yang di-upload

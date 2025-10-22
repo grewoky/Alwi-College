@@ -31,7 +31,7 @@ class MasterDataSeeder extends Seeder
         }
 
         // 3) Mata pelajaran
-        foreach (['Matematika','Fisika','Kimia','Biologi','Bahasa Indonesia','Bahasa Inggris'] as $sub) {
+        foreach (['Matematika','Fisika','Kimia','Biologi','Ips','SNBT','TKA'] as $sub) {
             \App\Models\Subject::firstOrCreate(['name'=>$sub]);
         }
 

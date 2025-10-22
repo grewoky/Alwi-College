@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Teacher;
 use App\Models\TeacherTrip;
 use Carbon\Carbon;
-
+use Illuminate\Support\Facades\Log;
 class TripController extends Controller
 {
     public function index(Request $r)
@@ -54,42 +54,70 @@ class TripController extends Controller
     // Store new trip (manual entry)
     public function store(Teacher $teacher, Request $r)
     {
-        $r->validate([
-            'date'              => 'required|date',
-            'teaching_sessions' => 'required|integer|min:0|max:3',
-            'sunday_bonus'      => 'nullable|boolean',
-        ]);
+        try {
+            $r->validate([
+                'date'              => 'required|date|after_or_equal:today',
+                'teaching_sessions' => 'required|integer|min:0|max:3',
+                'sunday_bonus'      => 'nullable|boolean',
+            ]);
 
-        TeacherTrip::create([
-            'teacher_id'        => $teacher->id,
-            'date'              => $r->date,
-            'teaching_sessions' => $r->teaching_sessions,
-            'sunday_bonus'      => $r->boolean('sunday_bonus'),
-        ]);
+            // Check for duplicate
+            $exists = TeacherTrip::where('teacher_id', $teacher->id)
+                ->whereDate('date', $r->date)
+                ->exists();
+            
+            if ($exists) {
+                return back()->with('error', 'Trip untuk tanggal ini sudah ada');
+            }
 
-        return back()->with('ok', 'Trip berhasil ditambahkan');
+            TeacherTrip::create([
+                'teacher_id'        => $teacher->id,
+                'date'              => $r->date,
+                'teaching_sessions' => $r->teaching_sessions,
+                'sunday_bonus'      => $r->boolean('sunday_bonus'),
+            ]);
+
+            return back()->with('ok', 'Trip berhasil ditambahkan');
+        } catch (\Exception $e) {
+       
+            return back()->with('error', 'Gagal menambahkan trip');
+        }
     }
 
     // Update trip
     public function update(TeacherTrip $trip, Request $r)
     {
-        $r->validate([
-            'teaching_sessions' => 'required|integer|min:0|max:3',
-            'sunday_bonus'      => 'nullable|boolean',
-        ]);
+        try {
+            $r->validate([
+                'teaching_sessions' => 'required|integer|min:0|max:3',
+                'sunday_bonus'      => 'nullable|boolean',
+            ]);
 
-        $trip->update([
-            'teaching_sessions' => $r->teaching_sessions,
-            'sunday_bonus'      => $r->boolean('sunday_bonus'),
-        ]);
+            $trip->update([
+                'teaching_sessions' => $r->teaching_sessions,
+                'sunday_bonus'      => $r->boolean('sunday_bonus'),
+            ]);
 
-        return back()->with('ok', 'Trip berhasil diperbarui');
+            return back()->with('ok', 'Trip berhasil diperbarui');
+        } catch (\Exception $e) {
+           
+            return back()->with('error', 'Gagal memperbarui trip');
+        }
     }
 
     // Delete trip
     public function destroy(TeacherTrip $trip)
     {
-        $trip->delete();
-        return back()->with('ok', 'Trip berhasil dihapus');
+        try {
+            $tripDate = $trip->date;
+            $trip->delete();
+            
+         
+            
+            return back()->with('ok', 'Trip berhasil dihapus');
+        } catch (\Exception $e) {
+           
+            return back()->with('error', 'Gagal menghapus trip');
+        }
     }
 }

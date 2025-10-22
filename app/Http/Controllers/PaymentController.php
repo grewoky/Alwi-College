@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use App\Models\Payment;
 use App\Models\Student;
-
 class PaymentController extends Controller
 {
     // SISWA: form upload + riwayat
@@ -53,23 +53,64 @@ class PaymentController extends Controller
 
     public function verify(Payment $payment, Request $r)
     {
-        $r->validate(['status'=>'required|in:approved,rejected', 'note'=>'nullable|string|max:255']);
+        try {
+            $r->validate([
+                'status' => 'required|in:approved,rejected',
+                'note'   => 'nullable|string|max:255'
+            ]);
 
-        $payment->update([
-            'status' => $r->status,
-            'note'   => $r->note,
-        ]);
+            $oldStatus = $payment->status;
+            
+            $payment->update([
+                'status' => $r->status,
+                'note'   => $r->note,
+                'verified_at' => now(),
+                'verified_by' => Auth::id(),
+            ]);
 
-        return back()->with('ok','Status pembayaran diperbarui.');
+            $studentName = $payment->student->user->name ?? 'Unknown';
+            $action = $r->status === 'approved' ? 'APPROVED' : 'REJECTED';
+            
+            Log::info("Payment {$action} for {$studentName} (was: {$oldStatus})", [
+                'payment_id' => $payment->id,
+                'student_id' => $payment->student_id,
+                'status' => $r->status,
+            ]);
+
+            return back()->with('ok', "Status pembayaran berhasil diperbarui menjadi {$r->status}.");
+        } catch (\Exception $e) {
+            Log::error('Payment verification failed', [
+                'error' => $e->getMessage(),
+                'payment_id' => $payment->id,
+            ]);
+            return back()->with('error', 'Gagal memperbarui status pembayaran');
+        }
     }
 
     // ADMIN: hapus record + file (kalau salah unggah)
     public function destroy(Payment $payment)
     {
-        if ($payment->proof_path && Storage::disk('public')->exists($payment->proof_path)) {
-            Storage::disk('public')->delete($payment->proof_path);
+        try {
+            // Delete file if exists
+            if ($payment->proof_path && Storage::disk('public')->exists($payment->proof_path)) {
+                Storage::disk('public')->delete($payment->proof_path);
+            }
+            
+            $studentName = $payment->student->user->name ?? 'Unknown';
+            $payment->delete();
+            
+            Log::info("Payment deleted for student: {$studentName}", [
+                'payment_id' => $payment->id,
+                'student_id' => $payment->student_id,
+            ]);
+            
+            return back()->with('ok','Data pembayaran dihapus.');
+        } catch (\Exception $e) {
+            Log::error('Payment delete failed', [
+                'error' => $e->getMessage(),
+                'payment_id' => $payment->id,
+            ]);
+            return back()->with('error', 'Gagal menghapus data pembayaran');
         }
-        $payment->delete();
-        return back()->with('ok','Data pembayaran dihapus.');
     }
 }
