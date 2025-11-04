@@ -11,17 +11,48 @@
             </div>
 
             <!-- Filter -->
-            <div class="mb-6 flex gap-4 flex-wrap">
+            <div class="mb-6">
+              <!-- Grade Filter Buttons -->
+              <div class="mb-6">
+                <p class="text-sm font-semibold text-gray-900 mb-3">Filter Jadwal Berdasarkan Kelas:</p>
+                <div class="flex gap-3 flex-wrap">
+                  <a href="{{ route('lessons.student') }}" 
+                     class="px-6 py-2 rounded-lg font-semibold transition-all duration-300 {{ !request('grade') ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                    📚 Semua Kelas
+                  </a>
+                  <a href="{{ route('lessons.student', ['grade' => '10']) }}" 
+                     class="px-6 py-2 rounded-lg font-semibold transition-all duration-300 {{ request('grade') == '10' ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                    📖 Kelas 10
+                  </a>
+                  <a href="{{ route('lessons.student', ['grade' => '11']) }}" 
+                     class="px-6 py-2 rounded-lg font-semibold transition-all duration-300 {{ request('grade') == '11' ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                    📖 Kelas 11
+                  </a>
+                  <a href="{{ route('lessons.student', ['grade' => '12']) }}" 
+                     class="px-6 py-2 rounded-lg font-semibold transition-all duration-300 {{ request('grade') == '12' ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                    📖 Kelas 12
+                  </a>
+                </div>
+              </div>
+
+              <!-- Date Filter -->
+              <div>
+                <p class="text-sm font-semibold text-gray-900 mb-3">Filter Berdasarkan Tanggal:</p>
                 <form method="GET" action="{{ route('lessons.student') }}" class="flex gap-2">
+                    @if(request('grade'))
+                      <input type="hidden" name="grade" value="{{ request('grade') }}">
+                    @endif
                     <input type="date" name="date" value="{{ request('date') }}" 
-                           class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600 focus:border-transparent">
-                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold">
-                        🔍 Filter
+                           class="px-4 py-2 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-blue-600 focus:border-blue-600">
+                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold transition">
+                        🔍 Cari
                     </button>
-                    <a href="{{ route('lessons.student') }}" class="px-6 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 font-bold">
-                        ⟲ Reset
+                    <a href="{{ request('grade') ? route('lessons.student', ['grade' => request('grade')]) : route('lessons.student') }}" 
+                       class="px-6 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 font-bold transition">
+                        ⟲ Reset Tanggal
                     </a>
                 </form>
+              </div>
             </div>
 
             <!-- Schedule Cards -->

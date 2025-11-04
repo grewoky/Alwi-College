@@ -14,7 +14,7 @@ class DashboardController extends Controller
         $stats = [
             'students' => \App\Models\Student::count(),
             'teachers' => \App\Models\Teacher::count(),
-            'classes'  => \App\Models\ClassRoom::count(),
+            'today_lessons'  => \App\Models\Lesson::where('date', now()->toDateString())->count(),
             'payments_pending' => \App\Models\Payment::where('status','pending')->count(),
         ];
         return view('dashboard.admin', compact('stats'));

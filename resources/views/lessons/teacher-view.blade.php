@@ -11,24 +11,58 @@
             </div>
 
             <!-- Filter -->
-            <div class="mb-6 flex gap-4 flex-wrap">
-                <form method="GET" action="{{ route('lessons.teacher') }}" class="flex gap-2 flex-wrap">
-                    <select name="class_room_id" class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600 focus:border-transparent">
-                        <option value="">-- Semua Kelas --</option>
-                        @foreach($teacherClasses as $class)
-                            <option value="{{ $class->id }}" @selected(request('class_room_id') == $class->id)>
-                                {{ $class->name }}
-                            </option>
-                        @endforeach
-                    </select>
+            <div class="mb-6">
+              <!-- Grade Filter Buttons -->
+              <div class="mb-6">
+                <p class="text-sm font-semibold text-gray-900 mb-3">Filter Jadwal Berdasarkan Kelas:</p>
+                <div class="flex gap-3 flex-wrap">
+                  <a href="{{ route('lessons.teacher') }}" 
+                     class="px-6 py-2 rounded-lg font-semibold transition-all duration-300 {{ !request('grade') ? 'bg-green-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                    📚 Semua Kelas
+                  </a>
+                  <a href="{{ route('lessons.teacher', ['grade' => '10']) }}" 
+                     class="px-6 py-2 rounded-lg font-semibold transition-all duration-300 {{ request('grade') == '10' ? 'bg-green-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                    📖 Kelas 10
+                  </a>
+                  <a href="{{ route('lessons.teacher', ['grade' => '11']) }}" 
+                     class="px-6 py-2 rounded-lg font-semibold transition-all duration-300 {{ request('grade') == '11' ? 'bg-green-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                    📖 Kelas 11
+                  </a>
+                  <a href="{{ route('lessons.teacher', ['grade' => '12']) }}" 
+                     class="px-6 py-2 rounded-lg font-semibold transition-all duration-300 {{ request('grade') == '12' ? 'bg-green-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                    📖 Kelas 12
+                  </a>
+                </div>
+              </div>
+
+              <!-- Additional Filters (Date & Class Dropdown) -->
+              <form method="GET" action="{{ route('lessons.teacher') }}" class="flex gap-2 flex-wrap items-end">
+                    @if(request('grade'))
+                      <input type="hidden" name="grade" value="{{ request('grade') }}">
+                    @endif
+                    <div>
+                      <label class="block text-sm font-semibold text-gray-700 mb-2">Tanggal</label>
+                      <input type="date" name="date" value="{{ request('date') }}" 
+                             class="px-4 py-2 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-green-600 focus:border-green-600">
+                    </div>
                     
-                    <input type="date" name="date" value="{{ request('date') }}" 
-                           class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600 focus:border-transparent">
+                    <div>
+                      <label class="block text-sm font-semibold text-gray-700 mb-2">Kelas</label>
+                      <select name="class_room_id" class="px-4 py-2 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-green-600 focus:border-green-600">
+                          <option value="">-- Semua Kelas --</option>
+                          @foreach($teacherClasses as $class)
+                              <option value="{{ $class->id }}" @selected(request('class_room_id') == $class->id)>
+                                  {{ $class->name }}
+                              </option>
+                          @endforeach
+                      </select>
+                    </div>
                     
-                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold">
-                        🔍 Filter
+                    <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold transition">
+                        🔍 Cari
                     </button>
-                    <a href="{{ route('lessons.teacher') }}" class="px-6 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 font-bold">
+                    <a href="{{ request('grade') ? route('lessons.teacher', ['grade' => request('grade')]) : route('lessons.teacher') }}" 
+                       class="px-6 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 font-bold transition">
                         ⟲ Reset
                     </a>
                 </form>

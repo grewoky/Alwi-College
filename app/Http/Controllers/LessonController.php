@@ -16,12 +16,10 @@ class LessonController extends Controller
 {
     public function showGenerate()
     {
-        $classrooms = ClassRoom::with('school')->orderBy('school_id')->orderBy('grade')->get();
         $teachersList = Teacher::with('user')->orderBy('id')->get();
         $subjectsList = Subject::orderBy('name')->get();
         
         return view('lessons.generate', [
-            'classrooms'  => $classrooms,
             'teachersList' => $teachersList,
             'subjectsList' => $subjectsList,
         ]);
@@ -29,50 +27,105 @@ class LessonController extends Controller
 
     public function generate(Request $r)
     {
+        // Validasi input
         $r->validate([
-            'class_room_id' => 'required|exists:class_rooms,id',
-            'subject_id'    => 'nullable|exists:subjects,id',
-            'teacher_id'    => 'required|exists:teachers,id',
-            'start_date'    => 'required|date',
-            'end_date'      => 'required|date|after_or_equal:start_date',
+            'school'     => 'required|in:Negeri,IGS,Xavega,Bangau',
+            'grade'      => 'required|in:10,11,12',
+            'room_code'  => 'required|string|max:10',
+            'teacher_id' => 'required|exists:teachers,id',
+            'subject_id' => 'nullable|exists:subjects,id',
+            'description' => 'nullable|string|max:500',
+            'start_date' => 'required|date',
+            'end_date'   => 'required|date|after_or_equal:start_date',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time'   => 'nullable|date_format:H:i',
         ]);
 
-        $start = new Carbon($r->start_date);
-        $end   = new Carbon($r->end_date);
-
         try {
+            // Cari ClassRoom berdasarkan grade dan room_code
+            $classRoom = ClassRoom::where('grade', (int)$r->grade)
+                ->where('name', 'like', '%' . $r->room_code . '%')
+                ->first();
+
+            if (!$classRoom) {
+                return back()
+                    ->withErrors(['room_code' => "Ruangan '{$r->room_code}' tidak ditemukan untuk Kelas {$r->grade}"])
+                    ->withInput();
+            }
+
+            // Validasi time jika keduanya diisi
+            if ($r->start_time && $r->end_time) {
+                if ($r->start_time >= $r->end_time) {
+                    return back()
+                        ->withErrors(['end_time' => 'Jam selesai harus lebih besar dari jam mulai'])
+                        ->withInput();
+                }
+            }
+
+            $start = Carbon::parse($r->start_date);
+            $end = Carbon::parse($r->end_date);
+
             $created = 0;
             $skipped = 0;
+            $errors = [];
 
-            DB::transaction(function() use ($r, $start, $end, &$created, &$skipped) {
+            DB::transaction(function() use ($r, $classRoom, $start, $end, &$created, &$skipped, &$errors) {
                 for ($d = $start->copy(); $d->lte($end); $d->addDay()) {
                     // Check if lesson already exists
                     $existingLesson = Lesson::where('date', $d->toDateString())
-                        ->where('class_room_id', $r->class_room_id)
+                        ->where('class_room_id', $classRoom->id)
                         ->where('teacher_id', $r->teacher_id)
                         ->first();
                     
                     if (!$existingLesson) {
-                        Lesson::create([
-                            'date'          => $d->toDateString(),
-                            'class_room_id' => $r->class_room_id,
-                            'teacher_id'    => $r->teacher_id,
-                            'subject_id'    => $r->subject_id,
-                            'start_time'    => null,
-                            'end_time'      => null,
-                        ]);
-                        $created++;
+                        try {
+                            Lesson::create([
+                                'date'          => $d->toDateString(),
+                                'class_room_id' => $classRoom->id,
+                                'teacher_id'    => $r->teacher_id,
+                                'subject_id'    => $r->subject_id,
+                                'start_time'    => $r->start_time,
+                                'end_time'      => $r->end_time,
+                                'description'   => $r->description,
+                            ]);
+                            $created++;
+                        } catch (\Exception $e) {
+                            $errors[] = "Error pada tanggal {$d->format('d-m-Y')}: {$e->getMessage()}";
+                        }
                     } else {
                         $skipped++;
                     }
                 }
             });
 
-            $msg = "Jadwal berhasil digenerate ({$created} baru, {$skipped} sudah ada) dari tanggal " . $start->format('d M Y') . " sampai " . $end->format('d M Y');
+            if (count($errors) > 0) {
+                Log::warning('Lesson generation dengan error', ['errors' => $errors]);
+                $errorMsg = implode(', ', array_slice($errors, 0, 3)); // Tampilkan 3 error pertama
+                return back()->with('warning', "⚠️ Jadwal dibuat dengan error: $errorMsg");
+            }
+
+            $msg = "✅ Jadwal berhasil digenerate! {$created} jadwal baru dibuat, {$skipped} duplikat diabaikan. Ruangan: {$classRoom->name} (Kelas {$classRoom->grade}), Tanggal: {$start->format('d M Y')} - {$end->format('d M Y')}";
+            
+            Log::info('Lesson generation success', [
+                'created' => $created,
+                'skipped' => $skipped,
+                'classroom_id' => $classRoom->id,
+                'classroom_name' => $classRoom->name,
+                'teacher_id' => $r->teacher_id,
+                'date_range' => $start->format('Y-m-d') . ' to ' . $end->format('Y-m-d'),
+            ]);
+
             return back()->with('ok', $msg);
         } catch (\Exception $e) {
-            Log::error('Lesson generation failed: ' . $e->getMessage());
-            return back()->with('error', 'Gagal membuat jadwal: ' . $e->getMessage());
+            Log::error('Lesson generation failed', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return back()
+                ->withErrors(['general' => 'Gagal membuat jadwal: ' . $e->getMessage()])
+                ->withInput();
         }
     }
 
@@ -110,6 +163,13 @@ class LessonController extends Controller
         $q = Lesson::with(['teacher.user', 'subject', 'classRoom'])
             ->where('class_room_id', $student->class_room_id)
             ->orderBy('date', 'asc');
+        
+        // Filter by grade if provided
+        if ($r->filled('grade')) {
+            $q->whereHas('classRoom', function($query) use ($r) {
+                $query->where('grade', $r->grade);
+            });
+        }
         
         if ($r->filled('date')) {
             $q->whereDate('date', $r->date);
@@ -251,6 +311,13 @@ class LessonController extends Controller
             ->where('teacher_id', $teacher->id)
             ->orderBy('date', 'desc');
         
+        // Filter by grade if provided
+        if ($r->filled('grade')) {
+            $q->whereHas('classRoom', function($query) use ($r) {
+                $query->where('grade', $r->grade);
+            });
+        }
+        
         if ($r->filled('date')) {
             $q->whereDate('date', $r->date);
         }
@@ -275,4 +342,82 @@ class LessonController extends Controller
             'teacherClasses'
         ));
     }
+
+    /**
+     * Menampilkan jadwal yang akan dihapus (jadwal yang sudah lewat tanggalnya)
+     * GET /admin/jadwal/will-delete
+     */
+    public function showExpiredLessons()
+    {
+        $today = Carbon::now()->startOfDay();
+
+        // Ambil jadwal yang date < hari ini
+        $expiredLessons = Lesson::with(['classRoom.school', 'teacher.user', 'subject'])
+            ->where('date', '<', $today->toDateString())
+            ->orderBy('date', 'desc')
+            ->paginate(20);
+
+        return view('lessons.expired', [
+            'expiredLessons' => $expiredLessons,
+            'totalExpired' => Lesson::where('date', '<', $today->toDateString())->count(),
+        ]);
+    }
+
+    /**
+     * Menampilkan log jadwal yang telah dihapus
+     * GET /admin/jadwal/delete-log
+     */
+    public function showDeletedLog()
+    {
+        // Check if table exists
+        if (!\Illuminate\Support\Facades\Schema::hasTable('deleted_lessons_log')) {
+            return back()->withErrors('Tabel deleted_lessons_log belum dibuat. Jalankan: php artisan migrate');
+        }
+
+        $deletedLog = DB::table('deleted_lessons_log')
+            ->orderBy('deleted_at', 'desc')
+            ->paginate(30);
+
+        return view('lessons.deleted-log', [
+            'deletedLog' => $deletedLog,
+            'totalDeleted' => DB::table('deleted_lessons_log')->count(),
+        ]);
+    }
+
+    /**
+     * Manual delete - hapus jadwal tertentu (admin only)
+     * DELETE /admin/jadwal/{id}
+     */
+    public function destroyManual($id)
+    {
+        $lesson = Lesson::findOrFail($id);
+
+        // Log ke deleted_lessons_log
+        if (\Illuminate\Support\Facades\Schema::hasTable('deleted_lessons_log')) {
+            DB::table('deleted_lessons_log')->insert([
+                'lesson_date' => $lesson->date,
+                'classroom_id' => $lesson->class_room_id,
+                'teacher_id' => $lesson->teacher_id,
+                'subject_id' => $lesson->subject_id,
+                'start_time' => $lesson->start_time,
+                'end_time' => $lesson->end_time,
+                'deleted_by' => Auth::user()->email ?? 'admin',
+                'deletion_reason' => 'Manual deletion by admin',
+                'deleted_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $lesson->delete();
+
+        Log::info('Lesson manually deleted', [
+            'lesson_id' => $id,
+            'date' => $lesson->date,
+            'deleted_by' => Auth::user()->email,
+        ]);
+
+        return back()->with('ok', '✅ Jadwal berhasil dihapus');
+    }
 }
+

@@ -1,21 +1,26 @@
 <x-app-layout>
   <x-slot name="title">Info • Unggah Kisi-kisi</x-slot>
 
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50">
+
+    <!-- Hero Header Section -->
+    <div class="mb-8 bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 rounded-2xl p-8 text-white shadow-lg">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-4xl font-bold mb-2">Upload Kisi-kisi & Materi</h1>
+          <p class="text-blue-100 text-lg">Bagikan materi pembelajaran dengan guru dan admin sekolah</p>
+        </div>
+        <div class="text-6xl hidden md:block">📚</div>
+      </div>
+    </div>
 
     <!-- Page Content -->
     <div class="py-8">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <!-- Page Header -->
-        <div class="mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">Upload Kisi-kisi / Materi Pelajaran</h1>
-          <p class="text-gray-600">Bagikan materi pembelajaran Anda dengan guru dan admin sekolah</p>
-        </div>
-
         <!-- Success/Error Messages -->
         @if(session('ok'))
-          <div class="mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-start">
+          <div class="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 text-green-800 px-4 py-3 rounded-lg shadow-md flex items-start">
             <svg class="w-5 h-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
             </svg>
@@ -26,12 +31,12 @@
         <!-- Form Card Container -->
         <div class="grid grid-cols-1 gap-6 mb-12">
           <!-- Upload Form Card -->
-          <div class="bg-white rounded-lg shadow-md border border-gray-200 p-8">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <svg class="w-7 h-7 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M3 1a1 1 0 011-1h12a1 1 0 011 1H3zm0 4h14v2H3V5zm0 4h14v2H3V9zm0 4h14v2H3v-2z"></path>
+          <div class="bg-white rounded-xl shadow-lg border-2 border-blue-100 p-8 hover:shadow-xl transition-all">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
               </svg>
-              Pengiriman Info
+              <span>Pengiriman Informasi</span>
             </h2>
 
             <form action="{{ route('info.store') }}" method="POST" enctype="multipart/form-data" id="form" class="space-y-6">

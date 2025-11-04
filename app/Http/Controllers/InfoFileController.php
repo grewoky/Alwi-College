@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\InfoFile;
 use App\Models\Student;
+use App\Models\Lesson;
+use App\Models\Attendance;
 use Illuminate\Support\Facades\Auth;  
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;    // ⬅️ penting
@@ -504,5 +506,115 @@ class InfoFileController extends Controller
         $stats['bySize'] = round($stats['bySize'] / (1024 * 1024), 2); // Convert to MB
         
         return response()->json($stats);
+    }
+
+    // View student files for teacher (lihat file yang diupload siswa)
+    public function teacherViewStudentFiles(Request $r)
+    {
+        // Check if user is teacher
+        $user = Auth::user();
+        $isTeacher = DB::table('model_has_roles')
+            ->join('roles','roles.id','=','model_has_roles.role_id')
+            ->where('model_has_roles.model_type', get_class($user))
+            ->where('model_has_roles.model_id', $user->id)
+            ->where('roles.name','teacher')
+            ->exists();
+
+        abort_unless($isTeacher, 403, 'Hanya guru yang dapat mengakses halaman ini.');
+
+        // Get all student files with relationships
+        // Only from Kelas 10, 11, 12 (Anak Bangau)
+        $q = InfoFile::with(['student.user', 'student.classRoom', 'student.attendances'])
+            ->whereHas('student.classRoom', function($query) {
+                $query->whereIn('grade', [10, 11, 12]);
+            })
+            ->latest();
+
+        // Filter by class if provided
+        if ($r->filled('class_room_id')) {
+            $q->whereHas('student', function($query) use ($r) {
+                $query->where('class_room_id', $r->class_room_id);
+            });
+        }
+
+        // Filter by subject if provided
+        if ($r->filled('subject')) {
+            $q->where('subject', 'like', '%' . $r->subject . '%');
+        }
+
+        $files = $q->paginate(20)->withQueryString();
+
+        // Get list of classes for filter (HANYA KELAS 10, 11, 12)
+        $classRooms = \App\Models\ClassRoom::whereIn('grade', [10, 11, 12])
+            ->orderBy('grade')
+            ->orderBy('name')
+            ->get();
+
+        return view('info.teacher-view-files', compact('files', 'classRooms'));
+    }
+
+    /**
+     * Calculate attendance percentage for a student
+     * Presentase kehadiran dari semua jadwal (Lessons) berdasarkan absensi yang sudah direkap
+     */
+    public function getAttendancePercentage($studentId)
+    {
+        // Get all lessons from Anak Bangau (Kelas 10, 11, 12)
+        $totalLessons = Lesson::whereHas('classRoom', function($query) {
+            $query->whereIn('grade', [10, 11, 12]);
+        })->count();
+
+        if ($totalLessons == 0) {
+            return ['percentage' => 0, 'present' => 0, 'total' => 0];
+        }
+
+        // Get attendance count (hadir/present only)
+        $presentCount = \App\Models\Attendance::where('student_id', $studentId)
+            ->whereIn('status', ['hadir', 'present', '1']) // sesuaikan dengan status di database
+            ->count();
+
+        // Calculate percentage
+        $percentage = ($presentCount / $totalLessons) * 100;
+
+        return [
+            'percentage' => round($percentage, 2),
+            'present' => $presentCount,
+            'total' => $totalLessons,
+            'formatted' => round($percentage, 2) . '%'
+        ];
+    }
+
+    /**
+     * Get attendance statistics for multiple students (untuk dashboard)
+     */
+    public function getStudentAttendanceStats($classRoomId = null)
+    {
+        $query = Student::query();
+
+        if ($classRoomId) {
+            $query->where('class_room_id', $classRoomId);
+        } else {
+            // Get from Kelas 10, 11, 12 only
+            $query->whereHas('classRoom', function($q) {
+                $q->whereIn('grade', [10, 11, 12]);
+            });
+        }
+
+        $students = $query->with(['user', 'classRoom', 'attendances'])->get();
+
+        $stats = $students->map(function($student) {
+            $attendance = $this->getAttendancePercentage($student->id);
+            return [
+                'id' => $student->id,
+                'name' => $student->user->name,
+                'class' => $student->classRoom->name,
+                'grade' => $student->classRoom->grade,
+                'attendance' => $attendance['percentage'],
+                'present' => $attendance['present'],
+                'total' => $attendance['total'],
+            ];
+        });
+
+        return $stats;
     }
 }

@@ -73,18 +73,25 @@ Route::middleware(['auth','role:admin'])->prefix('admin')->group(function () {
     Route::get('/payments', [PaymentController::class,'listAll'])->name('pay.list');
     Route::post('/payments/{payment}/verify', [PaymentController::class,'verify'])->name('pay.verify');
     Route::delete('/payments/{payment}', [PaymentController::class,'destroy'])->name('pay.destroy');
+    
+    // ADMIN ABSENSI (Lihat laporan kehadiran siswa)
+    Route::get('/attendance', [AttendanceController::class,'adminView'])->name('attendance.admin');
+    Route::get('/attendance/report', [AttendanceController::class,'report'])->name('attendance.report');
 });
 
 // ============ TEACHER AREA ============
 Route::middleware(['auth','role:teacher'])->prefix('teacher')->group(function () {
     // Dashboard
-    Route::get('/', [DashboardController::class,'teacher'])->name('teacher.dashboard');
+    Route::get('/teacher', [DashboardController::class,'teacher'])->name('teacher.dashboard');
     
     // TEACHER JADWAL (Lihat jadwal mengajar, absensi)
     Route::get('/jadwal', [LessonController::class,'teacherView'])->name('lessons.teacher');
     Route::get('/attendance', [AttendanceController::class,'teacherView'])->name('attendance.teacher');
     Route::get('/mark-attendance/{classRoom}', [AttendanceController::class,'markAttendance'])->name('attendance.mark');
     Route::post('/mark-attendance/{classRoom}', [AttendanceController::class,'storeMarkAttendance'])->name('attendance.store.mark');
+    
+    // TEACHER INFO (Lihat file yang diupload siswa)
+    Route::get('/dokumen', [InfoFileController::class,'teacherViewStudentFiles'])->name('info.teacher.student-files');
 });
 
 // ============ STUDENT AREA ============
