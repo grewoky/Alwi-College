@@ -142,15 +142,9 @@ class LessonController extends Controller
         if ($r->filled('date'))      $q->where('date',$r->date);
 
         $lessons = $q->paginate(15)->withQueryString();
-        
-        // ✅ Get only Kelas 10, 11, 12
-        $classes = ClassRoom::whereIn('grade', [10, 11, 12])
-            ->orderBy('grade')
-            ->get();
 
         return view('lessons.teacher_list', [
             'lessons' => $lessons,
-            'classes' => $classes,
             'filters' => [
                 'school_id' => $r->school_id,
                 'grade'     => $r->grade,
@@ -183,12 +177,7 @@ class LessonController extends Controller
         
         $lessons = $q->paginate(15)->withQueryString();
         
-        // ✅ Get only Kelas 10, 11, 12
-        $classes = ClassRoom::whereIn('grade', [10, 11, 12])
-            ->orderBy('grade')
-            ->get();
-        
-        return view('lessons.student-view', compact('student', 'lessons', 'classes'));
+        return view('lessons.student-view', compact('student', 'lessons'));
     }
 
     // View jadwal untuk admin/guru
@@ -211,10 +200,7 @@ class LessonController extends Controller
         
         $lessons = $q->paginate(20)->withQueryString();
         $teachers = Teacher::with('user')->orderBy('id')->get();
-        // ✅ Get only Kelas 10, 11, 12
-        $classes = ClassRoom::whereIn('grade', [10, 11, 12])
-            ->orderBy('grade')
-            ->get();
+        $classes = ClassRoom::orderBy('name')->get();
         
         return view('lessons.admin-view', compact(
             'lessons',
