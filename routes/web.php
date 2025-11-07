@@ -15,10 +15,7 @@ use App\Http\Controllers\DashboardController;
 
 // Halaman home
 Route::get('/', function () {
-    if (Auth::check()) {
-        return redirect()->route('dashboard');
-    }
-    return redirect()->route('login');
+    return view('welcome');
 });
 
 // Dashboard redirect sesuai role

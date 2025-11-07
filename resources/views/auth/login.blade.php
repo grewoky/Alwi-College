@@ -4,11 +4,8 @@
     <div class="bg-white/90 backdrop-blur border border-gray-200 rounded-2xl shadow-sm p-6 md:p-8">
       {{-- Logo + Title --}}
       <div class="text-center mb-6">
-        <div class="mx-auto mb-2 h-8 w-8 rounded-full bg-blue-600/90 flex items-center justify-center shadow-sm">
-          {{-- bintang/kompas --}}
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2l1.9 6.2L20 10l-6.1 1.8L12 18l-1.9-6.2L4 10l6.1-1.8L12 2z"/>
-          </svg>
+        <div class="mx-auto mb-2 h-16 w-16 flex items-center justify-center">
+          <img src="{{ asset('images/logo.png') }}" alt="Alwi College Logo" class="w-full h-full object-contain">
         </div>
         <div class="font-semibold">Alwi College</div>
         <h1 class="text-xl md:text-2xl font-semibold mt-1">Login</h1>
