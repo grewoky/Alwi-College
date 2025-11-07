@@ -19,7 +19,7 @@ class LessonController extends Controller
         $teachersList = Teacher::with('user')->orderBy('id')->get();
         $subjectsList = Subject::orderBy('name')->get();
         
-        return view('lessons.generate', [
+        return view('lessons.admin.generate', [
             'teachersList' => $teachersList,
             'subjectsList' => $subjectsList,
         ]);
@@ -138,12 +138,12 @@ class LessonController extends Controller
             ->orderBy('date','desc');
 
         if ($r->filled('school_id')) $q->whereHas('classRoom', fn($qq)=>$qq->where('school_id',$r->school_id));
-        if ($r->filled('grade'))     $q->whereHas('classRoom', fn($qq)=>$qq->where('grade',$r->grade));
+        if ($r->filled('grade'))     $q->whereHas('classRoom', fn($qq)=>$qq->where('grade',$r->grade)->whereIn('grade', [10, 11, 12]));
         if ($r->filled('date'))      $q->where('date',$r->date);
 
         $lessons = $q->paginate(15)->withQueryString();
 
-        return view('lessons.teacher_list', [
+        return view('lessons.teacher.list', [
             'lessons' => $lessons,
             'filters' => [
                 'school_id' => $r->school_id,
@@ -159,7 +159,7 @@ class LessonController extends Controller
         $user = Auth::user();
         $student = \App\Models\Student::where('user_id', $user->id)->firstOrFail();
         
-        // Get lessons for student's class
+        // Get lessons for student's class (filter only grade 10, 11, 12)
         $q = Lesson::with(['teacher.user', 'subject', 'classRoom'])
             ->where('class_room_id', $student->class_room_id)
             ->orderBy('date', 'asc');
@@ -167,8 +167,10 @@ class LessonController extends Controller
         // Filter by grade if provided
         if ($r->filled('grade')) {
             $q->whereHas('classRoom', function($query) use ($r) {
-                $query->where('grade', $r->grade);
+                $query->where('grade', $r->grade)->whereIn('grade', [10, 11, 12]);
             });
+        } else {
+            $q->whereHas('classRoom', fn($query) => $query->whereIn('grade', [10, 11, 12]));
         }
         
         if ($r->filled('date')) {
@@ -177,7 +179,7 @@ class LessonController extends Controller
         
         $lessons = $q->paginate(15)->withQueryString();
         
-        return view('lessons.student-view', compact('student', 'lessons'));
+        return view('lessons.student.index', compact('student', 'lessons'));
     }
 
     // View jadwal untuk admin/guru
@@ -194,15 +196,22 @@ class LessonController extends Controller
             $q->where('class_room_id', $r->class_room_id);
         }
         
+        if ($r->filled('grade')) {
+            $q->whereHas('classRoom', fn($query) => $query->where('grade', $r->grade));
+        } else {
+            // Default: filter hanya grade 10, 11, 12
+            $q->whereHas('classRoom', fn($query) => $query->whereIn('grade', [10, 11, 12]));
+        }
+        
         if ($r->filled('date')) {
             $q->whereDate('date', $r->date);
         }
         
         $lessons = $q->paginate(20)->withQueryString();
         $teachers = Teacher::with('user')->orderBy('id')->get();
-        $classes = ClassRoom::orderBy('name')->get();
+        $classes = ClassRoom::whereIn('grade', [10, 11, 12])->orderBy('name')->get();
         
-        return view('lessons.admin-view', compact(
+        return view('lessons.admin.index', compact(
             'lessons',
             'teachers',
             'classes'
@@ -213,7 +222,7 @@ class LessonController extends Controller
     public function editLesson(Lesson $lesson)
     {
         $subjectsList = Subject::orderBy('name')->get();
-        return view('lessons.edit', compact('lesson', 'subjectsList'));
+        return view('lessons.admin.edit', compact('lesson', 'subjectsList'));
     }
 
     // Update jadwal individual
@@ -273,24 +282,30 @@ class LessonController extends Controller
     // Admin dashboard - jadwal yang di-upload
     public function adminDashboard()
     {
-        // Statistik jadwal total
-        $totalLessons = Lesson::count();
-        $totalTeachers = Lesson::distinct('teacher_id')->count();
-        $totalClasses = Lesson::distinct('class_room_id')->count();
+        // Statistik jadwal total (filter only grade 10, 11, 12)
+        $totalLessons = Lesson::whereHas('classRoom', fn($q) => $q->whereIn('grade', [10, 11, 12]))->count();
+        $totalTeachers = Lesson::whereHas('classRoom', fn($q) => $q->whereIn('grade', [10, 11, 12]))->distinct('teacher_id')->count();
+        $totalClasses = Lesson::whereHas('classRoom', fn($q) => $q->whereIn('grade', [10, 11, 12]))->distinct('class_room_id')->count();
         
         // Jadwal per status
-        $lessonsWithoutTime = Lesson::whereNull('start_time')->orWhereNull('end_time')->count();
+        $lessonsWithoutTime = Lesson::whereHas('classRoom', fn($q) => $q->whereIn('grade', [10, 11, 12]))
+            ->where(function($q) {
+                $q->whereNull('start_time')->orWhereNull('end_time');
+            })->count();
         
         // Jadwal terbaru
         $recentLessons = Lesson::with(['teacher.user', 'subject', 'classRoom'])
+            ->whereHas('classRoom', fn($q) => $q->whereIn('grade', [10, 11, 12]))
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();
         
         // Jadwal per guru
-        $teachersLessonCount = Teacher::withCount(['lessons'])->orderBy('lessons_count', 'desc')->get();
+        $teachersLessonCount = Teacher::withCount(['lessons' => fn($q) => $q->whereHas('classRoom', fn($qq) => $qq->whereIn('grade', [10, 11, 12]))])
+            ->orderBy('lessons_count', 'desc')
+            ->get();
 
-        return view('lessons.admin-dashboard', compact(
+        return view('lessons.admin.dashboard', compact(
             'totalLessons',
             'totalTeachers',
             'totalClasses',
@@ -306,7 +321,7 @@ class LessonController extends Controller
         $user = Auth::user();
         $teacher = Teacher::where('user_id', $user->id)->firstOrFail();
         
-        // Get lessons hanya untuk guru yang login
+        // Get lessons hanya untuk guru yang login (filter grade 10, 11, 12)
         $q = Lesson::with(['subject', 'classRoom.school'])
             ->where('teacher_id', $teacher->id)
             ->orderBy('date', 'desc');
@@ -314,8 +329,10 @@ class LessonController extends Controller
         // Filter by grade if provided
         if ($r->filled('grade')) {
             $q->whereHas('classRoom', function($query) use ($r) {
-                $query->where('grade', $r->grade);
+                $query->where('grade', $r->grade)->whereIn('grade', [10, 11, 12]);
             });
+        } else {
+            $q->whereHas('classRoom', fn($query) => $query->whereIn('grade', [10, 11, 12]));
         }
         
         if ($r->filled('date')) {
@@ -328,15 +345,15 @@ class LessonController extends Controller
         
         $lessons = $q->paginate(20)->withQueryString();
         
-        // Get classes yang diajari guru ini untuk filter
+        // Get classes yang diajari guru ini untuk filter (hanya grade 10, 11, 12)
         $teacherClasses = ClassRoom::whereIn('id', function($query) use ($teacher) {
             $query->select('class_room_id')
                   ->from('lessons')
                   ->where('teacher_id', $teacher->id)
                   ->distinct();
-        })->orderBy('name')->get();
+        })->whereIn('grade', [10, 11, 12])->orderBy('name')->get();
         
-        return view('lessons.teacher-view', compact(
+        return view('lessons.teacher.index', compact(
             'teacher',
             'lessons',
             'teacherClasses'
@@ -351,15 +368,17 @@ class LessonController extends Controller
     {
         $today = Carbon::now()->startOfDay();
 
-        // Ambil jadwal yang date < hari ini
+        // Ambil jadwal yang date < hari ini (filter grade 10, 11, 12)
         $expiredLessons = Lesson::with(['classRoom.school', 'teacher.user', 'subject'])
+            ->whereHas('classRoom', fn($q) => $q->whereIn('grade', [10, 11, 12]))
             ->where('date', '<', $today->toDateString())
             ->orderBy('date', 'desc')
             ->paginate(20);
 
-        return view('lessons.expired', [
+        return view('lessons.admin.logs.expired', [
             'expiredLessons' => $expiredLessons,
-            'totalExpired' => Lesson::where('date', '<', $today->toDateString())->count(),
+            'totalExpired' => Lesson::whereHas('classRoom', fn($q) => $q->whereIn('grade', [10, 11, 12]))
+                ->where('date', '<', $today->toDateString())->count(),
         ]);
     }
 
@@ -378,7 +397,7 @@ class LessonController extends Controller
             ->orderBy('deleted_at', 'desc')
             ->paginate(30);
 
-        return view('lessons.deleted-log', [
+        return view('lessons.admin.logs.deleted-log', [
             'deletedLog' => $deletedLog,
             'totalDeleted' => DB::table('deleted_lessons_log')->count(),
         ]);
