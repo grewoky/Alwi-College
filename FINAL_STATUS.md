@@ -168,9 +168,10 @@ Status: 🟢 RUNNING
 ### Code
 
 -   **Controller Methods:** 8 updated with new view paths
+-   **Generate Jadwal:** Tidak lagi meminta sekolah/room code; otomatis membuat jadwal untuk seluruh kelas pada grade yang dipilih (10/11/12)
 -   **View Paths:** All corrected to new folder structure
--   **Filters:** Grade filtering active (Kelas 10, 11, 12)
--   **Performance:** Optimized queries with whereIn('grade')
+-   **Filters:** Grade filtering active (Kelas 10, 11, 12) di admin/teacher/student views
+-   **Performance:** Optimized queries dengan filter grade & pagination
 
 ### File Organization
 

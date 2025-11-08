@@ -2,88 +2,92 @@
   <x-slot name="title">Guru • Dashboard</x-slot>
 
   <!-- Hero Header Section -->
-  <div class="mb-8 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 rounded-2xl p-8 text-white shadow-lg">
-    <div class="flex items-center justify-between">
+  <div class="mb-8 bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
       <div>
-        <h1 class="text-4xl font-bold mb-2">Selamat Datang Guru</h1>
-        <p class="text-green-100 text-lg">Kelola jadwal mengajar, absensi, dan trip dengan mudah</p>
+        <p class="text-sm font-semibold text-indigo-600 uppercase tracking-wide">Selamat Datang</p>
+        <h1 class="text-4xl font-bold text-slate-900 mt-2">Dashboard Guru</h1>
+        <p class="text-slate-500 mt-3 max-w-2xl">Kelola jadwal mengajar, absensi kelas, dan kebutuhan trip dalam satu tempat. Gunakan akses cepat di bawah untuk memulai aktivitas harian Anda.</p>
       </div>
-      <div class="text-6xl hidden md:block">👨‍🏫</div>
+      <div class="h-20 w-20 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-4xl">
+        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 14l9-5-9-5-9 5 9 5z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 14v7" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M5 12.5V17a2 2 0 002 2h10a2 2 0 002-2v-4.5" />
+        </svg>
+      </div>
     </div>
   </div>
 
   <!-- Key Statistics -->
   <div class="grid md:grid-cols-2 gap-6 mb-8">
-    <!-- Today's Lessons -->
-    <div class="bg-gradient-to-br from-green-50 to-emerald-100 border-2 border-green-200 rounded-xl p-6 shadow-md hover:shadow-lg transition-all">
-      <div class="flex items-center justify-between">
+    <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition">
+      <div class="flex items-start justify-between">
         <div>
-          <p class="text-sm font-semibold text-green-600 uppercase">📅 Jadwal Hari Ini</p>
-          <p class="text-5xl font-bold text-green-900 mt-2">{{ $todayLessons }}</p>
-          <p class="text-sm text-green-700 mt-1">jam pelajaran</p>
+          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Jadwal Hari Ini</p>
+          <p class="mt-3 text-3xl font-bold text-slate-900">{{ $todayLessons }}</p>
+          <p class="mt-2 text-sm text-slate-500">Jam pelajaran yang Anda ajar</p>
         </div>
-        <div class="text-6xl">�</div>
+        <div class="h-12 w-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z" />
+          </svg>
+        </div>
       </div>
     </div>
 
-    <!-- Monthly Trips -->
-    <div class="bg-gradient-to-br from-orange-50 to-amber-100 border-2 border-orange-200 rounded-xl p-6 shadow-md hover:shadow-lg transition-all">
-      <div class="flex items-center justify-between">
+    <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition">
+      <div class="flex items-start justify-between">
         <div>
-          <p class="text-sm font-semibold text-orange-600 uppercase">🚗 Trip Bulan Ini</p>
-          <p class="text-5xl font-bold text-orange-900 mt-2">{{ $thisMonthTrips }} <span class="text-2xl">/</span> 90</p>
-          <p class="text-sm text-orange-700 mt-1">poin perbulan</p>
+          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Trip Bulan Ini</p>
+          <p class="mt-3 text-3xl font-bold text-slate-900">{{ $thisMonthTrips }} <span class="text-base font-medium text-slate-400">/ 90</span></p>
+          <p class="mt-2 text-sm text-slate-500">Poin penggunaan transportasi</p>
         </div>
-        <div class="text-6xl">🚗</div>
+        <div class="h-12 w-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M5 16l1.5-4.5A3 3 0 019.356 9h5.288a3 3 0 012.856 2.5L19 16m-14 0h14m-14 0v2a1 1 0 001 1h1m12-3v2a1 1 0 01-1 1h-1m-10 0h6m-6 0a2 2 0 11-4 0 2 2 0 014 0zm10 0a2 2 0 104 0 2 2 0 00-4 0z" />
+          </svg>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Quick Actions -->
   <div class="mb-12">
-    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-      <svg class="w-7 h-7 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-        <path d="M10.5 1.5H5.75A2.25 2.25 0 003.5 3.75v12.5A2.25 2.25 0 005.75 18.5h8.5a2.25 2.25 0 002.25-2.25V6.5m-11-4v4m0 0h4m-4 0L16 14.5"/>
-      </svg>
-      Akses Cepat
-    </h2>
+    <h2 class="text-2xl font-bold text-gray-900 mb-6">Akses Cepat</h2>
+
+    @php
+      $teacherLinks = [
+        [
+          'label' => 'Lihat Jadwal',
+          'description' => 'Kelola agenda mengajar dan materi kelas',
+          'route' => route('lessons.teacher')
+        ],
+        [
+          'label' => 'Absensi',
+          'description' => 'Rekap dan konfirmasi kehadiran siswa',
+          'route' => route('attendance.teacher')
+        ],
+        [
+          'label' => 'Dokumen Siswa',
+          'description' => 'Review file yang diunggah siswa',
+          'route' => route('info.teacher.student-files')
+        ],
+      ];
+    @endphp
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- View Schedule -->
-      <a href="{{ route('lessons.teacher') }}" class="group bg-gradient-to-br from-green-50 to-emerald-100 border-2 border-green-200 rounded-xl p-6 shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300 transform">
-        <div class="flex items-start gap-4">
-          <div class="text-5xl">📝</div>
-          <div class="flex-grow">
-            <h3 class="text-lg font-bold text-green-900 mb-2">Lihat Jadwal</h3>
-            <p class="text-sm text-green-700">Absen kelas & kelola kehadiran siswa</p>
-            <div class="text-green-600 font-semibold text-sm mt-3 group-hover:text-green-700">Akses →</div>
+      @foreach ($teacherLinks as $link)
+        <a href="{{ $link['route'] }}" class="group bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition flex flex-col">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-base font-semibold text-slate-900">{{ $link['label'] }}</h3>
+            <svg class="w-5 h-5 text-slate-300 group-hover:text-emerald-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M9 5l7 7-7 7" />
+            </svg>
           </div>
-        </div>
-      </a>
-
-      <!-- Attendance -->
-      <a href="{{ route('attendance.teacher') }}" class="group bg-gradient-to-br from-emerald-50 to-teal-100 border-2 border-emerald-200 rounded-xl p-6 shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300 transform">
-        <div class="flex items-start gap-4">
-          <div class="text-5xl">✓</div>
-          <div class="flex-grow">
-            <h3 class="text-lg font-bold text-emerald-900 mb-2">Absensi</h3>
-            <p class="text-sm text-emerald-700">Rekap kehadiran & laporan siswa</p>
-            <div class="text-emerald-600 font-semibold text-sm mt-3 group-hover:text-emerald-700">Akses →</div>
-          </div>
-        </div>
-      </a>
-
-      <!-- Student Documents -->
-      <a href="{{ route('info.teacher.student-files') }}" class="group bg-gradient-to-br from-amber-50 to-yellow-100 border-2 border-amber-200 rounded-xl p-6 shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300 transform">
-        <div class="flex items-start gap-4">
-          <div class="text-5xl">📚</div>
-          <div class="flex-grow">
-            <h3 class="text-lg font-bold text-amber-900 mb-2">Dokumen</h3>
-            <p class="text-sm text-amber-700">Lihat file yang diupload siswa</p>
-            <div class="text-amber-600 font-semibold text-sm mt-3 group-hover:text-amber-700">Akses →</div>
-          </div>
-        </div>
-      </a>
+          <p class="text-sm text-slate-500">{{ $link['description'] }}</p>
+        </a>
+      @endforeach
     </div>
   </div>
 </x-app-layout>

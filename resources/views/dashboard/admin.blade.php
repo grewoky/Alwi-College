@@ -12,124 +12,130 @@
 
   <!-- Statistics Cards -->
   <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <!-- Students Stat -->
-    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 shadow-md border border-blue-200 hover:shadow-lg transition-all">
-      <div class="flex justify-between items-start">
-        <div>
-          <p class="text-sm font-semibold text-blue-600 uppercase">Total Siswa</p>
-          <p class="text-4xl font-bold text-blue-900 mt-2">{{ $stats['students'] }}</p>
-          <p class="text-xs text-blue-700 mt-2">📈 siswa aktif</p>
-        </div>
-        <div class="text-4xl">👨‍🎓</div>
-      </div>
-    </div>
+    @php
+      $statCards = [
+        [
+          'label' => 'Total Siswa',
+          'value' => $stats['students'],
+          'description' => 'Siswa aktif',
+          'icon' => 'users'
+        ],
+        [
+          'label' => 'Total Guru',
+          'value' => $stats['teachers'],
+          'description' => 'Pengajar aktif',
+          'icon' => 'academic-cap'
+        ],
+        [
+          'label' => 'Jadwal Hari Ini',
+          'value' => $stats['today_lessons'],
+          'description' => 'Kelas berlangsung',
+          'icon' => 'calendar'
+        ],
+        [
+          'label' => 'Pembayaran Pending',
+          'value' => $stats['payments_pending'],
+          'description' => 'Menunggu verifikasi',
+          'icon' => 'credit-card'
+        ],
+      ];
+    @endphp
 
-    <!-- Teachers Stat -->
-    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 shadow-md border border-green-200 hover:shadow-lg transition-all">
-      <div class="flex justify-between items-start">
-        <div>
-          <p class="text-sm font-semibold text-green-600 uppercase">Total Guru</p>
-          <p class="text-4xl font-bold text-green-900 mt-2">{{ $stats['teachers'] }}</p>
-          <p class="text-xs text-green-700 mt-2">👨‍🏫 pengajar</p>
+    @foreach ($statCards as $card)
+      <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition">
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">{{ $card['label'] }}</p>
+            <p class="mt-3 text-3xl font-bold text-slate-900">{{ $card['value'] }}</p>
+            <p class="mt-2 text-sm text-slate-500">{{ $card['description'] }}</p>
+          </div>
+          <div class="h-12 w-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center">
+            @switch($card['icon'])
+              @case('users')
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M17 20v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M9 9a4 4 0 110-8 4 4 0 010 8z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M23 20v-2a4 4 0 00-3-3.87" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M16 3.13a4 4 0 010 7.75" />
+                </svg>
+                @break
+              @case('academic-cap')
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 14l9-5-9-5-9 5 9 5z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 14v7" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M5 12.5V17a2 2 0 002 2h10a2 2 0 002-2v-4.5" />
+                </svg>
+                @break
+              @case('calendar')
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M8 7V3m8 4V3M4 11h16M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z" />
+                </svg>
+                @break
+              @case('credit-card')
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M2.25 7.5h19.5M3.75 6A1.5 1.5 0 015.25 4.5h13.5A1.5 1.5 0 0120.25 6v12a1.5 1.5 0 01-1.5 1.5H5.25A1.5 1.5 0 013.75 18V6z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M6 15h2m3 0h7" />
+                </svg>
+                @break
+            @endswitch
+          </div>
         </div>
-        <div class="text-4xl">👨‍🏫</div>
       </div>
-    </div>
-
-    <!-- Classes Stat -->
-    <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 shadow-md border border-purple-200 hover:shadow-lg transition-all">
-      <div class="flex justify-between items-start">
-        <div>
-          <p class="text-sm font-semibold text-purple-600 uppercase">Jadwal Hari Ini</p>
-          <p class="text-4xl font-bold text-purple-900 mt-2">{{ $stats['today_lessons'] }}</p>
-          <p class="text-xs text-purple-700 mt-2">📅 jadwal pelajaran</p>
-        </div>
-        <div class="text-4xl">📚</div>
-      </div>
-    </div>
-
-    <!-- Pending Payments Stat -->
-    <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 shadow-md border border-orange-200 hover:shadow-lg transition-all">
-      <div class="flex justify-between items-start">
-        <div>
-          <p class="text-sm font-semibold text-orange-600 uppercase">Pembayaran Pending</p>
-          <p class="text-4xl font-bold text-orange-900 mt-2">{{ $stats['payments_pending'] }}</p>
-          <p class="text-xs text-orange-700 mt-2">⏳ menunggu verifikasi</p>
-        </div>
-        <div class="text-4xl">💳</div>
-      </div>
-    </div>
+    @endforeach
   </div>
 
   <!-- Quick Actions - Grid -->
   <div class="mb-12">
-    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-      <svg class="w-7 h-7 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
-        <path d="M10.5 1.5H5.75A2.25 2.25 0 003.5 3.75v12.5A2.25 2.25 0 005.75 18.5h8.5a2.25 2.25 0 002.25-2.25V6.5m-11-4v4m0 0h4m-4 0L16 14.5"/>
-      </svg>
-      Akses Cepat
-    </h2>
+    <h2 class="text-2xl font-bold text-gray-900 mb-6">Akses Cepat</h2>
     
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <!-- View Jadwal -->
-      <a href="{{ route('lessons.admin.dashboard') }}" class="group bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl p-6 shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300 transform">
-        <div class="flex flex-col h-full">
-          <div class="text-5xl mb-3">📚</div>
-          <h3 class="text-lg font-bold text-blue-900 mb-2">Jadwal Pelajaran</h3>
-          <p class="text-sm text-blue-700 flex-grow">Lihat & kelola jadwal les</p>
-          <div class="text-blue-600 font-semibold text-sm mt-3 group-hover:text-blue-700">Akses →</div>
-        </div>
-      </a>
+    @php
+      $quickLinks = [
+        [
+          'label' => 'Jadwal Pelajaran',
+          'description' => 'Lihat & kelola jadwal les',
+          'route' => route('lessons.admin.dashboard')
+        ],
+        [
+          'label' => 'Generate Jadwal',
+          'description' => 'Buat jadwal baru otomatis',
+          'route' => route('lessons.generate.form')
+        ],
+        [
+          'label' => 'Info & File',
+          'description' => 'Kelola file pembelajaran',
+          'route' => route('info.admin.list')
+        ],
+        [
+          'label' => 'Trip Guru',
+          'description' => 'Pantau penggunaan poin',
+          'route' => route('trips.index')
+        ],
+        [
+          'label' => 'Pembayaran',
+          'description' => 'Verifikasi pembayaran siswa',
+          'route' => route('pay.list')
+        ],
+        [
+          'label' => 'Absensi',
+          'description' => 'Laporan kehadiran siswa',
+          'route' => route('attendance.admin')
+        ],
+      ];
+    @endphp
 
-      <!-- Generate Jadwal -->
-      <a href="{{ route('lessons.generate.form') }}" class="group bg-gradient-to-br from-cyan-50 to-cyan-100 border-2 border-cyan-200 rounded-xl p-6 shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300 transform">
-        <div class="flex flex-col h-full">
-          <div class="text-5xl mb-3">📅</div>
-          <h3 class="text-lg font-bold text-cyan-900 mb-2">Generate Jadwal</h3>
-          <p class="text-sm text-cyan-700 flex-grow">Buat jadwal baru otomatis</p>
-          <div class="text-cyan-600 font-semibold text-sm mt-3 group-hover:text-cyan-700">Akses →</div>
-        </div>
-      </a>
-
-      <!-- Info Management -->
-      <a href="{{ route('info.admin.list') }}" class="group bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 rounded-xl p-6 shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300 transform">
-        <div class="flex flex-col h-full">
-          <div class="text-5xl mb-3">📋</div>
-          <h3 class="text-lg font-bold text-purple-900 mb-2">Info & File</h3>
-          <p class="text-sm text-purple-700 flex-grow">Kelola file pembelajaran</p>
-          <div class="text-purple-600 font-semibold text-sm mt-3 group-hover:text-purple-700">Akses →</div>
-        </div>
-      </a>
-
-      <!-- Trip Management -->
-      <a href="{{ route('trips.index') }}" class="group bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 rounded-xl p-6 shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300 transform">
-        <div class="flex flex-col h-full">
-          <div class="text-5xl mb-3">🚗</div>
-          <h3 class="text-lg font-bold text-green-900 mb-2">Trip Guru</h3>
-          <p class="text-sm text-green-700 flex-grow">Kelola 90 poin/bulan</p>
-          <div class="text-green-600 font-semibold text-sm mt-3 group-hover:text-green-700">Akses →</div>
-        </div>
-      </a>
-
-      <!-- Payment Verification -->
-      <a href="{{ route('pay.list') }}" class="group bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200 rounded-xl p-6 shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300 transform">
-        <div class="flex flex-col h-full">
-          <div class="text-5xl mb-3">💰</div>
-          <h3 class="text-lg font-bold text-orange-900 mb-2">Pembayaran</h3>
-          <p class="text-sm text-orange-700 flex-grow">Verifikasi pembayaran siswa</p>
-          <div class="text-orange-600 font-semibold text-sm mt-3 group-hover:text-orange-700">Akses →</div>
-        </div>
-      </a>
-
-      <!-- Attendance -->
-      <a href="{{ route('attendance.admin') }}" class="group bg-gradient-to-br from-indigo-50 to-indigo-100 border-2 border-indigo-200 rounded-xl p-6 shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300 transform">
-        <div class="flex flex-col h-full">
-          <div class="text-5xl mb-3">✓</div>
-          <h3 class="text-lg font-bold text-indigo-900 mb-2">Absensi</h3>
-          <p class="text-sm text-indigo-700 flex-grow">Laporan kehadiran siswa</p>
-          <div class="text-indigo-600 font-semibold text-sm mt-3 group-hover:text-indigo-700">Akses →</div>
-        </div>
-      </a>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      @foreach ($quickLinks as $link)
+        <a href="{{ $link['route'] }}" class="group bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition flex flex-col">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-base font-semibold text-slate-900">{{ $link['label'] }}</h3>
+            <svg class="w-5 h-5 text-slate-300 group-hover:text-indigo-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+          <p class="text-sm text-slate-500 flex-grow">{{ $link['description'] }}</p>
+          <span class="mt-4 text-sm font-medium text-indigo-600">Lihat detail</span>
+        </a>
+      @endforeach
     </div>
   </div>
 </x-admin-layout>

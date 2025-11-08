@@ -1,6 +1,12 @@
 <x-admin-layout>
 <div class="min-h-screen bg-gray-50 py-12">
   <div class="max-w-2xl mx-auto px-4">
+    <div class="mb-6">
+      <a href="{{ route('lessons.admin') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 font-medium shadow-sm">
+        <span class="text-lg">←</span>
+        <span>Kembali ke Manajemen Jadwal</span>
+      </a>
+    </div>
     <!-- Header -->
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">✏️ Edit Jadwal Pelajaran</h1>
@@ -79,10 +85,10 @@
 
         <!-- Buttons -->
         <div class="flex gap-3">
-          <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition">
+          <button type="submit" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-lg">
             💾 Simpan Perubahan
           </button>
-          <a href="{{ route('lessons.admin') }}" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 rounded-lg transition text-center">
+          <a href="{{ route('lessons.admin') }}" class="flex-1 bg-slate-500 text-white font-bold py-3 rounded-lg text-center">
             ← Kembali
           </a>
         </div>
@@ -93,7 +99,7 @@
         <form method="POST" action="{{ route('lessons.destroy', $lesson) }}" onsubmit="return confirm('Hapus jadwal ini?');" class="inline">
           @csrf
           @method('DELETE')
-          <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition">
+          <button type="submit" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg">
             🗑️ Hapus Jadwal
           </button>
         </form>

@@ -3,11 +3,17 @@
 
     <div class="min-h-screen bg-gray-50 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-6">
+                <a href="{{ route('teacher.dashboard') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 font-medium shadow-sm">
+                    <span class="text-lg">←</span>
+                    <span>Kembali ke Dashboard Guru</span>
+                </a>
+            </div>
             
             <!-- Page Header -->
             <div class="mb-8">
                 <h1 class="text-3xl font-bold text-gray-900 mb-2">Jadwal Mengajar</h1>
-                <p class="text-gray-600">Guru: <strong class="text-blue-600">{{ $teacher->user->name }}</strong></p>
+                <p class="text-gray-600">Guru: <strong class="text-indigo-600">{{ $teacher->user->name }}</strong></p>
             </div>
 
             <!-- Filters Section -->
@@ -19,19 +25,19 @@
                     <p class="text-sm font-medium text-gray-700 mb-3">Pilih Kelas:</p>
                     <div class="flex gap-2 flex-wrap">
                         <a href="{{ route('lessons.teacher') }}" 
-                           class="px-4 py-2 rounded-md font-medium transition-colors {{ !request('grade') ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                           class="inline-flex items-center px-4 py-2 rounded-lg font-medium transition {{ !request('grade') ? 'bg-indigo-600 text-white shadow-sm border border-indigo-600' : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600' }}">
                             Semua
                         </a>
                         <a href="{{ route('lessons.teacher', ['grade' => '10']) }}" 
-                           class="px-4 py-2 rounded-md font-medium transition-colors {{ request('grade') == '10' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                           class="inline-flex items-center px-4 py-2 rounded-lg font-medium transition {{ request('grade') == '10' ? 'bg-indigo-600 text-white shadow-sm border border-indigo-600' : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600' }}">
                             Kelas 10
                         </a>
                         <a href="{{ route('lessons.teacher', ['grade' => '11']) }}" 
-                           class="px-4 py-2 rounded-md font-medium transition-colors {{ request('grade') == '11' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                           class="inline-flex items-center px-4 py-2 rounded-lg font-medium transition {{ request('grade') == '11' ? 'bg-indigo-600 text-white shadow-sm border border-indigo-600' : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600' }}">
                             Kelas 11
                         </a>
                         <a href="{{ route('lessons.teacher', ['grade' => '12']) }}" 
-                           class="px-4 py-2 rounded-md font-medium transition-colors {{ request('grade') == '12' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                           class="inline-flex items-center px-4 py-2 rounded-lg font-medium transition {{ request('grade') == '12' ? 'bg-indigo-600 text-white shadow-sm border border-indigo-600' : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600' }}">
                             Kelas 12
                         </a>
                     </div>
@@ -62,11 +68,11 @@
                     </div>
                     
                     <div class="flex gap-2 items-end">
-                        <button type="submit" class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition">
+                        <button type="submit" class="flex-1 px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition">
                             Cari
                         </button>
                         <a href="{{ request('grade') ? route('lessons.teacher', ['grade' => request('grade')]) : route('lessons.teacher') }}" 
-                           class="flex-1 px-3 py-2 bg-gray-300 text-gray-900 rounded-md hover:bg-gray-400 font-medium text-center transition">
+                           class="flex-1 px-3 py-2 rounded-lg font-medium text-center transition bg-white border border-slate-200 text-slate-700 hover:border-indigo-300 hover:text-indigo-600">
                             Reset
                         </a>
                     </div>

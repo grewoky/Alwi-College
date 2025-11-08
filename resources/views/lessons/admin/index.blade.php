@@ -3,6 +3,13 @@
 
     <div class="min-h-screen bg-gray-50 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Back Link -->
+            <div class="mb-6">
+                <a href="{{ route('lessons.admin.dashboard') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 font-medium shadow-sm">
+                    <span class="text-lg">←</span>
+                    <span>Kembali ke Dashboard Jadwal</span>
+                </a>
+            </div>
             
             <!-- Page Header -->
             <div class="mb-8">
@@ -12,13 +19,13 @@
 
             <!-- Action Buttons -->
             <div class="mb-6 flex flex-wrap gap-3">
-                <a href="{{ route('lessons.generate.form') }}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition">
+                <a href="{{ route('lessons.generate.form') }}" class="px-4 py-2 bg-blue-600 text-white rounded-md font-medium">
                     Tambah Jadwal
                 </a>
-                <a href="{{ route('lessons.logs.deleted') }}" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 font-medium transition">
+                <a href="{{ route('lessons.logs.deleted') }}" class="px-4 py-2 bg-red-500 text-white rounded-md font-medium">
                     Log Terhapus
                 </a>
-                <a href="{{ route('lessons.logs.expired') }}" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 font-medium transition">
+                <a href="{{ route('lessons.logs.expired') }}" class="px-4 py-2 bg-red-400 text-white rounded-md font-medium">
                     Log Kadaluarsa
                 </a>
             </div>
@@ -26,7 +33,7 @@
             <!-- Filters Section -->
             <div class="bg-white rounded-md shadow-sm p-6 mb-6">
                 <h3 class="font-semibold text-lg mb-4 text-gray-900">Filter</h3>
-                <form method="GET" action="{{ route('lessons.admin') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <form method="GET" action="{{ route('lessons.admin') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <!-- Teacher Filter -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Pengajar</label>
@@ -35,19 +42,6 @@
                             @foreach($teachers as $teacher)
                                 <option value="{{ $teacher->id }}" {{ request('teacher_id') == $teacher->id ? 'selected' : '' }}>
                                     {{ $teacher->user->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Class Filter -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
-                        <select name="class_room_id" class="w-full px-3 py-2 rounded-md border border-gray-300 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">-- Semua --</option>
-                            @foreach($classes as $class)
-                                <option value="{{ $class->id }}" {{ request('class_room_id') == $class->id ? 'selected' : '' }}>
-                                    {{ $class->name }}
                                 </option>
                             @endforeach
                         </select>

@@ -1,6 +1,12 @@
 <x-admin-layout>
 <div class="min-h-screen bg-gray-50 py-12">
   <div class="max-w-2xl mx-auto px-4">
+    <div class="mb-6">
+      <a href="{{ route('lessons.admin') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 font-medium shadow-sm">
+        <span class="text-lg">←</span>
+        <span>Kembali ke Manajemen Jadwal</span>
+      </a>
+    </div>
     <!-- Header with Description -->
     <div class="mb-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-8 text-white shadow-lg">
       <h1 class="text-3xl font-bold mb-3">📅 Generate Jadwal Pelajaran</h1>
@@ -24,13 +30,14 @@
           <label class="block text-sm font-bold text-gray-900 mb-3">🏛️ Pilih Sekolah</label>
           <select name="school" required class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
             <option value="">-- Pilih Sekolah --</option>
-            <option value="Negeri">Negeri</option>
-            <option value="IGS">IGS</option>
-            <option value="Xavega">Xavega</option>
-            <option value="Bangau">Bangau</option>
+            @foreach(['Negeri','IGS','Xavega','Bangau','Kumbang'] as $schoolOption)
+              <option value="{{ $schoolOption }}" {{ old('school') === $schoolOption ? 'selected' : '' }}>
+                {{ $schoolOption }}
+              </option>
+            @endforeach
           </select>
           @error('school')
-            <span class="text-red-600 text-sm mt-1">{{ $message }}</span>
+            <span class="text-red-600 text-sm mt-1 block">{{ $message }}</span>
           @enderror
         </div>
 
@@ -39,23 +46,12 @@
           <label class="block text-sm font-bold text-gray-900 mb-3">📚 Pilih Kelas</label>
           <select name="grade" id="gradeSelect" required class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
             <option value="">-- Pilih Kelas --</option>
-            <option value="10">Kelas 10</option>
-            <option value="11">Kelas 11</option>
-            <option value="12">Kelas 12</option>
+            <option value="10" {{ old('grade') === '10' ? 'selected' : '' }}>Kelas 10</option>
+            <option value="11" {{ old('grade') === '11' ? 'selected' : '' }}>Kelas 11</option>
+            <option value="12" {{ old('grade') === '12' ? 'selected' : '' }}>Kelas 12</option>
           </select>
           @error('grade')
             <span class="text-red-600 text-sm mt-1">{{ $message }}</span>
-          @enderror
-        </div>
-
-        <!-- Ruangan Manual Input (No validation) -->
-        <div>
-          <label class="block text-sm font-bold text-gray-900 mb-3">🏫 Input Kode Ruangan</label>
-          <input type="text" name="room_code" id="roomCodeInput" placeholder="Contoh: 1B, A21, A22, B31, dll" required 
-            class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600"
-            value="{{ old('room_code') }}">
-          @error('room_code')
-            <span class="text-red-600 text-sm mt-1 block">{{ $message }}</span>
           @enderror
         </div>
 
@@ -91,8 +87,7 @@
         <div>
           <label class="block text-sm font-bold text-gray-900 mb-3">📝 Deskripsi Pelajaran (Opsional)</label>
           <textarea name="description" rows="4" placeholder="Tuliskan detail pelajaran, topik yang akan diajarkan, atau informasi penting tentang kelas..." 
-            class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 resize-none"
-            value="{{ old('description') }}"></textarea>
+            class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 resize-none">{{ old('description') }}</textarea>
           <p class="text-xs text-gray-500 mt-2">Contoh: Pembelajaran Matematika tentang Aljabar, Persiapan Ujian Nasional, Praktikum Kimia, dll</p>
           @error('description')
             <span class="text-red-600 text-sm mt-1">{{ $message }}</span>
@@ -158,7 +153,7 @@
         </div>
 
         <!-- Submit -->
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition flex items-center justify-center gap-2">
+        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2">
           🚀 Generate Jadwal Setiap Hari
         </button>
       </form>

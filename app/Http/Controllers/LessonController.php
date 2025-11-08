@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Models\Lesson;
 use App\Models\ClassRoom;
+use App\Models\School;
 use App\Models\Subject;
 use App\Models\Teacher;
 
@@ -29,9 +30,8 @@ class LessonController extends Controller
     {
         // Validasi input
         $r->validate([
-            'school'     => 'required|in:Negeri,IGS,Xavega,Bangau',
+            'school'     => 'required|in:Negeri,IGS,Xavega,Bangau,Kumbang',
             'grade'      => 'required|in:10,11,12',
-            'room_code'  => 'required|string|max:10',
             'teacher_id' => 'required|exists:teachers,id',
             'subject_id' => 'nullable|exists:subjects,id',
             'description' => 'nullable|string|max:500',
@@ -42,15 +42,23 @@ class LessonController extends Controller
         ]);
 
         try {
-            // Cari ClassRoom berdasarkan grade dan room_code
-            $classRoom = ClassRoom::where('grade', (int)$r->grade)
-                ->where('name', 'like', '%' . $r->room_code . '%')
-                ->first();
+            // Pastikan sekolah tersedia atau buat baru bila belum ada
+            $school = School::firstOrCreate(['name' => $r->school]);
 
-            if (!$classRoom) {
-                return back()
-                    ->withErrors(['room_code' => "Ruangan '{$r->room_code}' tidak ditemukan untuk Kelas {$r->grade}"])
-                    ->withInput();
+            // Ambil kelas berdasarkan sekolah & grade, buat default jika belum ada
+            $classRooms = ClassRoom::where('school_id', $school->id)
+                ->where('grade', (int) $r->grade)
+                ->orderBy('id')
+                ->get();
+
+            if ($classRooms->isEmpty()) {
+                $defaultClass = ClassRoom::create([
+                    'school_id' => $school->id,
+                    'name'      => "Kelas {$r->grade}",
+                    'grade'     => (int) $r->grade,
+                ]);
+
+                $classRooms = collect([$defaultClass]);
             }
 
             // Validasi time jika keduanya diisi
@@ -69,31 +77,32 @@ class LessonController extends Controller
             $skipped = 0;
             $errors = [];
 
-            DB::transaction(function() use ($r, $classRoom, $start, $end, &$created, &$skipped, &$errors) {
-                for ($d = $start->copy(); $d->lte($end); $d->addDay()) {
-                    // Check if lesson already exists
-                    $existingLesson = Lesson::where('date', $d->toDateString())
-                        ->where('class_room_id', $classRoom->id)
-                        ->where('teacher_id', $r->teacher_id)
-                        ->first();
-                    
-                    if (!$existingLesson) {
-                        try {
-                            Lesson::create([
-                                'date'          => $d->toDateString(),
-                                'class_room_id' => $classRoom->id,
-                                'teacher_id'    => $r->teacher_id,
-                                'subject_id'    => $r->subject_id,
-                                'start_time'    => $r->start_time,
-                                'end_time'      => $r->end_time,
-                                'description'   => $r->description,
-                            ]);
-                            $created++;
-                        } catch (\Exception $e) {
-                            $errors[] = "Error pada tanggal {$d->format('d-m-Y')}: {$e->getMessage()}";
+            DB::transaction(function() use ($r, $classRooms, $start, $end, &$created, &$skipped, &$errors) {
+                for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+                    foreach ($classRooms as $classRoom) {
+                        $existingLesson = Lesson::where('date', $date->toDateString())
+                            ->where('class_room_id', $classRoom->id)
+                            ->where('teacher_id', $r->teacher_id)
+                            ->first();
+
+                        if (!$existingLesson) {
+                            try {
+                                Lesson::create([
+                                    'date'          => $date->toDateString(),
+                                    'class_room_id' => $classRoom->id,
+                                    'teacher_id'    => $r->teacher_id,
+                                    'subject_id'    => $r->subject_id,
+                                    'start_time'    => $r->start_time,
+                                    'end_time'      => $r->end_time,
+                                    'description'   => $r->description,
+                                ]);
+                                $created++;
+                            } catch (\Exception $e) {
+                                $errors[] = "Error pada tanggal {$date->format('d-m-Y')} (Kelas {$classRoom->name}): {$e->getMessage()}";
+                            }
+                        } else {
+                            $skipped++;
                         }
-                    } else {
-                        $skipped++;
                     }
                 }
             });
@@ -104,13 +113,15 @@ class LessonController extends Controller
                 return back()->with('warning', "⚠️ Jadwal dibuat dengan error: $errorMsg");
             }
 
-            $msg = "✅ Jadwal berhasil digenerate! {$created} jadwal baru dibuat, {$skipped} duplikat diabaikan. Ruangan: {$classRoom->name} (Kelas {$classRoom->grade}), Tanggal: {$start->format('d M Y')} - {$end->format('d M Y')}";
+            $msg = "✅ Jadwal berhasil digenerate! {$created} jadwal baru dibuat untuk {$classRooms->count()} kelas grade {$r->grade} di {$school->name}, {$skipped} duplikat diabaikan. Rentang tanggal: {$start->format('d M Y')} - {$end->format('d M Y')}";
             
             Log::info('Lesson generation success', [
                 'created' => $created,
                 'skipped' => $skipped,
-                'classroom_id' => $classRoom->id,
-                'classroom_name' => $classRoom->name,
+                'school_id' => $school->id,
+                'school_name' => $school->name,
+                'grade' => $r->grade,
+                'classroom_ids' => $classRooms->pluck('id')->all(),
                 'teacher_id' => $r->teacher_id,
                 'date_range' => $start->format('Y-m-d') . ' to ' . $end->format('Y-m-d'),
             ]);
@@ -157,20 +168,15 @@ class LessonController extends Controller
     public function studentView(Request $r)
     {
         $user = Auth::user();
-        $student = \App\Models\Student::where('user_id', $user->id)->firstOrFail();
-        
-        // Get lessons for student's class (filter only grade 10, 11, 12)
-        $q = Lesson::with(['teacher.user', 'subject', 'classRoom'])
-            ->where('class_room_id', $student->class_room_id)
+        $student = \App\Models\Student::with('classRoom.school')->where('user_id', $user->id)->firstOrFail();
+
+        $q = Lesson::with(['teacher.user', 'subject', 'classRoom.school'])
             ->orderBy('date', 'asc');
-        
-        // Filter by grade if provided
+
         if ($r->filled('grade')) {
             $q->whereHas('classRoom', function($query) use ($r) {
-                $query->where('grade', $r->grade)->whereIn('grade', [10, 11, 12]);
+                $query->where('grade', $r->grade);
             });
-        } else {
-            $q->whereHas('classRoom', fn($query) => $query->whereIn('grade', [10, 11, 12]));
         }
         
         if ($r->filled('date')) {
@@ -186,21 +192,11 @@ class LessonController extends Controller
     public function adminView(Request $r)
     {
         $q = Lesson::with(['teacher.user', 'subject', 'classRoom'])
+            ->whereHas('classRoom', fn($query) => $query->whereIn('grade', [10, 11, 12]))
             ->orderBy('date', 'desc');
         
         if ($r->filled('teacher_id')) {
             $q->where('teacher_id', $r->teacher_id);
-        }
-        
-        if ($r->filled('class_room_id')) {
-            $q->where('class_room_id', $r->class_room_id);
-        }
-        
-        if ($r->filled('grade')) {
-            $q->whereHas('classRoom', fn($query) => $query->where('grade', $r->grade));
-        } else {
-            // Default: filter hanya grade 10, 11, 12
-            $q->whereHas('classRoom', fn($query) => $query->whereIn('grade', [10, 11, 12]));
         }
         
         if ($r->filled('date')) {
@@ -209,12 +205,10 @@ class LessonController extends Controller
         
         $lessons = $q->paginate(20)->withQueryString();
         $teachers = Teacher::with('user')->orderBy('id')->get();
-        $classes = ClassRoom::whereIn('grade', [10, 11, 12])->orderBy('name')->get();
         
         return view('lessons.admin.index', compact(
             'lessons',
-            'teachers',
-            'classes'
+            'teachers'
         ));
     }
 

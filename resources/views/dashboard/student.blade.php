@@ -111,77 +111,48 @@
         @endif
       </div>
 
-      <!-- INFO BIMBINGAN CARD -->
-      <div class="mb-8">
-        <div class="grid md:grid-cols-3 gap-6">
-          <!-- Card 1 -->
-          <div class="bg-white rounded-2xl p-6 shadow-md hover:shadow-lg transition border border-gray-100">
-            <div class="flex items-center mb-4">
-              <div class="flex-shrink-0">
-                <div class="flex items-center justify-center h-12 w-12 rounded-lg bg-blue-100">
-                  <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C6.5 6.253 2 10.998 2 17s4.5 10.747 10 10.747c5.5 0 10-4.998 10-10.747S17.5 6.253 12 6.253z"></path>
-                  </svg>
-                </div>
-              </div>
-              <h3 class="ml-3 text-lg font-semibold text-gray-900">Bimbingan Akademik</h3>
-            </div>
-            <p class="text-gray-600 text-sm leading-relaxed">Dapatkan dukungan penuh dari tim pengajar berpengalaman kami untuk menghadapi tantangan akademik dan meraih prestasi terbaik.</p>
-            <div class="mt-4">
-              <a href="#" class="text-blue-600 hover:text-blue-700 font-medium text-sm inline-flex items-center">
-                Pelajari Lebih Lanjut
-                <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-              </a>
-            </div>
-          </div>
+      <!-- Quick Access Cards -->
+      <div class="mb-10">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Akses Cepat</h2>
 
-          <!-- Card 2 -->
-          <div class="bg-white rounded-2xl p-6 shadow-md hover:shadow-lg transition border border-gray-100">
-            <div class="flex items-center mb-4">
-              <div class="flex-shrink-0">
-                <div class="flex items-center justify-center h-12 w-12 rounded-lg bg-green-100">
-                  <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                  </svg>
-                </div>
-              </div>
-              <h3 class="ml-3 text-lg font-semibold text-gray-900">Monitoring Nilai</h3>
-            </div>
-            <p class="text-gray-600 text-sm leading-relaxed">Pantau perkembangan nilai akademik Anda secara real-time dan identifikasi area yang perlu ditingkatkan untuk sukses.</p>
-            <div class="mt-4">
-              <a href="#" class="text-green-600 hover:text-green-700 font-medium text-sm inline-flex items-center">
-                Lihat Nilai Saya
-                <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-              </a>
-            </div>
-          </div>
+        @php
+          $studentLinks = [
+            [
+              'label' => 'Jadwal Pelajaran',
+              'description' => 'Lihat seluruh jadwal dari semua sekolah',
+              'route' => route('lessons.student')
+            ],
+            [
+              'label' => 'Pembayaran',
+              'description' => 'Upload bukti dan cek status pembayaran bulanan',
+              'route' => route('pay.index')
+            ],
+            [
+              'label' => 'Info Materi',
+              'description' => 'Unggah atau unduh kisi-kisi dan materi penting',
+              'route' => route('info.index')
+            ],
+            [
+              'label' => 'Riwayat Kehadiran',
+              'description' => 'Pantau catatan absensi pribadi setiap jadwal',
+              'route' => route('attendance.student')
+            ],
+          ];
+        @endphp
 
-          <!-- Card 3 -->
-          <div class="bg-white rounded-2xl p-6 shadow-md hover:shadow-lg transition border border-gray-100">
-            <div class="flex items-center mb-4">
-              <div class="flex-shrink-0">
-                <div class="flex items-center justify-center h-12 w-12 rounded-lg bg-purple-100">
-                  <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                </div>
-              </div>
-              <h3 class="ml-3 text-lg font-semibold text-gray-900">Beasiswa & Program</h3>
-            </div>
-            <p class="text-gray-600 text-sm leading-relaxed">Jangan lewatkan berbagai program beasiswa dan bantuan keuangan yang tersedia untuk mendukung pendidikan Anda.</p>
-            <div class="mt-4">
-              <a href="#" class="text-purple-600 hover:text-purple-700 font-medium text-sm inline-flex items-center">
-                Cek Ketersediaan
-                <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          @foreach ($studentLinks as $link)
+            <a href="{{ $link['route'] }}" class="group bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition flex flex-col">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-base font-semibold text-slate-900">{{ $link['label'] }}</h3>
+                <svg class="w-5 h-5 text-slate-300 group-hover:text-indigo-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M9 5l7 7-7 7" />
                 </svg>
-              </a>
-            </div>
-          </div>
+              </div>
+              <p class="text-sm text-slate-500 flex-grow">{{ $link['description'] }}</p>
+              <span class="mt-4 text-sm font-medium text-indigo-600">Masuk Sekarang</span>
+            </a>
+          @endforeach
         </div>
       </div>
 
@@ -231,33 +202,6 @@
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- QUICK ACCESS CARDS -->
-      <div class="grid md:grid-cols-2 gap-6">
-        <a href="{{ route('info.index') }}" class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 shadow-md hover:shadow-lg transition text-white group">
-          <div class="flex items-center justify-between">
-            <div>
-              <h3 class="text-lg font-semibold mb-2">Unggah Info / Kisi-kisi</h3>
-              <p class="text-blue-100 text-sm">Bagikan materi pembelajaran dengan pengajar</p>
-            </div>
-            <svg class="w-12 h-12 text-blue-400 group-hover:translate-x-2 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-          </div>
-        </a>
-
-        <a href="{{ route('pay.index') }}" class="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 shadow-md hover:shadow-lg transition text-white group">
-          <div class="flex items-center justify-between">
-            <div>
-              <h3 class="text-lg font-semibold mb-2">Riwayat Pembayaran</h3>
-              <p class="text-green-100 text-sm">Lihat semua transaksi pembayaran Anda</p>
-            </div>
-            <svg class="w-12 h-12 text-green-400 group-hover:translate-x-2 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </div>
-        </a>
       </div>
 
     </div>
