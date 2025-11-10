@@ -69,9 +69,19 @@ class InfoFileController extends Controller
 
         try {
             $student = Student::firstOrCreate(['user_id' => Auth::id()]);
-            $path = $r->file('file')->store('info_files', 'public');
             
-            $extension = $this->getFileExtension($path);
+            // Get original filename and sanitize it
+            $originalName = $r->file('file')->getClientOriginalName();
+            $fileName = pathinfo($originalName, PATHINFO_FILENAME);
+            $extension = pathinfo($originalName, PATHINFO_EXTENSION);
+            $sanitizedName = preg_replace("/[^a-zA-Z0-9.-]/", "_", $fileName);
+            
+            // Add timestamp to prevent duplicate names
+            $finalName = $sanitizedName . '_' . time() . '.' . $extension;
+            
+            // Store with original name
+            $path = $r->file('file')->storeAs('info_files', $finalName, 'public');
+            
             $fileType = $this->getFileType($extension);
 
             $infoFile = InfoFile::create([
@@ -153,9 +163,17 @@ class InfoFileController extends Controller
         
         // Download using response helper with proper path
         $filePath = storage_path('app/public/' . $info->file_path);
-        $fileName = pathinfo($info->file_path, PATHINFO_FILENAME);
+        $originalFileName = pathinfo($info->file_path, PATHINFO_BASENAME);
         
-        return response()->download($filePath, $fileName);
+        // Log download activity
+        Log::info('File downloaded', [
+            'file_id' => $info->id,
+            'user_id' => Auth::id(),
+            'file_name' => $originalFileName,
+            'file_path' => $info->file_path
+        ]);
+
+        return response()->download($filePath, $originalFileName);
     }
 
     /**
@@ -240,19 +258,19 @@ class InfoFileController extends Controller
         
         try {
             $filePath = storage_path('app/public/' . $info->file_path);
-            $fileName = pathinfo($info->file_path, PATHINFO_FILENAME);
+            $originalFileName = pathinfo($info->file_path, PATHINFO_BASENAME);
             $extension = $this->getFileExtension($info->file_path);
             
             // Log download activity
             Log::info('File downloaded', [
                 'file_id' => $info->id,
                 'user_id' => Auth::id(),
-                'file_name' => $fileName,
+                'file_name' => $originalFileName,
                 'file_type' => $extension,
                 'file_path' => $info->file_path
             ]);
             
-            return response()->download($filePath, $fileName);
+            return response()->download($filePath, $originalFileName);
         } catch (\Exception $e) {
             Log::error('Download file error', [
                 'file_id' => $info->id,

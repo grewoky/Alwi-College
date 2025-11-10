@@ -85,8 +85,8 @@
                             </div>
                         </div>
                         <div class="lg:w-1/2 p-6 sm:p-8 bg-white dark:bg-gray-800">
-                            <div class="h-64 bg-white dark:bg-gray-800 rounded-xl shadow-inner flex items-center justify-center">
-                                <span class="text-gray-500 dark:text-gray-400">Foto Alwi College</span>
+                            <div class="h-64 bg-white dark:bg-gray-800 rounded-xl shadow-inner overflow-hidden">
+                                <img src="{{ asset('images/About_Alwi.png') }}" alt="About Alwi College" class="w-full h-full object-cover">
                             </div>
                         </div>
                     </div>

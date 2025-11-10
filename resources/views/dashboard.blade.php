@@ -8,6 +8,13 @@
                 <p class="text-gray-600 mt-2">Selamat datang di Alwi College</p>
             </div>
 
+            <!-- About Image -->
+            <div class="mb-8">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <img src="{{ asset('images/About_Alwi.png') }}" alt="About Alwi College" class="w-full h-auto">
+                </div>
+            </div>
+
             <!-- Quick Links - Diperbesar -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <a href="{{ route('lessons.index') }}" class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-8 border-t-4 border-blue-600 hover:scale-105 transform transition-transform duration-200">

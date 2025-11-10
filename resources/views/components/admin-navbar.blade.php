@@ -1,5 +1,5 @@
 {{-- Navbar Component untuk ADMIN --}}
-<nav class="text-white border-b border-white/10 shadow-md" style="background: linear-gradient(90deg, #1B2A6B 0%, #3C5EC7 100%);">
+<nav class="bg-[#2E529F] border-b border-[#2E529F]/20 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
             <!-- Logo dan Brand -->

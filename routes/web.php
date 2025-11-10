@@ -47,8 +47,6 @@ Route::middleware(['auth','role:admin'])->prefix('admin')->group(function () {
     Route::get('/jadwal/{lesson}/edit', [LessonController::class,'editLesson'])->name('lessons.edit');
     Route::put('/jadwal/{lesson}', [LessonController::class,'updateLesson'])->name('lessons.update');
     Route::delete('/jadwal/{lesson}', [LessonController::class,'deleteLesson'])->name('lessons.destroy');
-    Route::get('/jadwal/logs/deleted', [LessonController::class,'showDeletedLog'])->name('lessons.logs.deleted');
-    Route::get('/jadwal/logs/expired', [LessonController::class,'showExpiredLessons'])->name('lessons.logs.expired');
     
     // ADMIN INFO (Lihat file yang diupload siswa)
     Route::get('/info', [InfoFileController::class,'listAll'])->name('info.admin.list');
