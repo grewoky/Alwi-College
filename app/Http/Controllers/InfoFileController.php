@@ -177,6 +177,49 @@ class InfoFileController extends Controller
     }
 
     /**
+     * Serve student uploaded file to owner, teacher, or admin.
+     */
+    public function showFile(InfoFile $info)
+    {
+        $user = Auth::user();
+
+        // Load relation
+        $info->loadMissing('student.user');
+
+        // Check roles via DB table (works even without Spatie helper)
+        $isAdmin = DB::table('model_has_roles')
+            ->join('roles','roles.id','=','model_has_roles.role_id')
+            ->where('model_has_roles.model_type', get_class($user))
+            ->where('model_has_roles.model_id', $user->id)
+            ->where('roles.name', 'admin')
+            ->exists();
+
+        $isTeacher = DB::table('model_has_roles')
+            ->join('roles','roles.id','=','model_has_roles.role_id')
+            ->where('model_has_roles.model_type', get_class($user))
+            ->where('model_has_roles.model_id', $user->id)
+            ->where('roles.name', 'teacher')
+            ->exists();
+
+        // Allow if admin, teacher, or owner student
+        if (! $isAdmin && ! $isTeacher && $info->student->user_id !== $user->id) {
+            abort(403, 'Tidak diizinkan mengakses file ini.');
+        }
+
+        if (! $info->file_path || ! Storage::disk('public')->exists($info->file_path)) {
+            abort(404, 'File tidak ditemukan.');
+        }
+
+        $fullPath = storage_path('app/public/' . $info->file_path);
+        if (! file_exists($fullPath)) {
+            abort(404, 'File tidak ditemukan.');
+        }
+
+        // If teacher/admin prefer download, but for student allow inline view when possible
+        return response()->file($fullPath);
+    }
+
+    /**
      * Supported MIME types untuk berbagai file format
      */
     private function getSupportedFileTypes(): array

@@ -26,6 +26,14 @@
                    class="px-4 py-2 rounded-md text-white hover:bg-white/10 transition-colors {{ request()->routeIs('info.admin.list') ? 'bg-white/20 font-semibold' : '' }}">
                     Info File
                 </a>
+                <a href="{{ route('admin.students.index') }}"
+                   class="px-4 py-2 rounded-md text-white hover:bg-white/10 transition-colors {{ request()->routeIs('admin.students.*') ? 'bg-white/20 font-semibold' : '' }}">
+                    Kelola Siswa
+                </a>
+                <a href="{{ route('admin.teachers.index') }}"
+                   class="px-4 py-2 rounded-md text-white hover:bg-white/10 transition-colors {{ request()->routeIs('admin.teachers.*') ? 'bg-white/20 font-semibold' : '' }}">
+                    Kelola Pengajar
+                </a>
                 <a href="{{ route('trips.index') }}" 
                    class="px-4 py-2 rounded-md text-white hover:bg-white/10 transition-colors {{ request()->routeIs('trips.index', 'trips.show') ? 'bg-white/20 font-semibold' : '' }}">
                     Trip Guru
@@ -71,6 +79,14 @@
             <a href="{{ route('info.admin.list') }}" 
                class="block px-4 py-2 text-white hover:bg-white/10 rounded-md {{ request()->routeIs('info.admin.list') ? 'bg-white/20 font-semibold' : '' }}">
                 Info File
+            </a>
+            <a href="{{ route('admin.students.index') }}" 
+               class="block px-4 py-2 text-white hover:bg-white/10 rounded-md {{ request()->routeIs('admin.students.*') ? 'bg-white/20 font-semibold' : '' }}">
+                Kelola Siswa
+            </a>
+            <a href="{{ route('admin.teachers.index') }}" 
+               class="block px-4 py-2 text-white hover:bg-white/10 rounded-md {{ request()->routeIs('admin.teachers.*') ? 'bg-white/20 font-semibold' : '' }}">
+                Kelola Pengajar
             </a>
             <a href="{{ route('trips.index') }}" 
                class="block px-4 py-2 text-white hover:bg-white/10 rounded-md {{ request()->routeIs('trips.index', 'trips.show') ? 'bg-white/20 font-semibold' : '' }}">

@@ -101,7 +101,7 @@
 
                                 <div class="pt-2 border-t border-gray-200">
                                     <p class="text-gray-500 text-xs font-medium uppercase">Kelas</p>
-                                    <p class="text-gray-900 font-medium">{{ $lesson->classRoom->name }}</p>
+                                    <p class="text-gray-900 font-medium">{{ $lesson->classRoom?->name ?? '-' }}</p>
                                 </div>
 
                                 <div>

@@ -42,6 +42,7 @@
                                                         <th class="px-4 py-2 text-center font-semibold text-gray-700">✗ Tidak</th>
                                                         <th class="px-4 py-2 text-center font-semibold text-gray-700">📋 Izin</th>
                                                         <th class="px-4 py-2 text-center font-semibold text-gray-700">🏥 Sakit</th>
+                                                        <th class="px-4 py-2 text-center font-semibold text-gray-700">Aksi</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -77,10 +78,20 @@
                                                                     {{ $sakit }}
                                                                 </span>
                                                             </td>
+                                                            <td class="px-4 py-3 text-center">
+                                                                @if($student->user && $student->user->email)
+                                                                    <form action="{{ route('admin.students.clear_email', $student) }}" method="POST" onsubmit="return confirm('Yakin hapus email siswa ini? Aksi ini akan mengganti email dengan placeholder dan tidak dapat dikembalikan.');">
+                                                                        @csrf
+                                                                        <button type="submit" class="px-2 py-1 bg-red-600 text-white rounded text-xs">Hapus Email</button>
+                                                                    </form>
+                                                                @else
+                                                                    <span class="text-slate-400 text-xs">—</span>
+                                                                @endif
+                                                            </td>
                                                         </tr>
                                                     @empty
                                                         <tr>
-                                                            <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                                                            <td colspan="6" class="px-4 py-8 text-center text-gray-500">
                                                                 Belum ada siswa di kelas ini
                                                             </td>
                                                         </tr>

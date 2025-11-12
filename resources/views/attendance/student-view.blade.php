@@ -7,7 +7,7 @@
             <!-- Page Header -->
             <div class="mb-8">
                 <h1 class="text-4xl font-bold text-gray-900 mb-2">📊 Riwayat Absensi</h1>
-                <p class="text-gray-600">Kelas: <strong>{{ $classRoom->name }}</strong></p>
+                <p class="text-gray-600">Kelas: <strong>{{ $classRoom->name ?? 'Belum ada kelas' }}</strong></p>
             </div>
 
             <!-- Statistics Cards -->

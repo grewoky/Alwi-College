@@ -45,7 +45,7 @@
         <td class="border p-2">{{ $p->created_at->format('d M Y H:i') }}</td>
         <td class="border p-2">{{ $p->month_period ?? '-' }}</td>
         <td class="border p-2">{{ $p->amount ? number_format($p->amount,0,',','.') : '-' }}</td>
-        <td class="border p-2"><a href="{{ asset('storage/'.$p->proof_path) }}" target="_blank" class="text-blue-600 underline">Lihat</a></td>
+  <td class="border p-2"><a href="{{ route('pay.proof',$p->id) }}" target="_blank" class="text-blue-600 underline">Lihat</a></td>
         <td class="border p-2">
           @if($p->status=='pending') <span class="text-yellow-700 bg-yellow-100 px-2 py-1 rounded">Menunggu</span>
           @elseif($p->status=='approved') <span class="text-green-700 bg-green-100 px-2 py-1 rounded">Diterima</span>

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Student;
+use App\Models\ClassRoom;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,7 +21,9 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        return view('auth.register');
+        // Load class rooms so registrant can choose their class during sign up
+        $classRooms = ClassRoom::with('school')->orderBy('grade')->orderBy('name')->get();
+        return view('auth.register', compact('classRooms'));
     }
 
     /**
@@ -33,18 +37,39 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'class_room_id' => ['required', 'exists:class_rooms,id'],
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            // new registrations require admin approval
+            'is_approved' => false,
         ]);
+
+        // assign student role if roles system is available
+        try {
+            if (method_exists($user, 'assignRole')) {
+                $user->assignRole('student');
+            }
+        } catch (\Exception $e) {
+            // ignore if roles not configured
+        }
+
+        // Ensure a Student model exists for this user and attach the selected class
+        try {
+            Student::firstOrCreate(
+                ['user_id' => $user->id],
+                ['class_room_id' => $request->input('class_room_id')]
+            );
+        } catch (\Exception $e) {
+            // ignore failures here (non-critical)
+        }
 
         event(new Registered($user));
 
-        Auth::login($user);
-
-        return redirect(route('dashboard', absolute: false));
+        // Do not auto-login — inform user to wait for admin verification
+        return redirect()->route('register.awaiting');
     }
 }

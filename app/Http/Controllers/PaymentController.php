@@ -113,4 +113,42 @@ class PaymentController extends Controller
             return back()->with('error', 'Gagal menghapus data pembayaran');
         }
     }
+
+    /**
+     * Serve payment proof file securely.
+     * Accessible to admin or the student owner only.
+     */
+    public function showProof(Payment $payment)
+    {
+        $user = Auth::user();
+
+        // ensure relation loaded
+        $payment->loadMissing('student.user');
+
+        $isAdmin = false;
+        try {
+            // roles may be via spatie
+            $isAdmin = method_exists($user, 'hasRole') && $user->hasRole('admin');
+        } catch (\Exception $e) {
+            $isAdmin = false;
+        }
+
+        // Allow if admin or owner
+        if (! $isAdmin && $payment->student->user_id !== $user->id) {
+            abort(403, 'Tidak diizinkan mengakses file ini.');
+        }
+
+        if (! $payment->proof_path || ! Storage::disk('public')->exists($payment->proof_path)) {
+            abort(404, 'File tidak ditemukan.');
+        }
+
+        // Build absolute path in storage/app/public
+        $fullPath = storage_path('app/public/' . $payment->proof_path);
+        if (! file_exists($fullPath)) {
+            abort(404, 'File tidak ditemukan.');
+        }
+
+        // Use response()->file to serve the file (works on Windows and avoids symlink dependency)
+        return response()->file($fullPath);
+    }
 }

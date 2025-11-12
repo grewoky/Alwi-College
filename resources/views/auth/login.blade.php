@@ -82,6 +82,11 @@
                 class="w-full h-10 rounded-lg bg-blue-600 text-white font-medium shadow hover:bg-blue-700 transition">
           Masuk
         </button>
+      
+        {{-- Info pendaftaran ditutup publik --}}
+        <div class="text-center mt-4">
+          <p class="text-sm text-gray-600">Untuk membuat akun baru, silakan hubungi administrator.</p>
+        </div>
       </form>
     </div>
   </div>

@@ -46,7 +46,7 @@
           <td class="p-3">{{ $p->created_at->format('d M Y H:i') }}</td>
           <td class="p-3">{{ $p->month_period ?? '-' }}</td>
           <td class="p-3">{{ $p->amount ? number_format($p->amount,0,',','.') : '-' }}</td>
-          <td class="p-3"><a href="{{ asset('storage/'.$p->proof_path) }}" target="_blank" class="text-blue-600 underline">Lihat</a></td>
+          <td class="p-3"><a href="{{ route('pay.proof',$p->id) }}" target="_blank" class="text-blue-600 underline">Lihat</a></td>
           <td class="p-3">{{ ucfirst($p->status) }}</td>
           <td class="p-3">
             <form action="{{ route('pay.verify',$p->id) }}" method="POST" class="flex flex-wrap gap-2 items-center">

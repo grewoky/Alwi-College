@@ -47,6 +47,9 @@ Route::middleware(['auth','role:admin'])->prefix('admin')->group(function () {
     Route::get('/jadwal/{lesson}/edit', [LessonController::class,'editLesson'])->name('lessons.edit');
     Route::put('/jadwal/{lesson}', [LessonController::class,'updateLesson'])->name('lessons.update');
     Route::delete('/jadwal/{lesson}', [LessonController::class,'deleteLesson'])->name('lessons.destroy');
+    // Deleted / expired logs
+    Route::get('/jadwal/deleted-log', [LessonController::class,'showDeletedLog'])->name('lessons.logs.deleted');
+    Route::get('/jadwal/expired', [LessonController::class,'showExpiredLessons'])->name('lessons.logs.expired');
     
     // ADMIN INFO (Lihat file yang diupload siswa)
     Route::get('/info', [InfoFileController::class,'listAll'])->name('info.admin.list');
@@ -74,6 +77,25 @@ Route::middleware(['auth','role:admin'])->prefix('admin')->group(function () {
     // ADMIN ABSENSI (Lihat laporan kehadiran siswa)
     Route::get('/attendance', [AttendanceController::class,'adminView'])->name('attendance.admin');
     Route::get('/attendance/report', [AttendanceController::class,'report'])->name('attendance.report');
+
+    // ADMIN USER MANAGEMENT (verifikasi pendaftar, tambah guru)
+    Route::get('/users/pending', [\App\Http\Controllers\AdminUserController::class,'pending'])->name('admin.users.pending');
+    Route::post('/users/{user}/approve', [\App\Http\Controllers\AdminUserController::class,'approve'])->name('admin.users.approve');
+    // Student management
+    Route::get('/students', [\App\Http\Controllers\AdminUserController::class,'studentsIndex'])->name('admin.students.index');
+    Route::delete('/students/{student}', [\App\Http\Controllers\AdminUserController::class,'destroyStudent'])->name('admin.students.destroy');
+    // Clear student email (replace with unique placeholder)
+    Route::post('/students/{student}/clear-email', [\App\Http\Controllers\AdminUserController::class,'clearStudentEmail'])->name('admin.students.clear_email');
+    // Create student (admin only)
+    Route::get('/students/create', [\App\Http\Controllers\AdminUserController::class,'createStudent'])->name('admin.students.create');
+    Route::post('/students', [\App\Http\Controllers\AdminUserController::class,'storeStudent'])->name('admin.students.store');
+    Route::get('/teachers/create', [\App\Http\Controllers\AdminUserController::class,'createTeacher'])->name('admin.teachers.create');
+    Route::post('/teachers', [\App\Http\Controllers\AdminUserController::class,'storeTeacher'])->name('admin.teachers.store');
+    // Kelola Pengajar
+    Route::get('/teachers', [\App\Http\Controllers\AdminUserController::class,'teachersIndex'])->name('admin.teachers.index');
+    Route::delete('/teachers/{teacher}', [\App\Http\Controllers\AdminUserController::class,'destroyTeacher'])->name('admin.teachers.destroy');
+    Route::get('/teachers/{teacher}/edit', [\App\Http\Controllers\AdminUserController::class,'editTeacher'])->name('admin.teachers.edit');
+    Route::put('/teachers/{teacher}', [\App\Http\Controllers\AdminUserController::class,'updateTeacher'])->name('admin.teachers.update');
 });
 
 // ============ TEACHER AREA ============
@@ -106,6 +128,11 @@ Route::middleware(['auth','role:student'])->prefix('student')->group(function ()
     // STUDENT PEMBAYARAN (Upload bukti pembayaran)
     Route::get('/payment', [PaymentController::class,'index'])->name('pay.index');
     Route::post('/payment', [PaymentController::class,'store'])->name('pay.store');
+    // Serve proof files securely (student owner or admin)
+    Route::get('/payment/{payment}/proof', [PaymentController::class,'showProof'])->name('pay.proof')->middleware('auth');
+
+    // Serve student info files securely (owner, teacher, or admin) — defined with auth only so teacher/admin can also access via controller check
+    Route::get('/info/{info}/file', [\App\Http\Controllers\InfoFileController::class,'showFile'])->name('info.file')->middleware('auth');
     
     // STUDENT ABSENSI (Lihat kehadiran)
     Route::get('/attendance', [AttendanceController::class,'studentView'])->name('attendance.student');

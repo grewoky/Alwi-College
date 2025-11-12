@@ -41,11 +41,28 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
+        // Check if the account exists and is approved before attempting authentication
+        $userModel = \App\Models\User::where('email', $this->input('email'))->first();
+        if ($userModel && property_exists($userModel, 'is_approved') && $userModel->is_approved === false) {
+            throw ValidationException::withMessages([
+                'email' => 'Akun Anda belum diverifikasi oleh admin. Silakan tunggu konfirmasi.',
+            ]);
+        }
+
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
+            ]);
+        }
+
+        // prevent login if account is not approved by admin (double-check)
+        $user = Auth::user();
+        if ($user && property_exists($user, 'is_approved') && $user->is_approved === false) {
+            Auth::logout();
+            throw ValidationException::withMessages([
+                'email' => 'Akun Anda belum diverifikasi oleh admin. Silakan tunggu konfirmasi.',
             ]);
         }
 
