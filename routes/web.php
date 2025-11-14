@@ -111,6 +111,8 @@ Route::middleware(['auth','role:teacher'])->prefix('teacher')->group(function ()
     
     // TEACHER INFO (Lihat file yang diupload siswa)
     Route::get('/dokumen', [InfoFileController::class,'teacherViewStudentFiles'])->name('info.teacher.student-files');
+    // Teacher attendance: view classes by grade
+    Route::get('/attendance/grade/{grade}', [\App\Http\Controllers\AttendanceController::class,'gradeView'])->name('attendance.grade');
 });
 
 // ============ STUDENT AREA ============

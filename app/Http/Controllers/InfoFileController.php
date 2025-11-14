@@ -123,6 +123,7 @@ class InfoFileController extends Controller
     {
         // Authorization check
         $user = Auth::user();
+        abort_unless($user !== null, 403, 'Unauthorized.');
         $isAdmin = DB::table('model_has_roles')
             ->join('roles','roles.id','=','model_has_roles.role_id')
             ->where('model_has_roles.model_type', get_class($user))
@@ -140,6 +141,7 @@ class InfoFileController extends Controller
     {
         // Authorization: only admin/teacher can download
         $user = Auth::user();
+        abort_unless($user !== null, 403, 'Unauthorized.');
         $isAdmin = DB::table('model_has_roles')
             ->join('roles','roles.id','=','model_has_roles.role_id')
             ->where('model_has_roles.model_type', get_class($user))
@@ -182,6 +184,7 @@ class InfoFileController extends Controller
     public function showFile(InfoFile $info)
     {
         $user = Auth::user();
+        abort_unless($user !== null, 403, 'Unauthorized.');
 
         // Load relation
         $info->loadMissing('student.user');

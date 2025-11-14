@@ -153,6 +153,12 @@
         </div>
 
         <!-- Submit -->
+        <!-- Option: generate per-variant classes -->
+        <div class="flex items-center gap-3">
+          <input type="checkbox" id="per_variant" name="per_variant" {{ old('per_variant') ? 'checked' : '' }} class="h-4 w-4">
+          <label for="per_variant" class="text-sm text-gray-700">Buat untuk tiap varian kelas (IPA,IPS). Jika tidak dicentang, jadwal dibuat sekali per grade.</label>
+        </div>
+
         <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2">
           🚀 Generate Jadwal Setiap Hari
         </button>

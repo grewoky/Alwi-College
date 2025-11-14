@@ -18,10 +18,12 @@ class TripController extends Controller
             $rows = TeacherTrip::where('teacher_id',$t->id)
                 ->whereBetween('date', [$from,$to])->get();
 
-            // hitung total trips
+            // hitung total trips: sessions (capped 3) + sunday bonus (3) per entry
             $total = 0;
             foreach ($rows as $row) {
-                $total += min(3, $row->teaching_sessions + ($row->sunday_bonus ? 3 : 0));
+                $sessionPoints = min(3, max(0, (int)$row->teaching_sessions));
+                $bonus = $row->sunday_bonus ? 3 : 0;
+                $total += ($sessionPoints + $bonus);
                 if ($total < 0) $total = 0;
             }
 
@@ -46,7 +48,12 @@ class TripController extends Controller
             ->orderBy('date', 'desc')
             ->get();
 
-        $totalTrips = $trips->sum(fn($t) => min(3, $t->teaching_sessions + ($t->sunday_bonus ? 3 : 0)));
+        $totalTrips = 0;
+        foreach ($trips as $t) {
+            $sessionPoints = min(3, max(0, (int)$t->teaching_sessions));
+            $bonus = $t->sunday_bonus ? 3 : 0;
+            $totalTrips += ($sessionPoints + $bonus);
+        }
 
         return view('trips.show', compact('teacher', 'trips', 'totalTrips', 'from', 'to'));
     }
@@ -56,31 +63,64 @@ class TripController extends Controller
     {
         try {
             $r->validate([
-                'date'              => 'required|date|after_or_equal:today',
+                'date'              => 'required|date',
                 'teaching_sessions' => 'required|integer|min:0|max:3',
-                'sunday_bonus'      => 'nullable|boolean',
+                // checkbox input from HTML may send 'on' which fails strict boolean validation;
+                // accept nullable here and coerce via has() when saving.
+                'sunday_bonus'      => 'nullable',
             ]);
 
-            // Check for duplicate
-            $exists = TeacherTrip::where('teacher_id', $teacher->id)
+            // Parse date robustly: try ISO (Y-m-d) first, then common UI format d/m/Y
+            $rawDate = $r->input('date');
+            try {
+                $inputDate = Carbon::createFromFormat('Y-m-d', $rawDate) ?: Carbon::parse($rawDate);
+            } catch (\Exception $e) {
+                try {
+                    $inputDate = Carbon::createFromFormat('d/m/Y', $rawDate);
+                } catch (\Exception $e2) {
+                    \Log::warning('Trip date parse failed', ['raw' => $rawDate, 'err1' => $e->getMessage(), 'err2' => $e2->getMessage()]);
+                    return back()->with('error', 'Format tanggal tidak valid. Gunakan format YYYY-MM-DD.');
+                }
+            }
+            $inputDate = $inputDate->startOfDay();
+            $today = Carbon::today();
+
+            // Only allow adding trip for the current day
+            if ($inputDate->lt($today)) {
+                return back()->with('error', 'Tidak dapat menambahkan trip untuk tanggal sebelumnya.');
+            }
+            if ($inputDate->gt($today)) {
+                return back()->with('error', 'Tidak dapat menambahkan trip untuk tanggal yang belum datang. Trip hanya dapat ditambahkan untuk hari ini.');
+            }
+
+            // Bonus is allowed for any day. (Business decided bonus is not limited to Sundays.)
+
+            // If a trip for this teacher+date already exists, update it so bonus can be added
+            $existing = TeacherTrip::where('teacher_id', $teacher->id)
                 ->whereDate('date', $r->date)
-                ->exists();
-            
-            if ($exists) {
-                return back()->with('error', 'Trip untuk tanggal ini sudah ada');
+                ->first();
+
+            if ($existing) {
+                $existing->update([
+                    'teaching_sessions' => $r->teaching_sessions,
+                    'sunday_bonus'      => $r->has('sunday_bonus'),
+                ]);
+
+                return back()->with('ok', 'Trip untuk tanggal ini berhasil diperbarui.');
             }
 
             TeacherTrip::create([
                 'teacher_id'        => $teacher->id,
                 'date'              => $r->date,
                 'teaching_sessions' => $r->teaching_sessions,
-                'sunday_bonus'      => $r->boolean('sunday_bonus'),
+                'sunday_bonus'      => $r->has('sunday_bonus'),
             ]);
 
             return back()->with('ok', 'Trip berhasil ditambahkan');
         } catch (\Exception $e) {
-       
-            return back()->with('error', 'Gagal menambahkan trip');
+            // log exception for debugging and return a helpful error message
+            Log::error('Failed to store teacher trip', ['error' => $e->getMessage(), 'input' => $r->all()]);
+            return back()->with('error', 'Gagal menambahkan trip: ' . $e->getMessage());
         }
     }
 
@@ -90,12 +130,12 @@ class TripController extends Controller
         try {
             $r->validate([
                 'teaching_sessions' => 'required|integer|min:0|max:3',
-                'sunday_bonus'      => 'nullable|boolean',
+                'sunday_bonus'      => 'nullable',
             ]);
 
             $trip->update([
                 'teaching_sessions' => $r->teaching_sessions,
-                'sunday_bonus'      => $r->boolean('sunday_bonus'),
+                'sunday_bonus'      => $r->has('sunday_bonus'),
             ]);
 
             return back()->with('ok', 'Trip berhasil diperbarui');

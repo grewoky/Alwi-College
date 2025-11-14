@@ -34,6 +34,7 @@ class LessonController extends Controller
             'grade'      => 'required|in:10,11,12',
             'teacher_id' => 'required|exists:teachers,id',
             'subject_id' => 'nullable|exists:subjects,id',
+            'per_variant' => 'nullable',
             'description' => 'nullable|string|max:500',
             'start_date' => 'required|date',
             'end_date'   => 'required|date|after_or_equal:start_date',
@@ -61,6 +62,17 @@ class LessonController extends Controller
                 $classRooms = collect([$defaultClass]);
             }
 
+            // If there are multiple class variants (e.g. "10 IPA 1, 10 IPA 2"),
+            // generate schedule only once for the grade-level. Prefer an existing
+            // class named exactly "Kelas {grade}" as the representative; otherwise
+            // pick the first classroom. This keeps scheduling and attendance
+            // classification aligned by school + grade (not class variant).
+            if ($classRooms->count() > 1 && ! $r->has('per_variant')) {
+                $preferredName = "Kelas {$r->grade}";
+                $representative = $classRooms->firstWhere('name', $preferredName) ?: $classRooms->first();
+                $classRooms = collect([$representative]);
+            }
+
             // Validasi time jika keduanya diisi
             if ($r->start_time && $r->end_time) {
                 if ($r->start_time >= $r->end_time) {
@@ -80,28 +92,32 @@ class LessonController extends Controller
             DB::transaction(function() use ($r, $classRooms, $start, $end, &$created, &$skipped, &$errors) {
                 for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
                     foreach ($classRooms as $classRoom) {
-                        $existingLesson = Lesson::where('date', $date->toDateString())
-                            ->where('class_room_id', $classRoom->id)
-                            ->where('teacher_id', $r->teacher_id)
-                            ->first();
+                        try {
+                            $attrs = [
+                                'date' => $date->toDateString(),
+                                'class_room_id' => $classRoom->id,
+                                'teacher_id' => $r->teacher_id,
+                            ];
 
-                        if (!$existingLesson) {
-                            try {
-                                Lesson::create([
-                                    'date'          => $date->toDateString(),
-                                    'class_room_id' => $classRoom->id,
-                                    'teacher_id'    => $r->teacher_id,
-                                    'subject_id'    => $r->subject_id,
-                                    'start_time'    => $r->start_time,
-                                    'end_time'      => $r->end_time,
-                                    'description'   => $r->description,
-                                ]);
+                            $values = [
+                                'subject_id' => $r->subject_id,
+                                'start_time' => $r->start_time,
+                                'end_time'   => $r->end_time,
+                                'description'=> $r->description,
+                            ];
+
+                            $lesson = Lesson::firstOrCreate($attrs, $values);
+
+                            if ($lesson->wasRecentlyCreated) {
                                 $created++;
-                            } catch (\Exception $e) {
-                                $errors[] = "Error pada tanggal {$date->format('d-m-Y')} (Kelas {$classRoom->name}): {$e->getMessage()}";
+                            } else {
+                                $skipped++;
                             }
-                        } else {
+                        } catch (\Illuminate\Database\QueryException $qe) {
+                            // Unique constraint race — another process created it concurrently
                             $skipped++;
+                        } catch (\Exception $e) {
+                            $errors[] = "Error pada tanggal {$date->format('d-m-Y')} (Kelas {$classRoom->name}): {$e->getMessage()}";
                         }
                     }
                 }
@@ -168,6 +184,8 @@ class LessonController extends Controller
     public function studentView(Request $r)
     {
         $user = Auth::user();
+        abort_unless($user !== null, 403, 'Unauthorized.');
+
         $student = \App\Models\Student::with('classRoom.school')->where('user_id', $user->id)->firstOrFail();
 
         $q = Lesson::with(['teacher.user', 'subject', 'classRoom.school'])

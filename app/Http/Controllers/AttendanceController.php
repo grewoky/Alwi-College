@@ -85,7 +85,8 @@ class AttendanceController extends Controller
     public function studentView()
     {
         $user = Auth::user();
-        
+        abort_unless($user !== null, 403, 'Unauthorized.');
+
         // Get student data
         $student = Student::where('user_id', $user->id)->firstOrFail();
         
@@ -121,25 +122,48 @@ class AttendanceController extends Controller
     public function teacherView()
     {
         $user = Auth::user();
+        abort_unless($user !== null, 403, 'Unauthorized.');
+
         $teacher = Teacher::where('user_id', $user->id)->firstOrFail();
         
         // Get classes taught by this teacher
         $lessons = Lesson::where('teacher_id', $teacher->id)
             ->with('classRoom')
             ->get();
-        
-        $classRooms = $lessons->pluck('classRoom')->unique('id')->sortBy('name');
-        
-        // Group by classroom prefix (A23, B22, etc)
-        $groupedClasses = $classRooms->groupBy(function($classroom) {
-            return substr($classroom->name, 0, 1); // Group by prefix (A, B, etc)
-        })->sortKeys();
-        
+        $classRooms = $lessons->pluck('classRoom')->unique('id')->filter()->values();
+
+        // Build a list of grades the teacher teaches (10,11,12) — do not show individual class names at top-level
+        $grades = $classRooms->pluck('grade')->unique()->intersect([10,11,12])->sort()->values();
+
+        // Also prepare mapping grade => classrooms (for drill-down)
+        $classesByGrade = [];
+        foreach ($grades as $grade) {
+            $classesByGrade[$grade] = $classRooms->filter(fn($c) => $c->grade == $grade)->values();
+        }
+
         return view('attendance.teacher-view', compact(
             'teacher',
-            'classRooms',
-            'groupedClasses'
+            'grades',
+            'classesByGrade'
         ));
+    }
+
+    // Show classes for a specific grade for the current teacher (drill-down)
+    public function gradeView(Request $r, $grade)
+    {
+        $user = Auth::user();
+        abort_unless($user !== null, 403, 'Unauthorized.');
+
+        $teacher = Teacher::where('user_id', $user->id)->firstOrFail();
+
+        $lessons = Lesson::where('teacher_id', $teacher->id)
+            ->with('classRoom')
+            ->whereHas('classRoom', fn($q) => $q->where('grade', $grade))
+            ->get();
+
+        $classRooms = $lessons->pluck('classRoom')->unique('id')->filter()->values();
+
+        return view('attendance.teacher-grade', compact('teacher','grade','classRooms'));
     }
 
     // Admin view: all attendance
@@ -190,13 +214,26 @@ class AttendanceController extends Controller
     public function markAttendance($classRoomId)
     {
         $user = Auth::user();
+        abort_unless($user !== null, 403, 'Unauthorized.');
+
         $teacher = Teacher::where('user_id', $user->id)->firstOrFail();
         
         // Get classroom and its students
         $classRoom = ClassRoom::findOrFail($classRoomId);
         $students = $classRoom->students()->with('user')->orderBy('id')->get();
         
-        // Get today's lesson
+        // Authorization: allow marking only if the teacher teaches in the same
+        // school + grade combination. This prevents teachers from marking
+        // attendance for unrelated schools/grades or for random class variants.
+        $teachesInSameSchoolGrade = Lesson::where('teacher_id', $teacher->id)
+            ->whereHas('classRoom', fn($q) => $q->where('school_id', $classRoom->school_id)->where('grade', $classRoom->grade))
+            ->exists();
+
+        if (!$teachesInSameSchoolGrade) {
+            abort(403, 'Unauthorized to mark attendance for this class.');
+        }
+
+        // Get today's lesson (if exists)
         $lesson = Lesson::where('teacher_id', $teacher->id)
             ->where('class_room_id', $classRoomId)
             ->whereDate('date', today())
@@ -213,6 +250,8 @@ class AttendanceController extends Controller
     public function storeMarkAttendance(Request $request, $classRoomId)
     {
         $user = Auth::user();
+        abort_unless($user !== null, 403, 'Unauthorized.');
+
         $teacher = Teacher::where('user_id', $user->id)->firstOrFail();
         
         // Validate
@@ -222,8 +261,17 @@ class AttendanceController extends Controller
         ]);
         
         $classRoom = ClassRoom::findOrFail($classRoomId);
-        
-        // Get or create lesson for today
+        // Authorization: allow storing only if the teacher teaches in the same
+        // school + grade combination. This enforces role scoping by school+grade.
+        $teachesInSameSchoolGrade = Lesson::where('teacher_id', $teacher->id)
+            ->whereHas('classRoom', fn($q) => $q->where('school_id', $classRoom->school_id)->where('grade', $classRoom->grade))
+            ->exists();
+
+        if (!$teachesInSameSchoolGrade) {
+            abort(403, 'Unauthorized to store attendance for this class.');
+        }
+
+        // Get or create lesson for today (safe firstOrCreate to avoid duplicates)
         $lesson = Lesson::firstOrCreate(
             [
                 'date' => today(),

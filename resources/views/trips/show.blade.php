@@ -40,18 +40,18 @@
               @error('date')<span class="text-red-600 text-sm">{{ $message }}</span>@enderror
             </div>
 
-            <!-- Teaching Sessions -->
+            <!-- Trip (sessions) -->
             <div>
-              <label class="block text-sm font-semibold text-gray-900 mb-2">Jam Mengajar (0-3)</label>
+              <label class="block text-sm font-semibold text-gray-900 mb-2">Trip (0-3)</label>
               <input type="number" name="teaching_sessions" min="0" max="3" value="1" required class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent">
               @error('teaching_sessions')<span class="text-red-600 text-sm">{{ $message }}</span>@enderror
             </div>
 
-            <!-- Sunday Bonus -->
+            <!-- Bonus -->
             <div class="flex items-center gap-2">
               <input type="checkbox" name="sunday_bonus" id="sunday_bonus" class="w-4 h-4">
               <label for="sunday_bonus" class="text-sm font-medium text-gray-700">
-                Bonus Hari Minggu (+3 poin)
+                Bonus (+3 poin)
               </label>
             </div>
 
@@ -66,42 +66,46 @@
               ✓ {{ session('ok') }}
             </div>
           @endif
+          @if(session('error'))
+            <div class="mt-4 bg-red-100 text-red-800 p-3 rounded-lg text-sm">
+              ✕ {{ session('error') }}
+            </div>
+          @endif
         </div>
       </div>
 
       <!-- Trip History -->
       <div class="lg:col-span-2">
         <div class="bg-white rounded-lg shadow overflow-hidden">
-          <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white px-6 py-4">
-            <h2 class="text-xl font-bold">📅 Riwayat Trip</h2>
-          </div>
+                <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white px-6 py-4">
+                  <h2 class="text-xl font-bold">📅 Riwayat Trip</h2>
+                </div>
 
-          @if($trips->isEmpty())
-            <div class="p-8 text-center text-gray-500">
-              <p class="text-lg">Belum ada data trip untuk periode ini</p>
-            </div>
-          @else
-            <div class="overflow-x-auto">
-              <table class="w-full">
-                <thead class="bg-gray-100 border-b">
-                  <tr>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Tanggal</th>
-                    <th class="px-6 py-3 text-center text-sm font-semibold text-gray-900">Jam</th>
-                    <th class="px-6 py-3 text-center text-sm font-semibold text-gray-900">Bonus Minggu</th>
-                    <th class="px-6 py-3 text-center text-sm font-semibold text-gray-900">Total</th>
-                    <th class="px-6 py-3 text-center text-sm font-semibold text-gray-900">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y">
+                @if($trips->isEmpty())
+                  <div class="p-8 text-center text-gray-500">
+                    <p class="text-lg">Belum ada data trip untuk periode ini</p>
+                  </div>
+                @else
+                  <div class="overflow-x-auto">
+                    <table class="w-full">
+                      <thead class="bg-gray-100 border-b">
+                        <tr>
+                          <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Tanggal</th>
+                          <th class="px-6 py-3 text-center text-sm font-semibold text-gray-900">Trip</th>
+                          <th class="px-6 py-3 text-center text-sm font-semibold text-gray-900">Bonus</th>
+                          <th class="px-6 py-3 text-center text-sm font-semibold text-gray-900">Total</th>
+                          <th class="px-6 py-3 text-center text-sm font-semibold text-gray-900">Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y">
                   @foreach($trips as $trip)
                     @php
-                      $tripValue = min(3, $trip->teaching_sessions + ($trip->sunday_bonus ? 3 : 0));
-                      $dayName = \Carbon\Carbon::parse($trip->date)->format('l');
+                      $sessionPoints = min(3, max(0, (int)$trip->teaching_sessions));
+                      $tripValue = $sessionPoints + ($trip->sunday_bonus ? 3 : 0);
                     @endphp
                     <tr class="hover:bg-gray-50 transition" data-trip-id="{{ $trip->id }}">
                       <td class="px-6 py-4">
                         <div class="font-medium text-gray-900">{{ \Carbon\Carbon::parse($trip->date)->format('d M Y') }}</div>
-                        <div class="text-sm text-gray-600">{{ $dayName }}</div>
                       </td>
                       <td class="px-6 py-4 text-center">
                         <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded font-semibold">{{ $trip->teaching_sessions }}</span>
@@ -153,7 +157,7 @@
 
       <div class="flex items-center gap-2">
         <input type="checkbox" name="sunday_bonus" id="editBonus" class="w-4 h-4">
-        <label for="editBonus" class="text-sm font-medium text-gray-700">Bonus Hari Minggu (+3 poin)</label>
+        <label for="editBonus" class="text-sm font-medium text-gray-700">Bonus (+3 poin)</label>
       </div>
 
       <div class="flex gap-2">

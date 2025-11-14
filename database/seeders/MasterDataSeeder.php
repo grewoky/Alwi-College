@@ -20,7 +20,7 @@ class MasterDataSeeder extends Seeder
         // Kamu bisa modifikasi sesuai kebutuhan
         foreach ($schools as $name => $school) {
             foreach ([10,11,12] as $grade) {
-                foreach (['IPA 1','IPA 2'] as $suffix) {
+                foreach (['IPA','IPS'] as $suffix) {
                     \App\Models\ClassRoom::firstOrCreate([
                         'school_id' => $school->id,
                         'name'      => "{$grade} {$suffix}",
