@@ -63,10 +63,10 @@
       <!-- NOTIFIKASI PEMBAYARAN -->
       <div class="mb-8" id="paymentNotification">
         @php
-          $currentMonth = now()->format('m');
-          $currentYear = now()->format('Y');
-          $monthPeriod = $currentMonth . '-' . $currentYear;
-          
+          // Payments store `month_period` using format `Y-m` (e.g. 2025-11).
+          // Use the same format here so we correctly detect approved payments for current month.
+          $monthPeriod = now()->format('Y-m');
+
           $paymentThisMonth = $payments->where('month_period', $monthPeriod)
                                         ->where('status', 'approved')
                                         ->first();

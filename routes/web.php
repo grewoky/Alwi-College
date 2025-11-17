@@ -83,6 +83,8 @@ Route::middleware(['auth','role:admin'])->prefix('admin')->group(function () {
     Route::post('/users/{user}/approve', [\App\Http\Controllers\AdminUserController::class,'approve'])->name('admin.users.approve');
     // Student management
     Route::get('/students', [\App\Http\Controllers\AdminUserController::class,'studentsIndex'])->name('admin.students.index');
+    Route::get('/students/{student}/edit', [\App\Http\Controllers\AdminUserController::class,'editStudent'])->name('admin.students.edit');
+    Route::put('/students/{student}', [\App\Http\Controllers\AdminUserController::class,'updateStudent'])->name('admin.students.update');
     Route::delete('/students/{student}', [\App\Http\Controllers\AdminUserController::class,'destroyStudent'])->name('admin.students.destroy');
     // Clear student email (replace with unique placeholder)
     Route::post('/students/{student}/clear-email', [\App\Http\Controllers\AdminUserController::class,'clearStudentEmail'])->name('admin.students.clear_email');
@@ -130,8 +132,6 @@ Route::middleware(['auth','role:student'])->prefix('student')->group(function ()
     // STUDENT PEMBAYARAN (Upload bukti pembayaran)
     Route::get('/payment', [PaymentController::class,'index'])->name('pay.index');
     Route::post('/payment', [PaymentController::class,'store'])->name('pay.store');
-    // Serve proof files securely (student owner or admin)
-    Route::get('/payment/{payment}/proof', [PaymentController::class,'showProof'])->name('pay.proof')->middleware('auth');
 
     // Serve student info files securely (owner, teacher, or admin) — defined with auth only so teacher/admin can also access via controller check
     Route::get('/info/{info}/file', [\App\Http\Controllers\InfoFileController::class,'showFile'])->name('info.file')->middleware('auth');
@@ -139,6 +139,9 @@ Route::middleware(['auth','role:student'])->prefix('student')->group(function ()
     // STUDENT ABSENSI (Lihat kehadiran)
     Route::get('/attendance', [AttendanceController::class,'studentView'])->name('attendance.student');
 });
+
+// Serve payment proof files securely (student owner or admin)
+Route::middleware('auth')->get('/payment/{payment}/proof', [\App\Http\Controllers\PaymentController::class,'showProof'])->name('pay.proof');
 
 // ============ UNIVERSAL REDIRECTS ============
 // Untuk backward compatibility, redirect routes lama ke route baru sesuai role

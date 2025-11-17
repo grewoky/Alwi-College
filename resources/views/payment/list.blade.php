@@ -52,10 +52,10 @@
             <form action="{{ route('pay.verify',$p->id) }}" method="POST" class="flex flex-wrap gap-2 items-center">
               @csrf
               <select name="status" class="border rounded p-1">
-                <option value="approved">Approve</option>
-                <option value="rejected">Reject</option>
+                <option value="approved" @selected($p->status=='approved')>Approve</option>
+                <option value="rejected" @selected($p->status=='rejected') @if($p->status=='approved') disabled @endif>Reject</option>
               </select>
-              <input type="text" name="note" placeholder="Catatan (opsional)" class="border p-1 rounded">
+              <input type="text" name="note" placeholder="Catatan (opsional)" value="{{ old('note', $p->note) }}" class="border p-1 rounded">
               <button class="bg-blue-600 text-white px-2 py-1 rounded">Simpan</button>
             </form>
 

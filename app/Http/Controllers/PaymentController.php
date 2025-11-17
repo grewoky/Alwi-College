@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use App\Models\Payment;
 use App\Models\Student;
 class PaymentController extends Controller
@@ -58,6 +59,11 @@ class PaymentController extends Controller
                 'status' => 'required|in:approved,rejected',
                 'note'   => 'nullable|string|max:255'
             ]);
+
+            // Once a payment is approved, it should not be possible to change it to rejected.
+            if ($payment->status === 'approved' && $r->status === 'rejected') {
+                return back()->with('error', 'Pembayaran sudah disetujui; tidak dapat diubah menjadi Ditolak.');
+            }
 
             $oldStatus = $payment->status;
             
@@ -120,18 +126,23 @@ class PaymentController extends Controller
      */
     public function showProof(Payment $payment)
     {
+
         $user = Auth::user();
+
+        if (! $user) {
+            abort(403, 'Unauthorized');
+        }
 
         // ensure relation loaded
         $payment->loadMissing('student.user');
 
-        $isAdmin = false;
-        try {
-            // roles may be via spatie
-            $isAdmin = method_exists($user, 'hasRole') && $user->hasRole('admin');
-        } catch (\Exception $e) {
-            $isAdmin = false;
-        }
+        // Check admin role via DB (avoids calling hasRole() method which static analyzers may flag)
+        $isAdmin = DB::table('model_has_roles')
+            ->join('roles','roles.id','=','model_has_roles.role_id')
+            ->where('model_has_roles.model_type', get_class($user))
+            ->where('model_has_roles.model_id', $user->id)
+            ->where('roles.name', 'admin')
+            ->exists();
 
         // Allow if admin or owner
         if (! $isAdmin && $payment->student->user_id !== $user->id) {

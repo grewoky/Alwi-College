@@ -28,30 +28,33 @@
                       <th class="px-4 py-3">Email</th>
                       <th class="px-4 py-3">Kelas</th>
                       <th class="px-4 py-3">Terdaftar</th>
-                      <th class="px-4 py-3">Aksi</th>
+                      <th class="px-4 py-3">Status</th>
                   </tr>
               </thead>
               <tbody>
                   @forelse($students as $s)
                   <tr class="border-t">
-                      <td class="px-4 py-3">{{ $s->id }}</td>
+                      <td class="px-4 py-3">{{ $students->firstItem() + $loop->index }}</td>
                       <td class="px-4 py-3">{{ $s->user->name ?? 'N/A' }}</td>
                       <td class="px-4 py-3">{{ $s->user->email ?? '-' }}</td>
                       <td class="px-4 py-3">{{ $s->classRoom?->grade }} - {{ $s->classRoom?->name ?? '-' }}</td>
                       <td class="px-4 py-3">{{ $s->created_at?->format('d M Y') ?? '-' }}</td>
                       <td class="px-4 py-3">
                           <div class="flex items-center gap-2">
-                              @if($s->user && $s->user->email)
-                              <form action="{{ route('admin.students.clear_email', $s) }}" method="POST" onsubmit="return confirm('Yakin hapus email siswa ini?');">
-                                  @csrf
-                                  <button class="px-3 py-1 bg-yellow-500 text-white rounded">Hapus Email</button>
-                              </form>
-                              @endif
+                              <a href="{{ route('admin.students.edit', $s->id) }}" class="px-3 py-1 bg-blue-600 text-white rounded">Edit</a>
 
-                              <form action="{{ route('admin.students.destroy', $s) }}" method="POST" onsubmit="return confirm('Yakin hapus akun siswa ini? Semua data akun akan dihapus.');">
+                              <form action="{{ route('admin.students.update', $s->id) }}" method="POST" onsubmit="return confirm('Ubah status aktif siswa?');">
                                   @csrf
-                                  @method('DELETE')
-                                  <button class="px-3 py-1 bg-red-600 text-white rounded">Hapus Akun</button>
+                                  @method('PUT')
+                                  <input type="hidden" name="name" value="{{ $s->user->name ?? '' }}">
+                                  <input type="hidden" name="email" value="{{ $s->user->email ?? '' }}">
+                                  <input type="hidden" name="class_room_id" value="{{ $s->class_room_id }}">
+                                  <input type="hidden" name="nis" value="{{ $s->nis }}">
+                                  <select name="is_approved" class="border p-1 rounded">
+                                    <option value="1" @selected($s->user->is_approved ?? true)>Aktif</option>
+                                    <option value="0" @selected(!($s->user->is_approved ?? true))>Nonaktif</option>
+                                  </select>
+                                  <button class="px-3 py-1 bg-gray-700 text-white rounded">Simpan</button>
                               </form>
                           </div>
                       </td>

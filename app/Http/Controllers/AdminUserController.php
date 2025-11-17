@@ -201,7 +201,11 @@ class AdminUserController extends Controller
 	public function studentsIndex()
 	{
 		$r = request();
-		$query = Student::with(['user','classRoom.school'])->orderBy('id');
+		// Order students by associated user's name (alphabetical)
+		$query = Student::select('students.*')
+			->leftJoin('users','users.id','students.user_id')
+			->with(['user','classRoom.school'])
+			->orderBy('users.name');
 
 		if ($r->filled('q')) {
 			$q = $r->q;
@@ -215,6 +219,50 @@ class AdminUserController extends Controller
 		$students = $query->paginate(20)->withQueryString();
 		$classRooms = ClassRoom::with('school')->orderBy('grade')->orderBy('name')->get();
 		return view('admin.students_index', compact('students','classRooms'));
+	}
+
+	/**
+	 * Show form to edit a student and user profile
+	 */
+	public function editStudent(Student $student)
+	{
+		$classRooms = ClassRoom::with('school')->orderBy('grade')->orderBy('name')->get();
+		return view('admin.edit_student', compact('student','classRooms'));
+	}
+
+	/**
+	 * Update student and associated user (name, email, class, nis, active)
+	 */
+	public function updateStudent(Request $request, Student $student)
+	{
+		$user = $student->user;
+		if (!$user) return redirect()->back()->withErrors('User for this student not found.');
+
+		$request->validate([
+			'name' => 'required|string|max:255',
+			'email' => 'required|email|unique:users,email,' . $user->id,
+			'class_room_id' => 'nullable|exists:class_rooms,id',
+			'nis' => 'nullable|string|max:50',
+			'is_approved' => 'nullable|in:0,1',
+		]);
+
+		try {
+			$user->name = $request->name;
+			$user->email = $request->email;
+			if ($request->filled('is_approved')) {
+				$user->is_approved = (bool) $request->is_approved;
+			}
+			$user->save();
+
+			$student->class_room_id = $request->class_room_id;
+			$student->nis = $request->nis;
+			$student->save();
+
+			return redirect()->route('admin.students.index')->with('success','Data siswa berhasil diperbarui.');
+		} catch (\Exception $e) {
+			Log::error('Failed to update student', ['error' => $e->getMessage()]);
+			return redirect()->back()->withErrors('Gagal memperbarui data siswa.');
+		}
 	}
 
 	/**
