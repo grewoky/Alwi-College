@@ -15,6 +15,11 @@
               <input type="email" name="email" value="{{ old('email') }}" required class="mt-1 block w-full border px-3 py-2 rounded" />
           </div>
 
+          <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700">Nomor Telepon</label>
+              <input type="text" name="phone" value="{{ old('phone') }}" placeholder="0812xxxx" class="mt-1 block w-full border px-3 py-2 rounded" />
+          </div>
+
           <div class="mb-4 grid grid-cols-2 gap-4">
               <div>
                   <label class="block text-sm font-medium text-gray-700">Password</label>
@@ -27,7 +32,7 @@
           </div>
 
           <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700">Kelas (opsional)</label>
+              <label class="block text-sm font-medium text-gray-700">Kelas </label>
               <select name="class_room_id" class="mt-1 block w-full border px-3 py-2 rounded">
                   <option value="">-- Pilih Kelas --</option>
                   @foreach($classRooms as $c)
@@ -37,7 +42,7 @@
           </div>
 
           <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700">NIS (opsional)</label>
+              <label class="block text-sm font-medium text-gray-700">NIS </label>
               <input type="text" name="nis" value="{{ old('nis') }}" class="mt-1 block w-full border px-3 py-2 rounded" />
           </div>
 

@@ -12,6 +12,8 @@
                       <th class="py-2">#</th>
                       <th class="py-2">Nama</th>
                       <th class="py-2">Email</th>
+                      <th class="py-2">Nomor Telepon</th>
+                      <th class="py-2">Status</th>
                       <th class="py-2">Aksi</th>
                   </tr>
               </thead>
@@ -21,14 +23,18 @@
                       <td class="py-2">{{ $t->id }}</td>
                       <td class="py-2">{{ $t->user->name ?? 'N/A' }}</td>
                       <td class="py-2">{{ $t->user->email ?? 'N/A' }}</td>
+                      <td class="py-2">{{ $t->user->phone ?? '-' }}</td>
                       <td class="py-2">
-                          <div class="flex gap-2">
+                          @php($approved = (bool)($t->user->is_approved ?? false))
+                          @if($approved)
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700 border border-green-200">Aktif</span>
+                          @else
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700 border border-red-200">Nonaktif</span>
+                          @endif
+                      </td>
+                      <td class="py-2">
+                          <div class="flex items-center justify-end">
                               <a href="{{ route('admin.teachers.edit', $t) }}" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">Edit</a>
-                              <form action="{{ route('admin.teachers.destroy', $t) }}" method="POST" onsubmit="return confirm('Hapus pengajar ini? Aksi tidak dapat dikembalikan.');">
-                                  @csrf
-                                  @method('DELETE')
-                                  <button class="px-3 py-1 bg-red-600 text-white rounded text-sm">Hapus</button>
-                              </form>
                           </div>
                       </td>
                   </tr>

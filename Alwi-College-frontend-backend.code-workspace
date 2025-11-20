@@ -1,0 +1,64 @@
+{
+  "folders": [
+    {
+      "name": "frontend",
+      "path": ".",
+      "settings": {
+        "files.exclude": {
+          "app": true,
+          "bootstrap": true,
+          "config": true,
+          "database": true,
+          "routes": true,
+          "storage": true,
+          "tests": true,
+          "vendor": true,
+          "artisan": true,
+          "composer.json": true,
+          "composer.lock": true,
+          ".env": true,
+          "phpunit.xml": true,
+          ".git": true,
+          ".github": true,
+          "**/*.php": {
+            "when": "$(basename) != blade.php"
+          }
+        },
+        "search.exclude": {
+          "app": true,
+          "bootstrap": true,
+          "config": true,
+          "database": true,
+          "routes": true,
+          "storage": true,
+          "tests": true,
+          "vendor": true
+        }
+      }
+    },
+    {
+      "name": "backend",
+      "path": ".",
+      "settings": {
+        "files.exclude": {
+          "resources": true,
+          "public": true,
+          "node_modules": true,
+          "package.json": true,
+          "package-lock.json": true,
+          "vite.config.js": true,
+          "tailwind.config.js": true,
+          "postcss.config.js": true
+        },
+        "search.exclude": {
+          "resources": true,
+          "public": true,
+          "node_modules": true
+        }
+      }
+    }
+  ],
+  "settings": {
+    "explorer.compactFolders": false
+  }
+}

@@ -13,6 +13,10 @@
               <input type="email" name="email" required class="mt-1 block w-full border rounded px-3 py-2">
           </div>
           <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700">Nomor Telepon</label>
+              <input type="text" name="phone" value="{{ old('phone') }}" placeholder="0812xxxx" class="mt-1 block w-full border rounded px-3 py-2">
+          </div>
+          <div class="mb-4">
               <label class="block text-sm font-medium text-gray-700">Password</label>
               <input type="password" name="password" required class="mt-1 block w-full border rounded px-3 py-2">
           </div>

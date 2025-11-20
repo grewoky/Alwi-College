@@ -17,8 +17,22 @@
           </div>
 
           <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700">Kode Pegawai (opsional)</label>
+              <label class="block text-sm font-medium text-gray-700">Nomor Telepon</label>
+              <input type="text" name="phone" value="{{ old('phone', $teacher->user->phone ?? '') }}" class="mt-1 block w-full border rounded px-3 py-2">
+          </div>
+
+          <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700">Kode Pegawai </label>
               <input type="text" name="employee_code" value="{{ old('employee_code', $teacher->employee_code ?? '') }}" class="mt-1 block w-full border rounded px-3 py-2">
+          </div>
+
+          <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700">Status Aktif</label>
+              <select name="is_approved" class="mt-1 block w-full border rounded px-3 py-2">
+                  <option value="1" @selected(old('is_approved', $teacher->user->is_approved ?? 1) == 1)>Aktif</option>
+                  <option value="0" @selected(old('is_approved', $teacher->user->is_approved ?? 1) == 0)>Nonaktif</option>
+              </select>
+              <p class="text-xs text-gray-500 mt-1">Perubahan status akan mengaktifkan atau menonaktifkan akses akun guru.</p>
           </div>
 
           <div class="flex gap-2">

@@ -21,6 +21,11 @@
       </div>
 
       <div class="mb-3">
+        <label class="block text-sm font-medium">Nomor Telepon</label>
+        <input type="text" name="phone" value="{{ old('phone', $student->user->phone ?? '') }}" class="border p-2 w-full rounded">
+      </div>
+
+      <div class="mb-3">
         <label class="block text-sm font-medium">Kelas</label>
         <select name="class_room_id" class="border p-2 w-full rounded">
           <option value="">-- Tidak Ada --</option>
@@ -41,6 +46,7 @@
           <option value="1" @selected(old('is_approved', $student->user->is_approved ?? 1) == 1)>Aktif</option>
           <option value="0" @selected(old('is_approved', $student->user->is_approved ?? 1) == 0)>Nonaktif</option>
         </select>
+        <p class="text-xs text-gray-500 mt-1">Perubahan status hanya bisa dilakukan di halaman ini.</p>
       </div>
 
       <div class="flex gap-2">

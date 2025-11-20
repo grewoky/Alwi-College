@@ -40,6 +40,7 @@ class AdminUserController extends Controller
 			'name' => 'required|string|max:255',
 			'email' => 'required|email|unique:users,email',
 			'password' => 'required|string|min:8|confirmed',
+			'phone' => 'nullable|string|max:30',
 		]);
 
 		$user = User::create([
@@ -47,6 +48,7 @@ class AdminUserController extends Controller
 			'email' => $request->email,
 			'password' => bcrypt($request->password),
 			'is_approved' => true,
+			'phone' => $request->phone ?? null,
 		]);
 
 		try {
@@ -98,11 +100,17 @@ class AdminUserController extends Controller
 			'name' => 'required|string|max:255',
 			'email' => 'required|email|unique:users,email,' . $user->id,
 			'employee_code' => 'nullable|string|max:50',
+			'phone' => 'nullable|string|max:30',
+			'is_approved' => 'nullable|in:0,1',
 		]);
 
 		try {
 			$user->name = $request->name;
 			$user->email = $request->email;
+			$user->phone = $request->phone ?? null;
+			if ($request->filled('is_approved')) {
+				$user->is_approved = (bool) $request->is_approved;
+			}
 			$user->save();
 
 			$teacher->employee_code = $request->employee_code;
@@ -243,12 +251,14 @@ class AdminUserController extends Controller
 			'email' => 'required|email|unique:users,email,' . $user->id,
 			'class_room_id' => 'nullable|exists:class_rooms,id',
 			'nis' => 'nullable|string|max:50',
+			'phone' => 'nullable|string|max:30',
 			'is_approved' => 'nullable|in:0,1',
 		]);
 
 		try {
 			$user->name = $request->name;
 			$user->email = $request->email;
+			$user->phone = $request->phone ?? null;
 			if ($request->filled('is_approved')) {
 				$user->is_approved = (bool) $request->is_approved;
 			}
@@ -285,6 +295,7 @@ class AdminUserController extends Controller
 			'password' => 'required|string|min:8|confirmed',
 			'class_room_id' => 'nullable|exists:class_rooms,id',
 			'nis' => 'nullable|string|max:50',
+			'phone' => 'nullable|string|max:30',
 		]);
 
 		$user = User::create([
@@ -292,6 +303,7 @@ class AdminUserController extends Controller
 			'email' => $request->email,
 			'password' => bcrypt($request->password),
 			'is_approved' => true, // admin-created accounts are approved
+			'phone' => $request->phone ?? null,
 		]);
 
 		try {
