@@ -13,48 +13,47 @@ class ClassRoomSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get or create SMA school
-        $school = School::firstOrCreate(
-            ['name' => 'SMA Alwi College']
-        );
-
-        // Definisikan ruangan kelas sesuai struktur Anda
-        $classRooms = [
-            // Grade 10 (Kelas X)
-            ['name' => 'Kelas 1B - Ruang Kecil', 'grade' => 10],
-
-            // Grade 11 (Kelas XI)
-            ['name' => 'Kelas XI IPA 1 (A21)', 'grade' => 11],
-            ['name' => 'Kelas XI IPA 2 (A22)', 'grade' => 11],
-            ['name' => 'Kelas XI IPA 3 (A23)', 'grade' => 11],
-
-            ['name' => 'Kelas XI IPS 1 (B21)', 'grade' => 11],
-            ['name' => 'Kelas XI IPS 2 (B22)', 'grade' => 11],
-            ['name' => 'Kelas XI IPS 3 (B23)', 'grade' => 11],
-            ['name' => 'Kelas XI IPS 4 (B24)', 'grade' => 11],
-
-            // Grade 12 (Kelas XII)
-            ['name' => 'Kelas XII IPA 1 (A31)', 'grade' => 12],
-            ['name' => 'Kelas XII IPA 2 (A32)', 'grade' => 12],
-
-            ['name' => 'Kelas XII IPS 1 (B31)', 'grade' => 12],
-            ['name' => 'Kelas XII IPS 2 (B32)', 'grade' => 12],
-            ['name' => 'Kelas XII IPS 3 (B33)', 'grade' => 12],
-            ['name' => 'Kelas XII IPS 4 (B34)', 'grade' => 12],
+        // Daftar sekolah yang digunakan di aplikasi beserta kelas grade-levelnya
+        $schoolsWithGrades = [
+            'Negeri'           => [10, 11, 12],
+            'IGS'              => [10, 11, 12],
+            'Xaverius 3'       => [10, 11, 12],
+            'Bangau'           => [10, 11, 12],
+            'Kumbang'          => [10, 11, 12]
         ];
 
-        // Insert ke database
-        foreach ($classRooms as $room) {
-            ClassRoom::firstOrCreate(
-                ['school_id' => $school->id, 'name' => $room['name']],
-                [
-                    'school_id' => $school->id,
-                    'name'      => $room['name'],
-                    'grade'     => $room['grade'],
-                ]
-            );
+        $createdCount = 0;
+        $deletedCount = 0;
+
+        foreach ($schoolsWithGrades as $schoolName => $grades) {
+            $school = School::firstOrCreate(['name' => $schoolName]);
+
+            $allowedNames = collect($grades)->map(fn($grade) => 'Kelas ' . $grade);
+
+            // Bersihkan varian lama (IPA/IPS dsb) agar hanya tersisa per-grade
+            $deletedCount += ClassRoom::where('school_id', $school->id)
+                ->whereNotIn('name', $allowedNames)
+                ->delete();
+
+            foreach ($grades as $grade) {
+                $roomName = 'Kelas ' . $grade;
+                $classRoom = ClassRoom::firstOrCreate(
+                    ['school_id' => $school->id, 'name' => $roomName],
+                    ['grade' => $grade]
+                );
+
+                if ($classRoom->wasRecentlyCreated) {
+                    $createdCount++;
+                } else {
+                    // Pastikan grade tetap sinkron jika record sudah ada
+                    if ($classRoom->grade !== $grade) {
+                        $classRoom->grade = $grade;
+                        $classRoom->save();
+                    }
+                }
+            }
         }
 
-        $this->command->info('✅ ClassRoom seeding completed! Created ' . count($classRooms) . ' classrooms');
+        $this->command->info("✅ ClassRoom seeding completed! {$createdCount} records ensured, {$deletedCount} old variants removed.");
     }
 }

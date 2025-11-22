@@ -30,7 +30,7 @@
         <select name="class_room_id" class="border p-2 w-full rounded">
           <option value="">-- Tidak Ada --</option>
           @foreach($classRooms as $c)
-            <option value="{{ $c->id }}" @selected(old('class_room_id', $student->class_room_id) == $c->id)>{{ $c->grade }} - {{ $c->name }} ({{ $c->school->name ?? '-' }})</option>
+            <option value="{{ $c->id }}" @selected(old('class_room_id', $student->class_room_id) == $c->id)>{{ $c->display_label }}</option>
           @endforeach
         </select>
       </div>

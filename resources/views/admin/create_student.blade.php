@@ -36,7 +36,7 @@
               <select name="class_room_id" class="mt-1 block w-full border px-3 py-2 rounded">
                   <option value="">-- Pilih Kelas --</option>
                   @foreach($classRooms as $c)
-                      <option value="{{ $c->id }}">{{ $c->grade }} - {{ $c->name }} ({{ $c->school->name ?? '' }})</option>
+                      <option value="{{ $c->id }}">{{ $c->display_label }}</option>
                   @endforeach
               </select>
           </div>

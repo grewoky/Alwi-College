@@ -225,7 +225,7 @@ class AdminUserController extends Controller
 		}
 
 		$students = $query->paginate(20)->withQueryString();
-		$classRooms = ClassRoom::with('school')->orderBy('grade')->orderBy('name')->get();
+		$classRooms = $this->gradeClassOptions();
 		return view('admin.students_index', compact('students','classRooms'));
 	}
 
@@ -234,7 +234,7 @@ class AdminUserController extends Controller
 	 */
 	public function editStudent(Student $student)
 	{
-		$classRooms = ClassRoom::with('school')->orderBy('grade')->orderBy('name')->get();
+		$classRooms = $this->gradeClassOptions();
 		return view('admin.edit_student', compact('student','classRooms'));
 	}
 
@@ -280,7 +280,7 @@ class AdminUserController extends Controller
 	 */
 	public function createStudent()
 	{
-		$classRooms = ClassRoom::with('school')->orderBy('grade')->orderBy('name')->get();
+		$classRooms = $this->gradeClassOptions();
 		return view('admin.create_student', compact('classRooms'));
 	}
 
@@ -378,5 +378,24 @@ class AdminUserController extends Controller
 			Log::error('Failed to delete student record', ['error' => $e->getMessage()]);
 			return redirect()->back()->withErrors('Gagal menghapus data siswa.');
 		}
+	}
+
+	protected function gradeClassOptions()
+	{
+		return ClassRoom::with('school')
+			->whereIn('grade', [10, 11, 12])
+			->orderBy('school_id')
+			->orderBy('grade')
+			->orderBy('id')
+			->get()
+			->unique(fn($room) => $room->school_id . '-' . $room->grade)
+			->values()
+			->map(function ($room) {
+				$room->display_label = $room->grade . ' - Kelas ' . $room->grade;
+				if ($room->school) {
+					$room->display_label .= ' (' . $room->school->name . ')';
+				}
+				return $room;
+			});
 	}
 }

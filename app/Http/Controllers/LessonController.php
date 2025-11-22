@@ -12,6 +12,7 @@ use App\Models\ClassRoom;
 use App\Models\School;
 use App\Models\Subject;
 use App\Models\Teacher;
+use App\Models\User;
 
 class LessonController extends Controller
 {
@@ -220,8 +221,7 @@ class LessonController extends Controller
     public function adminView(Request $r)
     {
         $q = Lesson::with(['teacher.user', 'subject', 'classRoom'])
-            ->whereHas('classRoom', fn($query) => $query->whereIn('grade', [10, 11, 12]))
-            ->orderBy('date', 'desc');
+            ->whereHas('classRoom', fn($query) => $query->whereIn('grade', [10, 11, 12]));
         
         if ($r->filled('teacher_id')) {
             $q->where('teacher_id', $r->teacher_id);
@@ -230,13 +230,27 @@ class LessonController extends Controller
         if ($r->filled('date')) {
             $q->whereDate('date', $r->date);
         }
+
+        $sort = $r->input('sort', 'date_desc');
+
+        if ($sort === 'teacher_asc') {
+            $q->orderBy(
+                User::select('name')
+                    ->join('teachers', 'teachers.user_id', '=', 'users.id')
+                    ->whereColumn('teachers.id', 'lessons.teacher_id'),
+                'asc'
+            )->orderBy('date', 'asc');
+        } else {
+            $q->orderBy('date', 'desc')->orderBy('id', 'desc');
+        }
         
         $lessons = $q->paginate(20)->withQueryString();
         $teachers = Teacher::with('user')->orderBy('id')->get();
         
         return view('lessons.admin.index', compact(
             'lessons',
-            'teachers'
+            'teachers',
+            'sort'
         ));
     }
 
