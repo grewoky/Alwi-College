@@ -31,6 +31,7 @@ class LessonGenerateTest extends TestCase
         // Create an admin user and give role
         $user = User::factory()->create();
         $user->assignRole('admin');
+        $user = $user->fresh();
 
         // Create teacher
         $teacherUser = User::factory()->create();

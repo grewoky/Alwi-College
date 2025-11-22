@@ -26,9 +26,9 @@ class DashboardController extends Controller
         $todayLessons = \App\Models\Lesson::where('teacher_id', $teacher?->id)
                           ->where('date', now()->toDateString())->count();
         $thisMonthTrips = \App\Models\TeacherTrip::where('teacher_id',$teacher?->id)
-                          ->whereBetween('date',[now()->startOfMonth()->toDateString(), now()->toDateString()])
-                          ->get()
-                          ->sum(fn($r)=> min(3, $r->teaching_sessions + ($r->sunday_bonus?3:0)));
+                  ->whereBetween('date',[now()->startOfMonth()->toDateString(), now()->toDateString()])
+                  ->get()
+                  ->sum(fn($r)=> min(3, (int)$r->teaching_sessions) + (int)($r->bonus ?? ($r->sunday_bonus?3:0)));
         return view('dashboard.teacher', compact('todayLessons','thisMonthTrips'));
     }
 

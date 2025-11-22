@@ -52,13 +52,17 @@ class AttendanceController extends Controller
             $date = new Carbon($lesson->date);
             $trip = TeacherTrip::firstOrCreate(
                 ['teacher_id'=>$teacher->id, 'date'=>$date->toDateString()],
-                ['teaching_sessions'=>0, 'sunday_bonus'=>false]
+                ['teaching_sessions'=>0, 'sunday_bonus'=>false, 'bonus' => 0]
             );
 
             $trip->teaching_sessions = min(3, $trip->teaching_sessions + 1);
-            // bonus Minggu (kalau hari Minggu), tandai sunday_bonus true (trip harian akan min(3, sesi + 3))
+            // If DB has numeric 'bonus' column, add 3 points for Sunday; otherwise keep legacy sunday_bonus boolean
             if ($date->isSunday()) {
-                $trip->sunday_bonus = true;
+                if (array_key_exists('bonus', $trip->getAttributes())) {
+                    $trip->bonus = max(0, (int)($trip->bonus ?? 0) + 3);
+                } else {
+                    $trip->sunday_bonus = true;
+                }
             }
             $trip->save();
         });

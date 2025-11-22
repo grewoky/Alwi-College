@@ -160,8 +160,13 @@ class LessonController extends Controller
     {
         $teacher = Teacher::where('user_id', Auth::id())->firstOrFail(); // ⬅️ fix di sini
 
+        // Respect retention window: teachers only see lessons not older than retention days
+        $retentionDays = (int) env('SCHEDULE_RETENTION_DAYS', 2);
+        $cutoffDate = Carbon::now()->startOfDay()->subDays($retentionDays)->toDateString();
+
         $q = Lesson::with(['classRoom.school','subject'])
             ->where('teacher_id', $teacher->id)
+            ->whereDate('date', '>=', $cutoffDate)
             ->orderBy('date','desc');
 
         if ($r->filled('school_id')) $q->whereHas('classRoom', fn($qq)=>$qq->where('school_id',$r->school_id));
@@ -188,7 +193,12 @@ class LessonController extends Controller
 
         $student = \App\Models\Student::with('classRoom.school')->where('user_id', $user->id)->firstOrFail();
 
+        // Respect retention window: students only see lessons not older than retention days
+        $retentionDays = (int) env('SCHEDULE_RETENTION_DAYS', 2);
+        $cutoffDate = Carbon::now()->startOfDay()->subDays($retentionDays)->toDateString();
+
         $q = Lesson::with(['teacher.user', 'subject', 'classRoom.school'])
+            ->whereDate('date', '>=', $cutoffDate)
             ->orderBy('date', 'asc');
 
         if ($r->filled('grade')) {
@@ -380,17 +390,22 @@ class LessonController extends Controller
     {
         $today = Carbon::now()->startOfDay();
 
-        // Ambil jadwal yang date < hari ini (filter grade 10, 11, 12)
+        $retentionDays = (int) env('SCHEDULE_RETENTION_DAYS', 2);
+        $cutoff = $today->copy()->subDays($retentionDays)->toDateString();
+
+        // Ambil jadwal yang sudah lewat tetapi masih dalam retention window:
+        // date < today AND date >= cutoff
         $expiredLessons = Lesson::with(['classRoom.school', 'teacher.user', 'subject'])
             ->whereHas('classRoom', fn($q) => $q->whereIn('grade', [10, 11, 12]))
             ->where('date', '<', $today->toDateString())
+            ->where('date', '>=', $cutoff)
             ->orderBy('date', 'desc')
             ->paginate(20);
 
         return view('lessons.admin.logs.expired', [
             'expiredLessons' => $expiredLessons,
             'totalExpired' => Lesson::whereHas('classRoom', fn($q) => $q->whereIn('grade', [10, 11, 12]))
-                ->where('date', '<', $today->toDateString())->count(),
+                ->where('date', '<', $today->toDateString())->where('date', '>=', $cutoff)->count(),
         ]);
     }
 

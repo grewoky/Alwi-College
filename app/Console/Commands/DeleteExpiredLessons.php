@@ -30,9 +30,9 @@ class DeleteExpiredLessons extends Command
         try {
             // Determine retention window. Previously the command removed any lesson with date < today.
             // To avoid immediate deletion of yesterday's schedules (which teachers/admins may still want to see),
-            // use a configurable retention period (in days). Default: 30 days.
+            // use a configurable retention period (in days). Default: 7 days.
             $today = Carbon::now()->startOfDay();
-            $retentionDays = (int) env('SCHEDULE_RETENTION_DAYS', 30);
+            $retentionDays = (int) env('SCHEDULE_RETENTION_DAYS', 7);
             $cutoff = $today->copy()->subDays($retentionDays);
 
             // Select lessons strictly older than the cutoff date (i.e., date < cutoff)

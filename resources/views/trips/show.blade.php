@@ -47,12 +47,11 @@
               @error('teaching_sessions')<span class="text-red-600 text-sm">{{ $message }}</span>@enderror
             </div>
 
-            <!-- Bonus -->
-            <div class="flex items-center gap-2">
-              <input type="checkbox" name="sunday_bonus" id="sunday_bonus" class="w-4 h-4">
-              <label for="sunday_bonus" class="text-sm font-medium text-gray-700">
-                Bonus (+3 poin)
-              </label>
+            <!-- Bonus (numeric) -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-900 mb-2">Bonus (angka)</label>
+              <input type="number" name="bonus" id="bonus" min="0" value="0" class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent">
+              <p class="text-xs text-gray-500 mt-1">Masukkan poin bonus numerik (mis. 3)</p>
             </div>
 
             <!-- Submit -->
@@ -101,7 +100,8 @@
                   @foreach($trips as $trip)
                     @php
                       $sessionPoints = min(3, max(0, (int)$trip->teaching_sessions));
-                      $tripValue = $sessionPoints + ($trip->sunday_bonus ? 3 : 0);
+                      $bonusValue = (int)($trip->bonus ?? ($trip->sunday_bonus ? 10 : 0));
+                      $tripValue = $sessionPoints + $bonusValue;
                     @endphp
                     <tr class="hover:bg-gray-50 transition" data-trip-id="{{ $trip->id }}">
                       <td class="px-6 py-4">
@@ -111,8 +111,8 @@
                         <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded font-semibold">{{ $trip->teaching_sessions }}</span>
                       </td>
                       <td class="px-6 py-4 text-center">
-                        @if($trip->sunday_bonus)
-                          <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded font-semibold">✓ Ya</span>
+                        @if($bonusValue > 0)
+                          <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded font-semibold">{{ $bonusValue }}</span>
                         @else
                           <span class="text-gray-500">—</span>
                         @endif
@@ -121,7 +121,7 @@
                         <span class="bg-green-100 text-green-800 px-4 py-2 rounded-full font-bold">{{ $tripValue }}</span>
                       </td>
                       <td class="px-6 py-4 text-center">
-                        <button onclick="editTrip({{ $trip->id }}, {{ $trip->teaching_sessions }}, {{ $trip->sunday_bonus ? 1 : 0 }})" class="text-blue-600 hover:underline text-sm font-medium">
+                        <button onclick="editTrip({{ $trip->id }}, {{ $trip->teaching_sessions }}, {{ $bonusValue }})" class="text-blue-600 hover:underline text-sm font-medium">
                           Edit
                         </button>
                         <form method="POST" action="{{ route('trips.destroy', $trip->id) }}" style="display:inline;" onsubmit="return confirm('Hapus trip ini?');">
@@ -155,9 +155,9 @@
         <input type="number" name="teaching_sessions" id="editSessions" min="0" max="3" required class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent">
       </div>
 
-      <div class="flex items-center gap-2">
-        <input type="checkbox" name="sunday_bonus" id="editBonus" class="w-4 h-4">
-        <label for="editBonus" class="text-sm font-medium text-gray-700">Bonus (+3 poin)</label>
+      <div>
+        <label class="block text-sm font-semibold text-gray-900 mb-2">Bonus (angka)</label>
+        <input type="number" name="bonus" id="editBonus" min="0" value="0" class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent">
       </div>
 
       <div class="flex gap-2">
@@ -178,7 +178,7 @@
   
   function editTrip(tripId, sessions, bonus) {
     document.getElementById('editSessions').value = sessions;
-    document.getElementById('editBonus').checked = bonus == 1;
+    document.getElementById('editBonus').value = bonus;
     
     // Replace TRIP_ID with actual ID
     const actionUrl = baseRoute.replace('TRIP_ID', tripId);
