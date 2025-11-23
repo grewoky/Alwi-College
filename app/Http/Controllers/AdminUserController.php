@@ -40,7 +40,7 @@ class AdminUserController extends Controller
 			'name' => 'required|string|max:255',
 			'email' => 'required|email|unique:users,email',
 			'password' => 'required|string|min:8|confirmed',
-			'phone' => 'nullable|string|max:30',
+			'phone' => 'nullable|string|max:30|unique:users,phone',
 		]);
 
 		$user = User::create([
@@ -100,7 +100,7 @@ class AdminUserController extends Controller
 			'name' => 'required|string|max:255',
 			'email' => 'required|email|unique:users,email,' . $user->id,
 			'employee_code' => 'nullable|string|max:50',
-			'phone' => 'nullable|string|max:30',
+			'phone' => 'nullable|string|max:30|unique:users,phone,' . $user->id,
 			'is_approved' => 'nullable|in:0,1',
 		]);
 
@@ -225,7 +225,7 @@ class AdminUserController extends Controller
 		}
 
 		$students = $query->paginate(20)->withQueryString();
-		$classRooms = $this->gradeClassOptions();
+		$classRooms = ClassRoom::with('school')->orderBy('grade')->orderBy('name')->get();
 		return view('admin.students_index', compact('students','classRooms'));
 	}
 
@@ -234,7 +234,7 @@ class AdminUserController extends Controller
 	 */
 	public function editStudent(Student $student)
 	{
-		$classRooms = $this->gradeClassOptions();
+		$classRooms = ClassRoom::with('school')->orderBy('grade')->orderBy('name')->get();
 		return view('admin.edit_student', compact('student','classRooms'));
 	}
 
@@ -251,7 +251,7 @@ class AdminUserController extends Controller
 			'email' => 'required|email|unique:users,email,' . $user->id,
 			'class_room_id' => 'nullable|exists:class_rooms,id',
 			'nis' => 'nullable|string|max:50',
-			'phone' => 'nullable|string|max:30',
+			'phone' => 'nullable|string|max:30|unique:users,phone,' . $user->id,
 			'is_approved' => 'nullable|in:0,1',
 		]);
 
@@ -280,7 +280,7 @@ class AdminUserController extends Controller
 	 */
 	public function createStudent()
 	{
-		$classRooms = $this->gradeClassOptions();
+		$classRooms = ClassRoom::with('school')->orderBy('grade')->orderBy('name')->get();
 		return view('admin.create_student', compact('classRooms'));
 	}
 
@@ -295,7 +295,7 @@ class AdminUserController extends Controller
 			'password' => 'required|string|min:8|confirmed',
 			'class_room_id' => 'nullable|exists:class_rooms,id',
 			'nis' => 'nullable|string|max:50',
-			'phone' => 'nullable|string|max:30',
+			'phone' => 'nullable|string|max:30|unique:users,phone',
 		]);
 
 		$user = User::create([
@@ -378,24 +378,5 @@ class AdminUserController extends Controller
 			Log::error('Failed to delete student record', ['error' => $e->getMessage()]);
 			return redirect()->back()->withErrors('Gagal menghapus data siswa.');
 		}
-	}
-
-	protected function gradeClassOptions()
-	{
-		return ClassRoom::with('school')
-			->whereIn('grade', [10, 11, 12])
-			->orderBy('school_id')
-			->orderBy('grade')
-			->orderBy('id')
-			->get()
-			->unique(fn($room) => $room->school_id . '-' . $room->grade)
-			->values()
-			->map(function ($room) {
-				$room->display_label = $room->grade . ' - Kelas ' . $room->grade;
-				if ($room->school) {
-					$room->display_label .= ' (' . $room->school->name . ')';
-				}
-				return $room;
-			});
 	}
 }

@@ -49,29 +49,12 @@
           <td class="p-3"><a href="{{ route('pay.proof',$p->id) }}" target="_blank" class="text-blue-600 underline">Lihat</a></td>
           <td class="p-3">{{ ucfirst($p->status) }}</td>
           <td class="p-3">
-            <form action="{{ route('pay.verify',$p->id) }}" method="POST" class="flex flex-wrap gap-2 items-center">
-              @csrf
-              <select name="status" class="border rounded p-1">
-                <option value="approved" @selected($p->status=='approved')>Approve</option>
-                <option value="rejected" @selected($p->status=='rejected') @if($p->status=='approved') disabled @endif>Reject</option>
-              </select>
-              <input type="text" name="note" placeholder="Catatan (opsional)" value="{{ old('note', $p->note) }}" class="border p-1 rounded">
-              <button class="bg-blue-600 text-white px-2 py-1 rounded">Simpan</button>
-            </form>
-
-            <form action="{{ route('pay.destroy',$p->id) }}" method="POST"
-                  onsubmit="return confirm('Yakin hapus data ini?')"
-                  class="inline-block mt-2">
-              @csrf
-              @method('DELETE')
-              <button class="border border-red-300 text-red-700 px-2 py-1 rounded hover:bg-red-50 inline-flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673A2.25 2.25 0 0 1 15.917 21H8.083A2.25 2.25 0 0 1 5.84 19.673L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0V4.5A1.5 1.5 0 0 0 13.5 3h-3A1.5 1.5 0 0 0 9 4.5v1.043m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                </svg>
-                Hapus
-              </button>
-            </form>
+            <a href="{{ route('pay.edit', $p->id) }}" class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536M9 11l6 6L21 11l-6-6-6 6z" />
+              </svg>
+              Edit
+            </a>
           </td>
         </tr>
         @endforeach

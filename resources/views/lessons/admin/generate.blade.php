@@ -98,19 +98,59 @@
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-bold text-gray-900 mb-3">📅 Tanggal Mulai</label>
-            <input type="date" name="start_date" required class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
+            <input type="date" name="start_date" required min="{{ date('Y-m-d') }}" value="{{ old('start_date') }}" id="start_date" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
             @error('start_date')
               <span class="text-red-600 text-sm mt-1">{{ $message }}</span>
             @enderror
           </div>
           <div>
             <label class="block text-sm font-bold text-gray-900 mb-3">📅 Tanggal Selesai</label>
-            <input type="date" name="end_date" required class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
+            <input type="date" name="end_date" required min="{{ date('Y-m-d') }}" value="{{ old('end_date') }}" id="end_date" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
             @error('end_date')
               <span class="text-red-600 text-sm mt-1">{{ $message }}</span>
             @enderror
           </div>
         </div>
+
+        <script>
+          (function(){
+            const start = document.getElementById('start_date');
+            const end = document.getElementById('end_date');
+            if (!start || !end) return;
+
+            // Ensure end date cannot be set before start date
+            start.addEventListener('change', function(){
+              if (!start.value) return;
+              end.min = start.value;
+              // if current end is before start, clear it
+              if (end.value && end.value < start.value) {
+                end.value = start.value;
+              }
+            });
+
+            // On page load ensure end.min respects start or today
+            document.addEventListener('DOMContentLoaded', function(){
+              const today = new Date().toISOString().split('T')[0];
+              if (!start.value) {
+                end.min = today;
+              } else {
+                end.min = start.value;
+              }
+            });
+
+            // Extra safety: prevent form submit if dates invalid
+            const form = start.closest('form');
+            if (form) {
+              form.addEventListener('submit', function(e){
+                if (start.value && end.value && end.value < start.value) {
+                  e.preventDefault();
+                  alert('Tanggal selesai tidak boleh sebelum tanggal mulai.');
+                  end.focus();
+                }
+              });
+            }
+          })();
+        </script>
 
         <!-- Time Range -->
         <div class="grid grid-cols-2 gap-4">

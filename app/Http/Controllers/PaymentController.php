@@ -52,6 +52,14 @@ class PaymentController extends Controller
         return view('payment.list', compact('payments'));
     }
 
+    /**
+     * Show edit page for a payment (admin)
+     */
+    public function edit(Payment $payment)
+    {
+        $payment->load('student.user');
+        return view('payment.edit', compact('payment'));
+    }
     public function verify(Payment $payment, Request $r)
     {
         try {

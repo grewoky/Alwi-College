@@ -99,7 +99,7 @@
               <tr>
                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Tanggal</th>
                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Kelas</th>
-                <th class="px-6 py-4 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Guru</th>
+                <th class="px-6 py-4 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Pengajar</th>
                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Waktu</th>
                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Dihapus</th>
                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Tipe</th>
@@ -120,7 +120,26 @@
                     </span>
                   </td>
                   <td class="px-6 py-4 text-sm text-gray-700">
-                    {{ optional($log)->teacher_id ? 'ID: ' . $log->teacher_id : '-' }}
+                    @php
+                      $teacherName = null;
+                      if (!empty($log->teacher_id)) {
+                        try {
+                          $t = \App\Models\Teacher::with('user')->find($log->teacher_id);
+                          if ($t && $t->user) {
+                            $teacherName = $t->user->name;
+                          }
+                        } catch (\Exception $e) {
+                          $teacherName = null;
+                        }
+                      }
+                    @endphp
+                    @if($teacherName)
+                      {{ $teacherName }}
+                    @elseif(!empty($log->teacher_id))
+                      ID: {{ $log->teacher_id }}
+                    @else
+                      -
+                    @endif
                   </td>
                   <td class="px-6 py-4 text-sm">
                     <span class="inline-flex items-center gap-1 text-gray-900">

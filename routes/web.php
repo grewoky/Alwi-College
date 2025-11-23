@@ -71,6 +71,7 @@ Route::middleware(['auth','role:admin'])->prefix('admin')->group(function () {
     
     // ADMIN PEMBAYARAN (Verifikasi pembayaran)
     Route::get('/payments', [PaymentController::class,'listAll'])->name('pay.list');
+    Route::get('/payments/{payment}/edit', [PaymentController::class,'edit'])->name('pay.edit');
     Route::post('/payments/{payment}/verify', [PaymentController::class,'verify'])->name('pay.verify');
     Route::delete('/payments/{payment}', [PaymentController::class,'destroy'])->name('pay.destroy');
     

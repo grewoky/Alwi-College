@@ -28,15 +28,21 @@ class DeleteExpiredLessons extends Command
         $this->info('🔄 Memulai cleanup jadwal yang sudah lewat...');
 
         try {
-            // Determine retention window. Previously the command removed any lesson with date < today.
-            // To avoid immediate deletion of yesterday's schedules (which teachers/admins may still want to see),
-            // use a configurable retention period (in days). Default: 7 days.
-            $today = Carbon::now()->startOfDay();
-            $retentionDays = (int) env('SCHEDULE_RETENTION_DAYS', 7);
-            $cutoff = $today->copy()->subDays($retentionDays);
+                        // Select lessons that have already finished:
+                        // - Any lesson with date before today, OR
+                        // - Lesson with date == today and end_time <= current time
+                        $now = Carbon::now();
+                        $today = $now->copy()->toDateString();
+                        $currentTime = $now->copy()->toTimeString();
 
-            // Select lessons strictly older than the cutoff date (i.e., date < cutoff)
-            $expiredLessons = Lesson::where('date', '<', $cutoff->toDateString())->get();
+                        $expiredLessons = Lesson::where(function($q) use ($today, $currentTime) {
+                                $q->where('date', '<', $today)
+                                    ->orWhere(function($q2) use ($today, $currentTime) {
+                                            $q2->where('date', $today)
+                                                 ->whereNotNull('end_time')
+                                                 ->where('end_time', '<=', $currentTime);
+                                    });
+                        })->get();
 
             $deletedCount = 0;
             $details = [];
