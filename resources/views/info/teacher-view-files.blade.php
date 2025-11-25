@@ -67,7 +67,7 @@
                             <tr class="hover:bg-gray-50 transition">
                                 <td class="px-6 py-4 text-sm text-gray-900">
                                     <div class="font-semibold">{{ $file->student->user->name }}</div>
-                                    <div class="text-xs text-gray-500">ID: {{ $file->student->id }}</div>
+                                    <div class="text-xs text-gray-500">{{ $file->student->user->email ?? ('ID: ' . $file->student->id) }}</div>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
@@ -128,7 +128,7 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm">
                                     @if($file->file_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($file->file_path))
-                                        <a href="{{ route('info.download', $file) }}" 
+                                        <a href="{{ route('info.teacher.download', $file) }}" 
                                            class="text-green-600 hover:text-green-700 font-semibold">
                                             ⬇️ Download
                                         </a>

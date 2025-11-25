@@ -13,45 +13,69 @@
             </div>
 
             <!-- Desktop Navigation -->
-            <div class="hidden md:flex items-center gap-1">
-                <a href="{{ route('dashboard') }}" 
-                   class="px-4 py-2 rounded-md text-white hover:bg-white/10 transition-colors {{ request()->routeIs('student.dashboard', 'teacher.dashboard') ? 'bg-white/20 font-semibold' : '' }}">
-                    Dashboard
-                </a>
-                @if(auth()->user() && auth()->user()->hasRole('student'))
-                    <a href="{{ route('lessons.student') }}" 
-                       class="px-4 py-2 rounded-md text-white hover:bg-white/10 transition-colors {{ request()->routeIs('lessons.student') ? 'bg-white/20 font-semibold' : '' }}">
-                        Jadwal
-                    </a>
-                    <a href="{{ route('info.index') }}" 
-                       class="px-4 py-2 rounded-md text-white hover:bg-white/10 transition-colors {{ request()->routeIs('info.index') ? 'bg-white/20 font-semibold' : '' }}">
-                        Info
-                    </a>
-                    <a href="{{ route('attendance.student') }}" 
-                       class="px-4 py-2 rounded-md text-white hover:bg-white/10 transition-colors {{ request()->routeIs('attendance.student') ? 'bg-white/20 font-semibold' : '' }}">
-                        Absensi
-                    </a>
-                    <a href="{{ route('pay.index') }}" 
-                       class="px-4 py-2 rounded-md text-white hover:bg-white/10 transition-colors {{ request()->routeIs('pay.index') ? 'bg-white/20 font-semibold' : '' }}">
-                        Pembayaran
-                    </a>
-                @elseif(auth()->user() && auth()->user()->hasRole('teacher'))
-                    <a href="{{ route('lessons.teacher') }}" 
-                       class="px-4 py-2 rounded-md text-white hover:bg-white/10 transition-colors {{ request()->routeIs('lessons.teacher') ? 'bg-white/20 font-semibold' : '' }}">
-                        Jadwal Mengajar
-                    </a>
-                    <a href="{{ route('attendance.teacher') }}" 
-                       class="px-4 py-2 rounded-md text-white hover:bg-white/10 transition-colors {{ request()->routeIs('attendance.teacher') ? 'bg-white/20 font-semibold' : '' }}">
-                        Absensi
-                    </a>
-                @endif
-            </div>
+                    @php
+                        use Illuminate\Support\Facades\DB;
+                        $u = auth()->user();
+                        $roles = [];
+                        if ($u) {
+                            $roles = DB::table('model_has_roles')
+                                ->join('roles','roles.id','=','model_has_roles.role_id')
+                                ->where('model_has_roles.model_type', get_class($u))
+                                ->where('model_has_roles.model_id', $u->id)
+                                ->pluck('roles.name')->toArray();
+                        }
+                    @endphp
+                    <div class="hidden md:flex items-center gap-1">
+                        <a href="{{ route('dashboard') }}" 
+                           class="px-4 py-2 rounded-md text-white hover:bg-white/10 transition-colors {{ request()->routeIs('student.dashboard', 'teacher.dashboard') ? 'bg-white/20 font-semibold' : '' }}">
+                            Dashboard
+                        </a>
+                        @if(in_array('student', $roles))
+                            <a href="{{ route('lessons.student') }}" 
+                               class="px-4 py-2 rounded-md text-white hover:bg-white/10 transition-colors {{ request()->routeIs('lessons.student') ? 'bg-white/20 font-semibold' : '' }}">
+                                Jadwal
+                            </a>
+                            <a href="{{ route('info.index') }}" 
+                               class="px-4 py-2 rounded-md text-white hover:bg-white/10 transition-colors {{ request()->routeIs('info.index') ? 'bg-white/20 font-semibold' : '' }}">
+                                Info
+                            </a>
+                            <a href="{{ route('attendance.student') }}" 
+                               class="px-4 py-2 rounded-md text-white hover:bg-white/10 transition-colors {{ request()->routeIs('attendance.student') ? 'bg-white/20 font-semibold' : '' }}">
+                                Absensi
+                            </a>
+                            <a href="{{ route('pay.index') }}" 
+                               class="px-4 py-2 rounded-md text-white hover:bg-white/10 transition-colors {{ request()->routeIs('pay.index') ? 'bg-white/20 font-semibold' : '' }}">
+                                Pembayaran
+                            </a>
+                        @elseif(in_array('teacher', $roles))
+                            <a href="{{ route('lessons.teacher') }}" 
+                               class="px-4 py-2 rounded-md text-white hover:bg-white/10 transition-colors {{ request()->routeIs('lessons.teacher') ? 'bg-white/20 font-semibold' : '' }}">
+                                Jadwal Mengajar
+                            </a>
+                            <a href="{{ route('info.teacher.student-files') }}"
+                               class="px-4 py-2 rounded-md text-white hover:bg-white/10 transition-colors {{ request()->routeIs('info.teacher.*') ? 'bg-white/20 font-semibold' : '' }}">
+                                Info File
+                            </a>
+                            <a href="{{ route('attendance.teacher') }}" 
+                               class="px-4 py-2 rounded-md text-white hover:bg-white/10 transition-colors {{ request()->routeIs('attendance.teacher') ? 'bg-white/20 font-semibold' : '' }}">
+                                Absensi
+                            </a>
+                        @endif
+                    </div>
 
             <!-- Right Side: User Info & Logout -->
             <div class="hidden md:flex items-center gap-4">
                 <div class="text-right">
                     <p class="text-sm font-medium text-white">{{ auth()->user()->name ?? 'User' }}</p>
-                    <p class="text-xs text-white/80">{{ auth()->user() && auth()->user()->hasRole('student') ? 'Siswa' : 'Guru' }}</p>
+                    @php
+                        $roleLabel = 'User';
+                        if (!empty($roles)) {
+                            if (in_array('admin', $roles)) $roleLabel = 'Administrator';
+                            elseif (in_array('teacher', $roles)) $roleLabel = 'Guru';
+                            elseif (in_array('student', $roles)) $roleLabel = 'Siswa';
+                        }
+                    @endphp
+                    <p class="text-xs text-white/80">{{ $roleLabel }}</p>
                 </div>
                 <form method="POST" action="{{ route('logout') }}" class="inline">
                     @csrf
@@ -75,7 +99,7 @@
                class="block px-4 py-2 text-white hover:bg-white/10 rounded-md {{ request()->routeIs('student.dashboard', 'teacher.dashboard') ? 'bg-white/20 font-semibold' : '' }}">
                 Dashboard
             </a>
-            @if(auth()->user() && auth()->user()->hasRole('student'))
+            @if(in_array('student', $roles))
                 <a href="{{ route('lessons.student') }}" 
                    class="block px-4 py-2 text-white hover:bg-white/10 rounded-md {{ request()->routeIs('lessons.student') ? 'bg-white/20 font-semibold' : '' }}">
                     Jadwal
@@ -92,10 +116,14 @@
                    class="block px-4 py-2 text-white hover:bg-white/10 rounded-md {{ request()->routeIs('pay.index') ? 'bg-white/20 font-semibold' : '' }}">
                     Pembayaran
                 </a>
-            @elseif(auth()->user() && auth()->user()->hasRole('teacher'))
+            @elseif(in_array('teacher', $roles))
                 <a href="{{ route('lessons.teacher') }}" 
                    class="block px-4 py-2 text-white hover:bg-white/10 rounded-md {{ request()->routeIs('lessons.teacher') ? 'bg-white/20 font-semibold' : '' }}">
                     Jadwal Mengajar
+                </a>
+                <a href="{{ route('info.teacher.student-files') }}"
+                   class="block px-4 py-2 text-white hover:bg-white/10 rounded-md {{ request()->routeIs('info.teacher.*') ? 'bg-white/20 font-semibold' : '' }}">
+                    Info File
                 </a>
                 <a href="{{ route('attendance.teacher') }}" 
                    class="block px-4 py-2 text-white hover:bg-white/10 rounded-md {{ request()->routeIs('attendance.teacher') ? 'bg-white/20 font-semibold' : '' }}">

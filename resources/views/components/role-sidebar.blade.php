@@ -18,14 +18,14 @@
       nav(route('lessons.generate.form'),'Generate Jadwal', request()->routeIs('lessons.generate.*')),
       nav(route('trips.index'),'Rekap Trip', request()->routeIs('trips.index')),
       nav(route('pay.list'),'Verifikasi Pembayaran', request()->routeIs('pay.list')),
-      nav(route('info.list'),'Info Siswa', request()->routeIs('info.list')),
+      nav(route('info.admin.list'),'Info Siswa', request()->routeIs('info.admin.*') || request()->routeIs('info.download') || request()->routeIs('info.download.*')),
     ];
   }
   if (in_array('teacher',$roles)) {
     $items = [
       nav(route('teacher.dashboard'),'Dashboard', request()->routeIs('teacher.*')),
       nav(route('teacher.lessons'),'Jadwal Mengajar', request()->routeIs('teacher.lessons') || request()->routeIs('attendance.*')),
-      nav(route('info.list'),'Info Siswa', request()->routeIs('info.list')),
+      nav(route('info.teacher.student-files'),'Info Siswa', request()->routeIs('info.teacher.*') || request()->routeIs('info.teacher.student-files')),
     ];
   }
   if (in_array('student',$roles)) {

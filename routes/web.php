@@ -114,6 +114,8 @@ Route::middleware(['auth','role:teacher'])->prefix('teacher')->group(function ()
     
     // TEACHER INFO (Lihat file yang diupload siswa)
     Route::get('/dokumen', [InfoFileController::class,'teacherViewStudentFiles'])->name('info.teacher.student-files');
+    // Teacher download single file (allow teacher to download without hitting admin routes)
+    Route::get('/dokumen/{info}/download', [InfoFileController::class,'download'])->name('info.teacher.download');
     // Teacher attendance: view classes by grade
     Route::get('/attendance/grade/{grade}', [\App\Http\Controllers\AttendanceController::class,'gradeView'])->name('attendance.grade');
 });

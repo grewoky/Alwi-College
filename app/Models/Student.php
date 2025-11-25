@@ -9,5 +9,6 @@ class Student extends Model
     protected $fillable = ['user_id','class_room_id','nis'];
     public function user(){ return $this->belongsTo(\App\Models\User::class); }
     public function classRoom(){ return $this->belongsTo(ClassRoom::class); }
+    public function attendances(){ return $this->hasMany(\App\Models\Attendance::class); }
 }
 

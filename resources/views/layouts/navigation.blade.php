@@ -19,14 +19,14 @@
     <x-nav-link :href="route('lessons.generate.form')" :active="request()->routeIs('lessons.generate.form')">Generate Jadwal</x-nav-link>
     <x-nav-link :href="route('trips.index')" :active="request()->routeIs('trips.index')">Rekap Trip</x-nav-link>
     <x-nav-link :href="route('pay.list')" :active="request()->routeIs('pay.list')">Verifikasi Pembayaran</x-nav-link>
-    <x-nav-link :href="route('info.list')" :active="request()->routeIs('info.list')">Info Siswa</x-nav-link>
+    <x-nav-link :href="route('info.admin.list')" :active="request()->routeIs('info.admin.*')">Info Siswa</x-nav-link>
   @endif
 
   {{-- TEACHER MENU --}}
   @if(in_array('teacher',$roles))
     <x-nav-link :href="route('teacher.dashboard')" :active="request()->routeIs('teacher.dashboard')">Dashboard</x-nav-link>
     <x-nav-link :href="route('teacher.lessons')" :active="request()->routeIs('teacher.lessons')">Jadwal Mengajar</x-nav-link>
-    <x-nav-link :href="route('info.list')" :active="request()->routeIs('info.list')">Info Siswa</x-nav-link>
+    <x-nav-link :href="route('info.teacher.student-files')" :active="request()->routeIs('info.teacher.*')">Info Siswa</x-nav-link>
   @endif
 
   {{-- STUDENT MENU --}}

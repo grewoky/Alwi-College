@@ -330,12 +330,18 @@
       materialInput.value = '';
     }
 
-    // Prevent form submission if no file selected
-    document.querySelector('form').addEventListener('submit', function(e) {
-      if (!document.getElementById('fileInput').files.length) {
-        e.preventDefault();
-        alert('Silakan pilih file terlebih dahulu');
-      }
-    });
+    // Prevent upload form submission if no file selected
+    (function(){
+      const uploadForm = document.getElementById('form');
+      const fileInput = document.getElementById('fileInput');
+      if (!uploadForm) return; // nothing to do
+
+      uploadForm.addEventListener('submit', function(e) {
+        if (!fileInput || !fileInput.files.length) {
+          e.preventDefault();
+          alert('Silakan pilih file terlebih dahulu');
+        }
+      });
+    })();
   </script>
 </x-app-layout>
