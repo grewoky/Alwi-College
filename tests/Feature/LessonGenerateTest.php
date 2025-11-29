@@ -29,12 +29,13 @@ class LessonGenerateTest extends TestCase
     public function test_generate_creates_single_lesson_per_date_per_grade()
     {
         // Create an admin user and give role
+        /** @var User $user */
         $user = User::factory()->create();
         $user->assignRole('admin');
-        $user = $user->fresh();
-
         // Create teacher
         $teacherUser = User::factory()->create();
+        /** @var User $teacherUser */
+        $teacher = Teacher::create(['user_id' => $teacherUser->id, 'employee_code' => 'T-' . Str::random(6)]);
         $teacher = Teacher::create(['user_id' => $teacherUser->id, 'employee_code' => 'T-' . Str::random(6)]);
 
         // Create school and a single grade-level class (no variant suffixes)
