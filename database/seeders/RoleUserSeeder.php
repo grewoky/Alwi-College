@@ -15,17 +15,17 @@ class RoleUserSeeder extends Seeder
             Role::firstOrCreate(['name' => $r, 'guard_name' => 'web']);
         }
 
-        $admin = User::firstOrCreate(
+        $admin = User::updateOrCreate(
             ['email' => 'admin@alwi.test'],
-            ['name' => 'Admin', 'password' => Hash::make(bcrypt('password'))]
+            ['name' => 'Admin', 'password' => Hash::make('password')]
         );
-        $teacher = User::firstOrCreate(
+        $teacher = User::updateOrCreate(
             ['email' => 'guru@alwi.test'],
-            ['name' => 'Guru', 'password' => Hash::make(bcrypt('password'))]
+            ['name' => 'Guru', 'password' => Hash::make('password')]
         );
-        $student = User::firstOrCreate(
+        $student = User::updateOrCreate(
             ['email' => 'siswa@alwi.test'],
-            ['name' => 'Siswa', 'password' => Hash::make(bcrypt('password'))]
+            ['name' => 'Siswa', 'password' => Hash::make('password')]
         );
 
         $admin->assignRole('admin');
