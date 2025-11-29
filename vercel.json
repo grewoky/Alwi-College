@@ -45,5 +45,8 @@
         "CACHE_DRIVER": "array",
         "LOG_CHANNEL": "stderr",
         "SESSION_DRIVER": "cookie"
-    }
+    },
+    "buildCommand": "composer install --no-dev --optimize-autoloader && npm install && npm run build",
+
+    "outputDirectory": "public"
 }
