@@ -58,7 +58,7 @@
     <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
       @if($expiredLessons->count() > 0)
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
+          <table class="min-w-[900px] min-w-full divide-y divide-gray-200">
             <thead class="bg-gradient-to-r from-orange-50 via-red-50 to-orange-50 border-b-2 border-orange-200">
               <tr>
                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Tanggal</th>

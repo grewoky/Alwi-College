@@ -29,7 +29,8 @@
   <hr class="my-6">
 
   <h2 class="text-xl font-semibold mb-3">Riwayat Pembayaran</h2>
-  <table class="min-w-full border border-gray-300 text-sm">
+  <div class="overflow-x-auto -mx-4 sm:mx-0">
+    <table class="min-w-[900px] w-full border border-gray-300 text-sm">
     <thead class="bg-gray-100">
       <tr>
         <th class="p-2 border">Tanggal</th>
@@ -57,6 +58,7 @@
       </tr>
       @endforeach
     </tbody>
-  </table>
+    </table>
+  </div>
 </div>
 </x-app-layout>

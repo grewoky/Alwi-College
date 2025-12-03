@@ -1,15 +1,15 @@
 <x-admin-layout title="Kelola Siswa">
   <div class="max-w-6xl mx-auto py-10">
       <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold">Kelola Siswa</h2>
+          <h2 class="text-2xl font-bold"><span class="heading-inline">Kelola Siswa</span></h2>
           <div>
-              <a href="{{ route('admin.students.create') }}" class="px-4 py-2 bg-green-600 text-white rounded">Tambah Siswa</a>
+              <a href="{{ route('admin.students.create') }}" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600">Tambah Siswa</a>
           </div>
       </div>
 
       <form method="GET" action="{{ route('admin.students.index') }}" class="mb-6 flex gap-2">
-          <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari nama, email, atau NIS" class="px-3 py-2 border rounded w-full" />
-          <button class="px-4 py-2 bg-indigo-600 text-white rounded">Cari</button>
+          <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari nama, email, atau NIS" class="px-3 py-2 border rounded w-full focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600 focus-visible:outline-none" />
+          <button class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600">Cari</button>
       </form>
 
       @if(session('success'))
@@ -20,7 +20,8 @@
       @endif
 
       <div class="bg-white shadow rounded-lg overflow-hidden">
-          <table class="w-full table-auto">
+          <div class="overflow-x-auto">
+          <table class="min-w-[960px] w-full table-auto">
               <thead>
                   <tr class="text-left bg-gray-50">
                       <th class="px-4 py-3">#</th>
@@ -61,7 +62,7 @@
                                             </td>
                                             <td class="px-4 py-3">
                                                 <div class="flex items-center justify-end">
-                                                    <a href="{{ route('admin.students.edit', $s->id) }}" class="px-3 py-1 bg-blue-600 text-white rounded">Edit</a>
+                                                    <a href="{{ route('admin.students.edit', $s->id) }}" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">Edit</a>
                                                 </div>
                                             </td>
                   </tr>
@@ -72,6 +73,7 @@
                   @endforelse
               </tbody>
           </table>
+          </div>
       </div>
 
       <div class="mt-4">{{ $students->links() }}</div>

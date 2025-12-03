@@ -6,7 +6,8 @@
       </div>
 
       <div class="bg-white shadow rounded-lg p-4">
-          <table class="w-full text-left">
+                    <div class="overflow-x-auto -mx-4 sm:mx-0">
+                        <table class="min-w-[900px] w-full text-left">
               <thead>
                   <tr>
                       <th class="py-2">#</th>
@@ -40,7 +41,8 @@
                   </tr>
                   @endforeach
               </tbody>
-          </table>
+                        </table>
+                    </div>
 
           <div class="mt-4">
               {{ $teachers->links() }}

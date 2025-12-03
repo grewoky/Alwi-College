@@ -23,7 +23,7 @@ if ($u) {
       
       <!-- Page Header -->
       <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Opsi Download File</h1>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2"><span class="heading-inline">Opsi Download File</span></h1>
         <p class="text-gray-600">Pilih opsi download yang sesuai dengan kebutuhan Anda</p>
       </div>
 
@@ -46,7 +46,7 @@ if ($u) {
             <h3 class="text-xl font-bold text-gray-900">Download Semua File</h3>
           </div>
           <p class="text-gray-600 text-sm mb-4">Unduh semua file dari semua siswa dalam satu file ZIP yang terorganisir berdasarkan nama siswa.</p>
-          <a href="{{ route('info.downloadAll') }}" class="inline-block px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition">
+          <a href="{{ route('info.downloadAll') }}" class="inline-block px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600">
             📦 Mulai Download
           </a>
         </div>
@@ -67,7 +67,7 @@ if ($u) {
               <form action="{{ route('info.download.by-type') }}" method="POST" class="inline">
                 @csrf
                 <input type="hidden" name="type" value="{{ $type }}">
-                <button type="submit" class="block w-full text-left px-3 py-2 bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-600 rounded text-sm font-medium transition">
+                <button type="submit" class="block w-full text-left px-3 py-2 bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-600 rounded text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
                   {{ $type }}
                 </button>
               </form>
@@ -86,7 +86,7 @@ if ($u) {
             <h3 class="text-xl font-bold text-gray-900">Download File Terpilih</h3>
           </div>
           <p class="text-gray-600 text-sm mb-4">Pilih file tertentu untuk diunduh dalam satu file ZIP.</p>
-          <a href="{{ route('info.admin.list') }}" class="inline-block px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition">
+          <a href="{{ route('info.admin.list') }}" class="inline-block px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-600">
             ✓ Pilih File
           </a>
         </div>
@@ -102,7 +102,7 @@ if ($u) {
             <h3 class="text-xl font-bold text-gray-900">Statistik File</h3>
           </div>
           <p class="text-gray-600 text-sm mb-4">Lihat statistik lengkap tentang file yang ada: jumlah, tipe, dan ukuran total.</p>
-          <button onclick="loadFileStats()" class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-medium transition">
+          <button onclick="loadFileStats()" class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600">
             📊 Lihat Statistik
           </button>
         </div>

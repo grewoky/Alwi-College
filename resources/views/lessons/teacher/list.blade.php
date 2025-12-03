@@ -10,7 +10,8 @@
   </form>
 
   <div class="overflow-x-auto rounded-xl shadow">
-    <table class="min-w-full text-sm">
+    <div class="overflow-x-auto -mx-4 sm:mx-0">
+      <table class="min-w-[900px] w-full text-sm">
       <thead class="bg-gray-100">
         <tr>
           <th class="p-2 text-left">Tanggal</th>
@@ -33,7 +34,8 @@
           </tr>
         @endforeach
       </tbody>
-    </table>
+      </table>
+    </div>
   </div>
 
   <div class="mt-4">

@@ -26,7 +26,8 @@
 
     <!-- Teachers Table -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
-      <table class="w-full">
+      <div class="overflow-x-auto">
+      <table class="min-w-[820px] w-full">
         <thead class="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
           <tr>
             <th class="px-6 py-4 text-left font-semibold">Guru</th>
@@ -55,10 +56,11 @@
                 @endif
               </td>
               <td class="px-6 py-4">
+                @php($progress = min(100, ($t['total'] / 90) * 100))
                 <div class="w-full bg-gray-200 rounded-full h-2">
-                  <div class="bg-blue-600 h-2 rounded-full transition" style="width: {{ min(100, ($t['total'] / 90) * 100) }}%"></div>
+                  <div class="bg-blue-600 h-2 rounded-full transition" <?php echo 'style="width: '.$progress.'%;"'; ?>></div>
                 </div>
-                <div class="text-sm text-gray-600 mt-1 text-center">{{ round(($t['total'] / 90) * 100, 0) }}%</div>
+                <div class="text-sm text-gray-600 mt-1 text-center">{{ round($progress, 0) }}%</div>
               </td>
               <td class="px-6 py-4 text-center">
                 <a href="{{ route('trips.show', $t['id']) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition inline-block">
@@ -75,6 +77,7 @@
           @endforelse
         </tbody>
       </table>
+      </div>
     </div>
   </div>
 </div>

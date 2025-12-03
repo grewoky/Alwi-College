@@ -3,10 +3,14 @@
 
     <div class="min-h-screen bg-gray-50 py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <style>
+                .heading-inline{display:inline-block;position:relative;padding-left:.75rem}
+                .heading-inline::before{content:"";position:absolute;left:0;top:55%;transform:translateY(-50%);height:.6em;width:.4em;background:linear-gradient(135deg,#16a34a,#22c55e);border-radius:.2em}
+            </style>
             
             <!-- Page Header -->
             <div class="mb-8">
-                <h1 class="text-4xl font-bold text-gray-900 mb-2">📚 Dokumen Siswa</h1>
+                <h1 class="text-4xl font-bold text-gray-900 mb-2"><span class="heading-inline">📚 Dokumen Siswa</span></h1>
                 <p class="text-gray-600">Lihat file yang diupload oleh siswa Anda</p>
             </div>
 
@@ -17,7 +21,7 @@
                         <!-- Class Filter (Hanya Kelas 10, 11, 12) -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">🏫 Kelas (Anak Bangau)</label>
-                            <select name="class_room_id" class="w-full border-2 border-gray-300 rounded-lg p-2 focus:border-green-600 focus:ring-2 focus:ring-green-600">
+                            <select name="class_room_id" class="w-full border-2 border-gray-300 rounded-lg p-2 focus:border-green-600 focus:ring-2 focus:ring-green-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600">
                                 <option value="">-- Semua Kelas --</option>
                                 @foreach($classRooms as $class)
                                     <option value="{{ $class->id }}" @selected(request('class_room_id') == $class->id)>
@@ -31,16 +35,16 @@
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">📖 Matapelajaran</label>
                             <input type="text" name="subject" placeholder="Cari matapelajaran..." 
-                                class="w-full border-2 border-gray-300 rounded-lg p-2 focus:border-green-600 focus:ring-2 focus:ring-green-600"
+                                class="w-full border-2 border-gray-300 rounded-lg p-2 focus:border-green-600 focus:ring-2 focus:ring-green-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600"
                                 value="{{ request('subject') }}">
                         </div>
                     </div>
 
                     <div class="flex gap-2">
-                        <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition">
+                        <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600">
                             🔍 Filter
                         </button>
-                        <a href="{{ route('info.teacher.student-files') }}" class="px-6 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 font-semibold transition">
+                        <a href="{{ route('info.teacher.student-files') }}" class="px-6 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500">
                             ⟲ Reset
                         </a>
                     </div>
@@ -49,7 +53,9 @@
 
             <!-- Files Table -->
             <div class="bg-white rounded-lg shadow overflow-hidden">
-                <table class="w-full">
+                <!-- Mobile-friendly horizontal scroll wrapper -->
+                <div class="overflow-x-auto">
+                <table class="min-w-[900px] w-full">
                     <thead class="bg-gray-100 border-b">
                         <tr>
                             <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Siswa</th>
@@ -64,7 +70,7 @@
                     </thead>
                     <tbody class="divide-y">
                         @forelse($files as $file)
-                            <tr class="hover:bg-gray-50 transition">
+                            <tr class="hover:bg-gray-50 transition focus-within:bg-gray-50">
                                 <td class="px-6 py-4 text-sm text-gray-900">
                                     <div class="font-semibold">{{ $file->student->user->name }}</div>
                                     <div class="text-xs text-gray-500">{{ $file->student->user->email ?? ('ID: ' . $file->student->id) }}</div>
@@ -129,7 +135,7 @@
                                 <td class="px-6 py-4 text-sm">
                                     @if($file->file_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($file->file_path))
                                         <a href="{{ route('info.teacher.download', $file) }}" 
-                                           class="text-green-600 hover:text-green-700 font-semibold">
+                                           class="text-green-600 hover:text-green-700 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 rounded">
                                             ⬇️ Download
                                         </a>
                                     @else
@@ -150,10 +156,14 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>
             </div>
 
             <!-- Pagination -->
-            @if($files->hasPages())
+            @php
+                $isPaginator = is_object($files) && (method_exists($files, 'hasPages') && method_exists($files, 'links'));
+            @endphp
+            @if($isPaginator && $files->hasPages())
                 <div class="mt-6">
                     {{ $files->links() }}
                 </div>

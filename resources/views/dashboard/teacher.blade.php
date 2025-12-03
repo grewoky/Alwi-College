@@ -1,12 +1,18 @@
 <x-app-layout>
   <x-slot name="title">Guru • Dashboard</x-slot>
 
+  <style>
+    .card-hover{transition:all .25s cubic-bezier(0.4,0,0.2,1)}
+    .card-hover:hover{transform:translateY(-4px);box-shadow:0 12px 24px rgba(0,0,0,0.08)}
+    .heading-inline{position:relative;display:inline-block}
+    .heading-inline::after{content:"";position:absolute;left:0;bottom:-10px;width:100%;height:4px;border-radius:9999px;background:linear-gradient(90deg,#3B63B5 0%, #6FA2FF 50%, #3B63B5 100%);opacity:.25}
+  </style>
   <!-- Hero Header Section -->
   <div class="mb-8 bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
       <div>
         <p class="text-sm font-semibold text-indigo-600 uppercase tracking-wide">Selamat Datang</p>
-        <h1 class="text-4xl font-bold text-slate-900 mt-2">Dashboard Guru</h1>
+        <h1 class="text-4xl font-bold text-slate-900 mt-2"><span class="heading-inline">Dashboard Guru</span></h1>
         <p class="text-slate-500 mt-3 max-w-2xl">Kelola jadwal mengajar, absensi kelas, dan kebutuhan trip dalam satu tempat. Gunakan akses cepat di bawah untuk memulai aktivitas harian Anda.</p>
       </div>
       <div class="h-20 w-20 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-4xl">
@@ -21,7 +27,7 @@
 
   <!-- Key Statistics -->
   <div class="grid md:grid-cols-2 gap-6 mb-8">
-    <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition">
+    <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition card-hover">
       <div class="flex items-start justify-between">
         <div>
           <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Jadwal Hari Ini</p>
@@ -36,7 +42,7 @@
       </div>
     </div>
 
-    <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition">
+    <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition card-hover">
       <div class="flex items-start justify-between">
         <div>
           <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Trip Bulan Ini</p>
@@ -54,7 +60,7 @@
 
   <!-- Quick Actions -->
   <div class="mb-12">
-    <h2 class="text-2xl font-bold text-gray-900 mb-6">Akses Cepat</h2>
+    <h2 class="text-2xl font-bold text-gray-900 mb-6"><span class="heading-inline">Akses Cepat</span></h2>
 
     @php
       $teacherLinks = [
@@ -78,7 +84,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       @foreach ($teacherLinks as $link)
-        <a href="{{ $link['route'] }}" class="group bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition flex flex-col">
+        <a href="{{ $link['route'] }}" class="group bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition flex flex-col card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">
           <div class="flex items-center justify-between mb-2">
             <h3 class="text-base font-semibold text-slate-900">{{ $link['label'] }}</h3>
             <svg class="w-5 h-5 text-slate-300 group-hover:text-emerald-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">

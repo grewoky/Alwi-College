@@ -34,7 +34,8 @@
                                         </div>
 
                                         <div class="overflow-x-auto">
-                                            <table class="w-full text-sm">
+                                            <div class="overflow-x-auto -mx-4 sm:mx-0">
+                                                <table class="min-w-[900px] w-full text-sm">
                                                 <thead>
                                                     <tr class="bg-gray-100 border-b">
                                                         <th class="px-4 py-2 text-left font-semibold text-gray-700">Nama Siswa</th>
@@ -97,7 +98,8 @@
                                                         </tr>
                                                     @endforelse
                                                 </tbody>
-                                            </table>
+                                                </table>
+                                            </div>
                                         </div>
                                     </div>
                                 @endforeach

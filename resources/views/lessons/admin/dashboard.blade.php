@@ -128,7 +128,7 @@
           
           @if($recentLessons->count())
             <div class="overflow-x-auto">
-              <table class="w-full">
+              <table class="min-w-[900px] w-full">
                 <thead class="bg-gray-100 border-b">
                   <tr>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Tanggal</th>

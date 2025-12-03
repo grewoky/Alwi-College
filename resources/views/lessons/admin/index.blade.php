@@ -78,7 +78,7 @@
             <!-- Schedule Table -->
             <div class="bg-white rounded-md shadow-sm overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="w-full">
+                    <table class="min-w-[900px] w-full">
                         <thead>
                             <tr class="bg-gray-100 border-b border-gray-200">
                                 <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Tanggal</th>

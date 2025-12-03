@@ -3,7 +3,7 @@
   <div class="mb-8 bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 rounded-2xl p-8 text-white shadow-lg">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-4xl font-bold mb-2">Welcome Admin</h1>
+        <h1 class="text-4xl font-bold mb-2"><span class="heading-inline">Welcome Admin</span></h1>
         <p class="text-indigo-100 text-lg">Kelola sistem pembelajaran Alwi College dengan mudah</p>
       </div>
       <div class="text-6xl hidden md:block">🎓</div>
@@ -42,7 +42,7 @@
     @endphp
 
     @foreach ($statCards as $card)
-      <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition">
+      <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition focus-within:shadow-md">
         <div class="flex items-start justify-between">
           <div>
             <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">{{ $card['label'] }}</p>
@@ -125,7 +125,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       @foreach ($quickLinks as $link)
-        <a href="{{ $link['route'] }}" class="group bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition flex flex-col">
+        <a href="{{ $link['route'] }}" class="group bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition flex flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600">
           <div class="flex items-center justify-between mb-3">
             <h3 class="text-base font-semibold text-slate-900">{{ $link['label'] }}</h3>
             <svg class="w-5 h-5 text-slate-300 group-hover:text-indigo-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">

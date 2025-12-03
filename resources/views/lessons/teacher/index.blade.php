@@ -82,7 +82,8 @@
             <!-- Schedule Table -->
             <div class="bg-white rounded-md shadow-sm overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="w-full">
+                                        <div class="overflow-x-auto -mx-4 sm:mx-0">
+                                            <table class="min-w-[900px] w-full">
                         <thead class="bg-gray-100 border-b border-gray-200">
                             <tr>
                                 <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Tanggal</th>
@@ -119,7 +120,8 @@
                                 </tr>
                             @endforelse
                         </tbody>
-                    </table>
+                                            </table>
+                                        </div>
                 </div>
 
                 @if($lessons->hasPages())

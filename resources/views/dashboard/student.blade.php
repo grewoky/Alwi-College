@@ -3,11 +3,17 @@
 
   <div class="py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <style>
+        .card-hover{transition:all .25s cubic-bezier(0.4,0,0.2,1)}
+        .card-hover:hover{transform:translateY(-4px);box-shadow:0 12px 24px rgba(0,0,0,0.08)}
+        .heading-inline{position:relative;display:inline-block}
+        .heading-inline::after{content:"";position:absolute;left:0;bottom:-10px;width:100%;height:4px;border-radius:9999px;background:linear-gradient(90deg,#3B63B5 0%, #6FA2FF 50%, #3B63B5 100%);opacity:.25}
+      </style>
       
       <!-- CAROUSEL BANNER -->
       <div class="mb-8">
         <div class="relative w-full bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl overflow-hidden shadow-lg">
-          <div class="carousel-container relative w-full h-80 md:h-96 bg-gray-900 rounded-2xl overflow-hidden">
+          <div class="carousel-container relative w-full h-64 md:h-80 lg:h-96 bg-gray-900 rounded-2xl overflow-hidden">
             <!-- Slide 1 -->
             <div class="carousel-slide absolute w-full h-full transition-opacity duration-1000 opacity-100" data-index="0">
               <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-700">
@@ -113,7 +119,7 @@
 
       <!-- Quick Access Cards -->
       <div class="mb-10">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">Akses Cepat</h2>
+        <h2 class="text-2xl font-bold text-gray-900 mb-6"><span class="heading-inline">Akses Cepat</span></h2>
 
         @php
           $studentLinks = [
@@ -142,7 +148,7 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           @foreach ($studentLinks as $link)
-            <a href="{{ $link['route'] }}" class="group bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition flex flex-col">
+            <a href="{{ $link['route'] }}" class="group bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition flex flex-col card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300">
               <div class="flex items-center justify-between mb-2">
                 <h3 class="text-base font-semibold text-slate-900">{{ $link['label'] }}</h3>
                 <svg class="w-5 h-5 text-slate-300 group-hover:text-indigo-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -171,7 +177,7 @@
 
             <!-- Teks Tentang Kami -->
             <div>
-              <h2 class="text-3xl font-bold text-gray-900 mb-4">Tentang Kami</h2>
+              <h2 class="text-3xl font-bold text-gray-900 mb-4"><span class="heading-inline">Tentang Kami</span></h2>
               <p class="text-gray-600 leading-relaxed mb-4">
                 Alwi College didirikan pada tahun 2003, berawal dari sebuah visi sederhana untuk memberikan pendidikan berkualitas tinggi kepada masyarakat. Dengan komitmen terhadap keunggulan akademik dan pengembangan karakter, kami terus berinovasi dalam metode pembelajaran.
               </p>

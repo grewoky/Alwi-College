@@ -207,9 +207,11 @@
               <p class="text-gray-500 text-sm mt-1">Mulai dengan mengisi form di atas untuk mengunggah file pertama Anda</p>
             </div>
           @else
-            <div class="grid gap-4">
+            <!-- Responsive list: horizontal scroll on mobile, grid on desktop -->
+            <div class="overflow-x-auto md:overflow-visible -mx-4 md:mx-0">
+              <div class="flex md:grid md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8 px-4 md:px-0 flex-nowrap md:flex-none">
               @foreach($files as $f)
-                <div class="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition">
+                <div class="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition min-w-[280px] sm:min-w-[320px] md:min-w-0">
                   <div class="flex items-start justify-between">
                     <div class="flex-1">
                       <!-- Header -->
@@ -220,7 +222,7 @@
                           </svg>
                         </div>
                         <div>
-                          <h3 class="font-semibold text-gray-900">{{ $f->title }}</h3>
+                          <h3 class="font-semibold text-gray-900 break-words">{{ $f->title }}</h3>
                           <p class="text-sm text-gray-500">{{ $f->created_at->format('d M Y H:i') }}</p>
                         </div>
                       </div>
@@ -230,25 +232,25 @@
                         @if($f->school)
                           <div>
                             <p class="text-xs font-medium text-gray-500 uppercase">Sekolah</p>
-                            <p class="text-sm font-semibold text-gray-900">{{ $f->school }}</p>
+                            <p class="text-sm font-semibold text-gray-900 whitespace-normal break-words">{{ $f->school }}</p>
                           </div>
                         @endif
                         @if($f->class_name)
                           <div>
                             <p class="text-xs font-medium text-gray-500 uppercase">Kelas</p>
-                            <p class="text-sm font-semibold text-gray-900">{{ $f->class_name }}</p>
+                            <p class="text-sm font-semibold text-gray-900 whitespace-normal break-words">{{ $f->class_name }}</p>
                           </div>
                         @endif
                         @if($f->subject)
                           <div>
                             <p class="text-xs font-medium text-gray-500 uppercase">Pelajaran</p>
-                            <p class="text-sm font-semibold text-gray-900">{{ $f->subject }}</p>
+                            <p class="text-sm font-semibold text-gray-900 whitespace-normal break-words">{{ $f->subject }}</p>
                           </div>
                         @endif
                         @if($f->material)
                           <div>
                             <p class="text-xs font-medium text-gray-500 uppercase">Materi</p>
-                            <p class="text-sm font-semibold text-gray-900">{{ $f->material }}</p>
+                            <p class="text-sm font-semibold text-gray-900 whitespace-normal break-words">{{ $f->material }}</p>
                           </div>
                         @endif
                       </div>
@@ -283,6 +285,7 @@
                   </div>
                 </div>
               @endforeach
+              </div>
             </div>
           @endif
         </div>

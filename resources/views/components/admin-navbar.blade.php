@@ -4,12 +4,14 @@
         <div class="flex items-center justify-between h-16">
             <!-- Logo dan Brand -->
             <div class="flex items-center gap-3">
-                <div class="flex items-center justify-center">
-                    <img src="{{ asset('images/logo.png') }}" alt="Alwi College Logo" class="h-8 w-auto">
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold text-white">Alwi College</h1>
-                </div>
+                <a href="{{ auth()->check() ? route('dashboard') : url('/') }}" class="flex items-center gap-3">
+                    <div class="flex items-center justify-center">
+                        <img src="{{ asset('images/logo.png') }}" alt="Alwi College Logo" class="h-8 w-auto">
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-white">Alwi College</h1>
+                    </div>
+                </a>
             </div>
 
             <!-- Desktop Navigation -->
@@ -52,7 +54,8 @@
                 </div>
                 <form method="POST" action="{{ route('logout') }}" class="inline">
                     @csrf
-                    <button type="submit" class="text-white/90 hover:text-white transition-colors text-sm font-medium">
+                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white shadow-sm text-sm font-medium transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                         Logout
                     </button>
                 </form>
@@ -98,7 +101,7 @@
             </a>
             <form method="POST" action="{{ route('logout') }}" class="mt-4 px-4">
                 @csrf
-                <button type="submit" class="w-full text-left px-4 py-2 text-white hover:bg-white/10 rounded-md text-sm font-medium">
+                <button type="submit" class="block px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white shadow-sm text-sm font-medium transition">
                     Logout
                 </button>
             </form>
