@@ -9,11 +9,17 @@
     "routes": [
         {
             "src": "/build/(.*)",
-            "dest": "/public/build/$1"
+            "dest": "/public/build/$1",
+            "headers": {
+                "cache-control": "max-age=0, s-maxage=0, must-revalidate"
+            }
         },
         {
             "src": "/css/(.*)",
-            "dest": "/public/css/$1"
+            "dest": "/public/css/$1",
+            "headers": {
+                "cache-control": "max-age=0, s-maxage=0, must-revalidate"
+            }
         },
         {
             "src": "/images/(.*)",
@@ -36,7 +42,6 @@
         "APP_ENV": "production",
         "APP_DEBUG": "false",
         "APP_URL": "https://admin.alwicollege.id",
-        "APP_KEY": "@app-key",
         "APP_CONFIG_CACHE": "/tmp/config.php",
         "APP_EVENTS_CACHE": "/tmp/events.php",
         "APP_PACKAGES_CACHE": "/tmp/packages.php",
