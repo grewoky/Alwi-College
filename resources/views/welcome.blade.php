@@ -183,39 +183,70 @@
             <!-- Main content (will grow) -->
             <main class="flex-1">
               <!-- Hero Section (Tailwind component) -->
-                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0 sm:py-6">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4 sm:py-10">
                   @include('components.hero')
               </div>
 
       <!-- Features Section -->
-      <section id="features" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 sm:pt-4 pb-10 sm:py-12 -mt-24 sm:-mt-16 md:mt-0 scroll-mt-24 sm:scroll-mt-28">
-        <h2 class="text-3xl font-bold text-center text-[#3B63B5] mt-0 heading-accent"><span class="heading-inline">Mengapa Alwi College?</span></h2>
-        <p class="text-center text-gray-600 mt-3 max-w-2xl mx-auto">Belajar jadi lebih fokus, menyenangkan, dan terarah dengan pendampingan intensif serta materi yang dirancang untuk hasil terbaik.</p>
-        <div class="grid md:grid-cols-3 gap-6 mt-1">
-          <div class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 card-hover reveal show">
-            <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-500 text-white mb-4">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18s-3.332.477-4.5 1.253"/></svg>
+      <div id="features" class="relative -mt-32 sm:-mt-20 md:-mt-16 lg:-mt-10 xl:mt-0 scroll-mt-24 sm:scroll-mt-28">
+        <!-- Mobile layout -->
+        <section class="md:hidden max-w-5xl mx-auto px-4 pt-0 pb-6">
+          <h2 class="text-2xl font-semibold text-center text-[#3B63B5] heading-accent"><span class="heading-inline">Mengapa Alwi College?</span></h2>
+          <p class="text-center text-gray-600 mt-2">Belajar jadi lebih fokus, menyenangkan, dan terarah dengan pendampingan intensif.</p>
+          <div class="space-y-4 mt-4">
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 card-hover reveal show">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-500 text-white mb-3">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18s-3.332.477-4.5 1.253"/></svg>
+              </div>
+              <h3 class="font-semibold text-base mb-1">Materi Lengkap & Terstruktur</h3>
+              <p class="text-sm text-gray-600">Kurikulum up-to-date, ringkasan materi, latihan terarah, dan bank soal berlevel.</p>
             </div>
-            <h3 class="font-semibold text-lg mb-2">Materi Lengkap & Terstruktur</h3>
-            <p class="text-gray-600">Kurikulum up-to-date, ringkasan materi, latihan terarah, dan bank soal berlevel.</p>
-          </div>
-          <div class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 card-hover reveal show">
-            <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-emerald-500 to-teal-500 text-white mb-4">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M7 20H2v-2a4 4 0 014-4h1m10-5a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 card-hover reveal show">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-emerald-500 to-teal-500 text-white mb-3">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M7 20H2v-2a4 4 0 014-4h1m10-5a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+              </div>
+              <h3 class="font-semibold text-base mb-1">Pengajar Berpengalaman</h3>
+              <p class="text-sm text-gray-600">Mentor berpengalaman, pendampingan personal, dan strategi belajar yang efektif.</p>
             </div>
-            <h3 class="font-semibold text-lg mb-2">Pengajar Berpengalaman</h3>
-            <p class="text-gray-600">Mentor berpengalaman, pendampingan personal, dan strategi belajar yang efektif.</p>
-          </div>
-          <div class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 card-hover reveal show">
-            <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-pink-500 to-rose-500 text-white mb-4">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9 9 0 1021 12h-8V4a9 9 0 00-2-.945z"/></svg>
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 card-hover reveal show">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-pink-500 to-rose-500 text-white mb-3">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9 9 0 1021 12h-8V4a9 9 0 00-2-.945z"/></svg>
+              </div>
+              <h3 class="font-semibold text-base mb-1">Monitoring Progres</h3>
+              <p class="text-sm text-gray-600">Pantau kemajuan belajar, nilai tugas, dan rekomendasi materi berikutnya.</p>
             </div>
-            <h3 class="font-semibold text-lg mb-2">Monitoring Progres</h3>
-            <p class="text-gray-600">Pantau kemajuan belajar, nilai tugas, dan rekomendasi materi berikutnya.</p>
           </div>
-        </div>
+        </section>
 
-      </section>
+        <!-- Desktop & tablet layout -->
+        <section class="hidden md:block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
+          <h2 class="text-3xl font-bold text-center text-[#3B63B5] heading-accent"><span class="heading-inline">Mengapa Alwi College?</span></h2>
+          <p class="text-center text-gray-600 mt-3 max-w-2xl mx-auto">Belajar jadi lebih fokus, menyenangkan, dan terarah dengan pendampingan intensif serta materi yang dirancang untuk hasil terbaik.</p>
+          <div class="grid md:grid-cols-3 gap-6 mt-6">
+            <div class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 card-hover reveal show">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-500 text-white mb-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18s-3.332.477-4.5 1.253"/></svg>
+              </div>
+              <h3 class="font-semibold text-lg mb-2">Materi Lengkap & Terstruktur</h3>
+              <p class="text-gray-600">Kurikulum up-to-date, ringkasan materi, latihan terarah, dan bank soal berlevel.</p>
+            </div>
+            <div class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 card-hover reveal show">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-emerald-500 to-teal-500 text-white mb-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M7 20H2v-2a4 4 0 014-4h1m10-5a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+              </div>
+              <h3 class="font-semibold text-lg mb-2">Pengajar Berpengalaman</h3>
+              <p class="text-gray-600">Mentor berpengalaman, pendampingan personal, dan strategi belajar yang efektif.</p>
+            </div>
+            <div class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 card-hover reveal show">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-pink-500 to-rose-500 text-white mb-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9 9 0 1021 12h-8V4a9 9 0 00-2-.945z"/></svg>
+              </div>
+              <h3 class="font-semibold text-lg mb-2">Monitoring Progres</h3>
+              <p class="text-gray-600">Pantau kemajuan belajar, nilai tugas, dan rekomendasi materi berikutnya.</p>
+            </div>
+          </div>
+        </section>
+      </div>
 
             <!-- About Section -->
             <section id="about" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 scroll-mt-24 sm:scroll-mt-28">

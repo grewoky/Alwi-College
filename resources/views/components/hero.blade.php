@@ -1,7 +1,7 @@
 <section class="relative bg-gray-50">
   <div class="overflow-hidden">
     <div id="poster-carousel" class="relative w-full" role="region" aria-label="Carousel Poster">
-      <div class="carousel-track relative w-full h-36 sm:h-48 md:h-[450px] lg:h-[560px]">
+      <div class="carousel-track relative w-full h-60 sm:h-72 md:h-[450px] lg:h-[560px]">
         <div class="carousel-inner flex w-full h-full will-change-transform rounded-2xl shadow-lg overflow-hidden">
         @php
           // If the controller hasn't provided $posters, build it from files in public/images/posters
@@ -99,17 +99,30 @@
       }
 
       // Lock horizontal panning on mobile to keep centered view
-      inner.style.touchAction = isMobile ? 'none' : 'pan-y';
+      inner.style.touchAction = 'pan-y';
 
       // Basic swipe support
       let startX = 0;
       let deltaX = 0;
       const threshold = 50; // px to trigger swipe
 
+      function stopAuto(){
+        if(interval){
+          clearInterval(interval);
+          interval = null;
+        }
+      }
+
+      function startAuto(){
+        if(prefersReduced || total <= 1){ return; }
+        stopAuto();
+        interval = setInterval(nextSlide, 4000);
+      }
+
       function onTouchStart(e){
         if (e.touches && e.touches.length) startX = e.touches[0].clientX;
         else if (e instanceof PointerEvent) startX = e.clientX;
-        if(interval){ clearInterval(interval); interval = null; }
+        stopAuto();
       }
 
       function onTouchMove(e){
@@ -124,16 +137,16 @@
           else show(current - 1);
         }
         startX = 0; deltaX = 0;
-        if(!prefersReduced && !interval) interval = setInterval(nextSlide, 4000);
+        startAuto();
       }
 
-      if (!isMobile) {
-        inner.addEventListener('touchstart', onTouchStart, {passive:true});
-        inner.addEventListener('touchmove', onTouchMove, {passive:true});
-        inner.addEventListener('touchend', onTouchEnd);
-        inner.addEventListener('pointerdown', onTouchStart);
-        inner.addEventListener('pointerup', onTouchEnd);
-      }
+      inner.addEventListener('touchstart', onTouchStart, {passive:true});
+      inner.addEventListener('touchmove', onTouchMove, {passive:true});
+      inner.addEventListener('touchend', onTouchEnd);
+      inner.addEventListener('touchcancel', onTouchEnd);
+      inner.addEventListener('pointerdown', onTouchStart);
+      inner.addEventListener('pointerup', onTouchEnd);
+      inner.addEventListener('pointercancel', onTouchEnd);
 
       function show(index){
         index = ((index % total) + total) % total; // normalize
@@ -162,11 +175,11 @@
       dots.forEach(d=> d.addEventListener('click', e => show(Number(e.currentTarget.dataset.index))));
 
       const carouselEl = document.getElementById('poster-carousel');
-      carouselEl.addEventListener('mouseenter', ()=> { if(interval){ clearInterval(interval); interval = null; }});
-      carouselEl.addEventListener('mouseleave', ()=> { if(!prefersReduced && !interval) interval = setInterval(nextSlide, 4000); });
+      carouselEl.addEventListener('mouseenter', stopAuto);
+      carouselEl.addEventListener('mouseleave', startAuto);
 
       // start autoplay if not reduced motion
-      if(!prefersReduced && !isMobile){ interval = setInterval(nextSlide, 4000); }
+      startAuto();
 
       // init
       show(0);
