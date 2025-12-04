@@ -204,7 +204,7 @@
               <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M7 20H2v-2a4 4 0 014-4h1m10-5a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
             </div>
             <h3 class="font-semibold text-lg mb-2">Pengajar Berpengalaman</h3>
-            <p class="text-gray-600">Mentor berpengalaman, pendampingan personal, dan strategi belajar efektif.</p>
+            <p class="text-gray-600">Mentor berpengalaman, pendampingan personal, dan strategi belajar yang efektif.</p>
           </div>
           <div class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 card-hover reveal show">
             <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-pink-500 to-rose-500 text-white mb-4">
