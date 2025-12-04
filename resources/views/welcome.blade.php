@@ -188,7 +188,7 @@
               </div>
 
       <!-- Features Section -->
-      <section id="features" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-10 sm:py-12 -mt-20 sm:-mt-12 md:mt-0 scroll-mt-24 sm:scroll-mt-28">
+      <section id="features" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 sm:pt-4 pb-10 sm:py-12 -mt-24 sm:-mt-16 md:mt-0 scroll-mt-24 sm:scroll-mt-28">
         <h2 class="text-3xl font-bold text-center text-[#3B63B5] mt-0 heading-accent"><span class="heading-inline">Mengapa Alwi College?</span></h2>
         <p class="text-center text-gray-600 mt-3 max-w-2xl mx-auto">Belajar jadi lebih fokus, menyenangkan, dan terarah dengan pendampingan intensif serta materi yang dirancang untuk hasil terbaik.</p>
         <div class="grid md:grid-cols-3 gap-6 mt-1">
