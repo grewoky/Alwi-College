@@ -1,6 +1,16 @@
 <x-app-layout>
   <x-slot name="title">Info • Unggah Kisi-kisi</x-slot>
 
+  @php
+      $infoCloudName = '';
+      $infoUploadPreset = config('cloudinary.upload_preset');
+      $infoCloudUrl = config('cloudinary.cloud_url');
+      if (is_string($infoCloudUrl)) {
+          $infoParts = parse_url($infoCloudUrl);
+          $infoCloudName = $infoParts['host'] ?? '';
+      }
+  @endphp
+
   <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50">
 
     <!-- Hero Header Section -->
@@ -28,6 +38,15 @@
           </div>
         @endif
 
+        @if(session('error'))
+          <div class="mb-6 bg-red-50 border-l-4 border-red-500 text-red-800 px-4 py-3 rounded-lg shadow-md flex items-start">
+            <svg class="w-5 h-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1-5h2v2h-2v-2zm0-6h2v5h-2V7z" clip-rule="evenodd"></path>
+            </svg>
+            <span>{{ session('error') }}</span>
+          </div>
+        @endif
+
         <!-- Form Card Container -->
         <div class="grid grid-cols-1 gap-6 mb-12">
           <!-- Upload Form Card -->
@@ -39,7 +58,7 @@
               <span>Pengiriman Informasi</span>
             </h2>
 
-            <form action="{{ route('info.store') }}" method="POST" enctype="multipart/form-data" id="form" class="space-y-6">
+            <form action="{{ route('info.store') }}" method="POST" enctype="multipart/form-data" id="infoUploadForm" class="space-y-6">
               @csrf
 
               <!-- Form Fields in Grid -->
@@ -122,40 +141,41 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-4">
                   📎 Pilih File
                 </label>
-                <div class="flex gap-3">
+                <p class="text-sm text-gray-500 mb-3">
+                  File diunggah langsung ke Cloudinary (maks. 10 MB). Format yang didukung: pdf, doc, docx, xls, xlsx, ppt, pptx, jpg, jpeg, png, gif, txt, zip, rar, 7z.
+                </p>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-3">
                   <button 
                     type="button" 
                     class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition flex items-center gap-2"
-                    onclick="document.getElementById('fileInput').click()"
+                    id="infoUploadButton"
                   >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
-                    Pilih File
+                    Upload via Cloudinary
+                  </button>
+                  <button 
+                    type="button"
+                    id="infoReplaceButton"
+                    class="hidden px-4 py-2 border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 font-medium transition"
+                  >
+                    Ganti File
                   </button>
                 </div>
 
-                <!-- Hidden File Input -->
-                <input 
-                  type="file" 
-                  id="fileInput" 
-                  name="file"
-                  class="hidden"
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                  onchange="updateFileName(this)"
-                  required
-                >
-
-                <!-- File Name Display -->
                 <div id="fileNameDisplay" class="hidden mt-4">
                   <div class="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
                     <svg class="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
-                    <span id="fileName" class="text-sm font-medium text-gray-700"></span>
+                    <div class="flex-1">
+                      <span id="infoFileName" class="text-sm font-medium text-gray-700"></span>
+                      <div id="infoFileMeta" class="text-xs text-gray-500"></div>
+                    </div>
                     <button 
                       type="button" 
-                      onclick="clearFile()" 
+                      id="infoClearButton"
                       class="ml-auto text-red-600 hover:text-red-700 text-sm font-medium"
                     >
                       ✕ Hapus
@@ -163,7 +183,17 @@
                   </div>
                 </div>
 
+                <input type="hidden" name="cloudinary_public_id" id="infoCloudinaryPublicId">
+                <input type="hidden" name="cloudinary_secure_url" id="infoCloudinarySecureUrl">
+                <input type="hidden" name="cloudinary_format" id="infoCloudinaryFormat">
+                <input type="hidden" name="cloudinary_original_filename" id="infoCloudinaryOriginal">
+                <input type="hidden" name="cloudinary_resource_type" id="infoCloudinaryResourceType">
+                <input type="file" name="file" id="infoFallbackFile" class="hidden">
+
                 @error('file')
+                  <p class="text-red-600 text-sm mt-2">{{ $message }}</p>
+                @enderror
+                @error('cloudinary_public_id')
                   <p class="text-red-600 text-sm mt-2">{{ $message }}</p>
                 @enderror
               </div>
@@ -293,58 +323,119 @@
       </div>
     </div>
   </div>
-
-  <!-- JavaScript for File Upload -->
+  @once
+    <script src="https://widget.cloudinary.com/v2.0/global/all.js" defer></script>
+  @endonce
   <script>
-    function updateFileName(input) {
-      const fileNameDisplay = document.getElementById('fileNameDisplay');
-      const fileName = document.getElementById('fileName');
+    window.addEventListener('load', function () {
+      const cloudName = @json($infoCloudName);
+      const uploadPreset = @json($infoUploadPreset);
+
+      const uploadButton = document.getElementById('infoUploadButton');
+      const replaceButton = document.getElementById('infoReplaceButton');
+      const clearButton = document.getElementById('infoClearButton');
+      const preview = document.getElementById('fileNameDisplay');
+      const fileNameEl = document.getElementById('infoFileName');
+      const fileMetaEl = document.getElementById('infoFileMeta');
       const titleInput = document.getElementById('title');
       const materialInput = document.getElementById('material');
+      const publicIdInput = document.getElementById('infoCloudinaryPublicId');
+      const secureUrlInput = document.getElementById('infoCloudinarySecureUrl');
+      const formatInput = document.getElementById('infoCloudinaryFormat');
+      const originalInput = document.getElementById('infoCloudinaryOriginal');
+      const resourceInput = document.getElementById('infoCloudinaryResourceType');
+      const fallbackInput = document.getElementById('infoFallbackFile');
+      const form = document.getElementById('infoUploadForm');
 
-      if (input.files && input.files[0]) {
-        const file = input.files[0];
-        const displayName = file.name;
-        const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
-
-        // Update display
-        fileName.textContent = displayName;
-        fileNameDisplay.classList.remove('hidden');
-
-        // Auto-fill title with filename (without extension)
-        titleInput.value = nameWithoutExt;
-
-        // Auto-fill material if empty
-        if (!materialInput.value) {
-          materialInput.value = nameWithoutExt;
-        }
+      if (!uploadButton || !cloudName || !uploadPreset || !window.cloudinary) {
+        console.warn('Cloudinary widget belum siap digunakan.');
+        return;
       }
-    }
 
-    function clearFile() {
-      const fileInput = document.getElementById('fileInput');
-      const fileNameDisplay = document.getElementById('fileNameDisplay');
-      const titleInput = document.getElementById('title');
-      const materialInput = document.getElementById('material');
+      const resetSelection = function () {
+        publicIdInput.value = '';
+        secureUrlInput.value = '';
+        formatInput.value = '';
+        originalInput.value = '';
+        if (resourceInput) resourceInput.value = '';
+        if (fileNameEl) fileNameEl.textContent = '';
+        if (fileMetaEl) fileMetaEl.textContent = '';
+        if (fallbackInput) fallbackInput.value = '';
+        preview.classList.add('hidden');
+        replaceButton?.classList.add('hidden');
+      };
 
-      fileInput.value = '';
-      fileNameDisplay.classList.add('hidden');
-      titleInput.value = '';
-      materialInput.value = '';
-    }
+      const widget = window.cloudinary.createUploadWidget({
+        cloudName: cloudName,
+        uploadPreset: uploadPreset,
+        multiple: false,
+        resourceType: 'auto',
+        maxFileSize: 10 * 1024 * 1024,
+        clientAllowedFormats: ['pdf','doc','docx','xls','xlsx','ppt','pptx','jpg','jpeg','png','gif','txt','zip','rar','7z'],
+        sources: ['local','camera','google_drive','dropbox','box','onedrive','url']
+      }, function (error, result) {
+        if (error) {
+          console.error('Cloudinary upload error', error);
+          alert('Upload gagal. Silakan coba lagi.');
+          return;
+        }
 
-    // Prevent upload form submission if no file selected
-    (function(){
-      const uploadForm = document.getElementById('form');
-      const fileInput = document.getElementById('fileInput');
-      if (!uploadForm) return; // nothing to do
+        if (result && result.event === 'success') {
+          const info = result.info;
+          publicIdInput.value = info.public_id || '';
+          secureUrlInput.value = info.secure_url || '';
+          formatInput.value = info.format || '';
+          originalInput.value = info.original_filename || '';
+          if (resourceInput) resourceInput.value = info.resource_type || '';
 
-      uploadForm.addEventListener('submit', function(e) {
-        if (!fileInput || !fileInput.files.length) {
-          e.preventDefault();
-          alert('Silakan pilih file terlebih dahulu');
+          const extension = info.format ? '.' + info.format : '';
+          const displayName = (info.original_filename || info.public_id) + extension;
+          if (fileNameEl) fileNameEl.textContent = displayName;
+          if (fileMetaEl) {
+            const sizeKb = info.bytes ? Math.round(info.bytes / 1024) : null;
+            fileMetaEl.textContent = sizeKb ? sizeKb + ' KB • ' + (info.resource_type || 'file') : (info.resource_type || '');
+          }
+
+          // Autofill title/material if kosong
+          if (titleInput && !titleInput.value) {
+            titleInput.value = info.original_filename || info.public_id || '';
+          }
+          if (materialInput && !materialInput.value) {
+            materialInput.value = info.original_filename || info.public_id || '';
+          }
+
+          preview.classList.remove('hidden');
+          replaceButton?.classList.remove('hidden');
         }
       });
-    })();
+
+      const openWidget = function () {
+        widget.open();
+      };
+
+      uploadButton.addEventListener('click', openWidget);
+
+      if (replaceButton) {
+        replaceButton.addEventListener('click', function () {
+          resetSelection();
+          openWidget();
+        });
+      }
+
+      if (clearButton) {
+        clearButton.addEventListener('click', resetSelection);
+      }
+
+      if (form) {
+        form.addEventListener('submit', function (e) {
+          const hasDirect = publicIdInput.value && secureUrlInput.value;
+          const hasFallback = fallbackInput && fallbackInput.files && fallbackInput.files.length > 0;
+          if (!hasDirect && !hasFallback) {
+            e.preventDefault();
+            alert('Silakan unggah file melalui Cloudinary terlebih dahulu.');
+          }
+        });
+      }
+    });
   </script>
 </x-app-layout>

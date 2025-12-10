@@ -10,7 +10,11 @@ use App\Models\Attendance;
 use Illuminate\Support\Facades\Auth;  
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;    // ⬅️ penting
- use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Log;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 class InfoFileController extends Controller
 {
     private function assertStudentUser(): void
@@ -29,8 +33,18 @@ class InfoFileController extends Controller
     public function destroy(InfoFile $info)
     {
         try {
-            // Hapus file fisik (jika ada)
-            if ($info->file_path && Storage::disk('public')->exists($info->file_path)) {
+            $cloudinaryId = $info->file_public_id ?: $info->file_path;
+            if ($info->file_url && $cloudinaryId) {
+                try {
+                    Cloudinary::destroy($cloudinaryId, ['invalidate' => true]);
+                } catch (\Throwable $th) {
+                    Log::warning('Failed to delete info file from Cloudinary', [
+                        'info_id' => $info->id,
+                        'public_id' => $cloudinaryId,
+                        'error' => $th->getMessage(),
+                    ]);
+                }
+            } elseif ($info->file_path && Storage::disk('public')->exists($info->file_path)) {
                 Storage::disk('public')->delete($info->file_path);
             }
             
@@ -39,7 +53,6 @@ class InfoFileController extends Controller
             
             return back()->with('ok', 'File berhasil dihapus.');
         } catch (\Exception $e) {
-         
             return back()->with('error', 'Gagal menghapus file: ' . $e->getMessage());
         }
     }
@@ -64,24 +77,39 @@ class InfoFileController extends Controller
             'subject'   => 'nullable|max:120',
             'title'     => 'required|max:120',
             'material'  => 'nullable|max:255',
-            'file'      => 'required|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,txt,zip,rar,7z|max:10240',
+            'file'      => ['required','file','mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,txt,zip,rar,7z','max:10240'],
         ]);
+
+        $this->enforceImageSizeLimit($r, ['file']);
 
         try {
             $student = Student::firstOrCreate(['user_id' => Auth::id()]);
-            
-            // Get original filename and sanitize it
-            $originalName = $r->file('file')->getClientOriginalName();
+
+            $fileInstance = $r->file('file');
+            $originalName = $fileInstance->getClientOriginalName();
             $fileName = pathinfo($originalName, PATHINFO_FILENAME);
             $extension = pathinfo($originalName, PATHINFO_EXTENSION);
-            $sanitizedName = preg_replace("/[^a-zA-Z0-9.-]/", "_", $fileName);
-            
-            // Add timestamp to prevent duplicate names
-            $finalName = $sanitizedName . '_' . time() . '.' . $extension;
-            
-            // Store with original name
-            $path = $r->file('file')->storeAs('info_files', $finalName, 'public');
-            
+            $sanitizedName = preg_replace("/[^a-zA-Z0-9.-]/", "_", $fileName) ?: 'file';
+            $finalName = $sanitizedName . '_' . time();
+
+            $folder = 'info_files/' . $student->id;
+            $publicId = Str::slug($finalName . '-' . Str::random(8));
+
+            $options = [
+                'folder' => $folder,
+                'public_id' => $publicId,
+                'resource_type' => 'auto',
+                'overwrite' => true,
+            ];
+
+            if ($extension) {
+                $options['format'] = $extension;
+            }
+
+            $upload = Cloudinary::uploadFile($fileInstance->getRealPath(), $options);
+
+            $secureUrl = $upload->getSecurePath();
+            $cloudinaryId = $upload->getPublicId();
             $fileType = $this->getFileType($extension);
 
             $infoFile = InfoFile::create([
@@ -91,14 +119,18 @@ class InfoFileController extends Controller
                 'subject'    => $r->subject,
                 'title'      => $r->title,
                 'material'   => $r->material,
-                'file_path'  => $path,
+                'file_path'  => $finalName . ($extension ? '.' . $extension : ''),
+                'file_url'   => $secureUrl,
+                'file_public_id' => $cloudinaryId,
             ]);
             
             Log::info('File uploaded', [
                 'student_id' => $student->id,
                 'file_type' => $fileType,
                 'file_extension' => $extension,
-                'file_path' => $path
+                'file_path' => $infoFile->file_path,
+                'cloudinary_public_id' => $cloudinaryId,
+                'cloudinary_url' => $secureUrl,
             ]);
 
             return back()->with('ok', 'File ' . $fileType . ' berhasil diunggah!');
@@ -122,53 +154,107 @@ class InfoFileController extends Controller
     public function showDownloadOptions()
     {
         // Authorization check
-        $user = Auth::user();
+        $r->validate([
         abort_unless($user !== null, 403, 'Unauthorized.');
         $isAdmin = DB::table('model_has_roles')
             ->join('roles','roles.id','=','model_has_roles.role_id')
             ->where('model_has_roles.model_type', get_class($user))
             ->where('model_has_roles.model_id', $user->id)
-            ->where('roles.name', 'admin')
+            'file'      => ['nullable','file','mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,txt,zip,rar,7z','max:10240'],
+            'cloudinary_public_id' => ['nullable','string','max:255'],
+            'cloudinary_secure_url' => ['nullable','url','max:2048'],
+            'cloudinary_format' => ['nullable','string','max:20'],
+            'cloudinary_original_filename' => ['nullable','string','max:255'],
+            'cloudinary_resource_type' => ['nullable','string','max:50'],
             ->exists();
         
+        $hasDirectUpload = $r->filled('cloudinary_public_id') && $r->filled('cloudinary_secure_url');
+
+        if (! $hasDirectUpload && ! $r->hasFile('file')) {
+            throw ValidationException::withMessages([
+                'cloudinary_public_id' => 'Silakan unggah file melalui Cloudinary.',
+            ]);
+        }
+
+        $this->enforceImageSizeLimit($r, ['file']);
+
         abort_unless($isAdmin, 403, 'Unauthorized');
         
-        return view('info.download-options');
-    }
+            $cloudinaryId = null;
+            $secureUrl = null;
+            $extension = null;
+            $fileType = 'File Lainnya';
+            $storedFileName = null;
 
-    // Guru/admin download file tertentu
-    public function download(InfoFile $info)
-    {
-        // Authorization: only admin/teacher can download
-        $user = Auth::user();
-        abort_unless($user !== null, 403, 'Unauthorized.');
-        $isAdmin = DB::table('model_has_roles')
-            ->join('roles','roles.id','=','model_has_roles.role_id')
-            ->where('model_has_roles.model_type', get_class($user))
-            ->where('model_has_roles.model_id', $user->id)
-            ->where('roles.name', 'admin')
-            ->exists();
-        
-        $isTeacher = DB::table('model_has_roles')
-            ->join('roles','roles.id','=','model_has_roles.role_id')
-            ->where('model_has_roles.model_type', get_class($user))
-            ->where('model_has_roles.model_id', $user->id)
-            ->where('roles.name', 'teacher')
-            ->exists();
-        
-        abort_unless($isAdmin || $isTeacher, 403, 'Unauthorized');
-        
-        // Check if file exists
+            if ($hasDirectUpload) {
+                $cloudinaryId = $r->cloudinary_public_id;
+                $secureUrl = $r->cloudinary_secure_url;
+                $extension = strtolower((string) $r->input('cloudinary_format')) ?: null;
+                $originalName = $r->input('cloudinary_original_filename') ?: basename($cloudinaryId);
+                $sanitizedName = preg_replace("/[^a-zA-Z0-9.-]/", "_", $originalName) ?: 'file';
+                $storedFileName = $extension ? $sanitizedName . '.' . $extension : $sanitizedName;
+                $fileType = $this->getFileType((string) $extension);
+            } else {
+                $fileInstance = $r->file('file');
+                $originalName = $fileInstance->getClientOriginalName();
+                $fileName = pathinfo($originalName, PATHINFO_FILENAME);
+                $extension = pathinfo($originalName, PATHINFO_EXTENSION);
+                $sanitizedName = preg_replace("/[^a-zA-Z0-9.-]/", "_", $fileName) ?: 'file';
+                $finalName = $sanitizedName . '_' . time();
+
+                $folder = 'info_files/' . $student->id;
+                $publicId = Str::slug($finalName . '-' . Str::random(8));
+
+                $options = [
+                    'folder' => $folder,
+                    'public_id' => $publicId,
+                    'resource_type' => 'auto',
+                    'overwrite' => true,
+                ];
+
+                if ($extension) {
+                    $options['format'] = $extension;
+                }
+
+                $upload = Cloudinary::uploadFile($fileInstance->getRealPath(), $options);
+
+                $secureUrl = $upload->getSecurePath();
+                $cloudinaryId = $upload->getPublicId();
+                $fileType = $this->getFileType($extension);
+                $storedFileName = $finalName . ($extension ? '.' . $extension : '');
+            }
+
+            if (! $storedFileName) {
+                $basename = basename($cloudinaryId);
+                $storedFileName = $extension ? $basename . '.' . $extension : $basename;
+            }
+                [$tempPath, $downloadName] = $this->prepareCloudinaryDownload($info);
+
+                Log::info('File downloaded', [
+                    'file_id' => $info->id,
+                    'user_id' => Auth::id(),
+                    'file_name' => $downloadName,
+                    'file_public_id' => $info->file_public_id,
+                ]);
+                'file_path'  => $storedFileName,
+                return response()->download($tempPath, $downloadName)->deleteFileAfterSend(true);
+            } catch (\Throwable $th) {
+                Log::error('Cloudinary download failed', [
+                    'file_id' => $info->id,
+                    'error' => $th->getMessage(),
+                ]);
+                return back()->with('error', 'Gagal mengunduh file dari Cloudinary.');
+            }
+        }
+
         if (!Storage::disk('public')->exists($info->file_path)) {
             return back()->with('error', 'File tidak ditemukan');
         }
-        
-        // Download using response helper with proper path
+
         $filePath = storage_path('app/public/' . $info->file_path);
         $originalFileName = pathinfo($info->file_path, PATHINFO_BASENAME);
-        
-        // Log download activity
-        Log::info('File downloaded', [
+
+        Log::info('File downloaded (legacy storage)', [
             'file_id' => $info->id,
             'user_id' => Auth::id(),
             'file_name' => $originalFileName,
@@ -209,6 +295,10 @@ class InfoFileController extends Controller
             abort(403, 'Tidak diizinkan mengakses file ini.');
         }
 
+        if ($info->file_url) {
+            return redirect()->away($info->file_url);
+        }
+
         if (! $info->file_path || ! Storage::disk('public')->exists($info->file_path)) {
             abort(404, 'File tidak ditemukan.');
         }
@@ -218,8 +308,46 @@ class InfoFileController extends Controller
             abort(404, 'File tidak ditemukan.');
         }
 
-        // If teacher/admin prefer download, but for student allow inline view when possible
         return response()->file($fullPath);
+    }
+
+    private function prepareCloudinaryDownload(InfoFile $info, ?string $preferredName = null): array
+    {
+        if (! $info->file_url) {
+            throw new \RuntimeException('Cloudinary URL tidak tersedia.');
+        }
+
+        $fileName = $preferredName ?: $info->file_path;
+        if (! $fileName) {
+            $urlPath = parse_url($info->file_url, PHP_URL_PATH) ?: '';
+            $fileName = $urlPath ? basename($urlPath) : 'file';
+        }
+
+        if (str_contains($fileName, '.') === false && $info->file_path) {
+            $extension = pathinfo($info->file_path, PATHINFO_EXTENSION);
+            if ($extension) {
+                $fileName .= '.' . $extension;
+            }
+        }
+
+        $tempDir = storage_path('app/temp');
+        if (! is_dir($tempDir)) {
+            mkdir($tempDir, 0755, true);
+        }
+
+        $tempPath = $tempDir . '/' . Str::uuid()->toString() . '_' . $fileName;
+
+        $response = Http::timeout(45)->sink($tempPath)->get($info->file_url);
+        if (! $response->successful()) {
+            @unlink($tempPath);
+            throw new \RuntimeException('Gagal mengambil file dari Cloudinary.');
+        }
+
+        if (! file_exists($tempPath)) {
+            throw new \RuntimeException('File sementara tidak ditemukan.');
+        }
+
+        return [$tempPath, $fileName];
     }
 
     /**
@@ -297,18 +425,37 @@ class InfoFileController extends Controller
         
         abort_unless($isAdmin || $isTeacher, 403, 'Unauthorized');
         
-        // Check if file exists
+        if ($info->file_url) {
+            try {
+                [$tempPath, $downloadName] = $this->prepareCloudinaryDownload($info);
+
+                Log::info('File downloaded', [
+                    'file_id' => $info->id,
+                    'user_id' => Auth::id(),
+                    'file_name' => $downloadName,
+                    'file_public_id' => $info->file_public_id,
+                ]);
+
+                return response()->download($tempPath, $downloadName)->deleteFileAfterSend(true);
+            } catch (\Exception $e) {
+                Log::error('Download file error', [
+                    'file_id' => $info->id,
+                    'error' => $e->getMessage()
+                ]);
+                return back()->with('error', 'Gagal mengunduh file: ' . $e->getMessage());
+            }
+        }
+
         if (!Storage::disk('public')->exists($info->file_path)) {
             return back()->with('error', 'File tidak ditemukan');
         }
-        
+
         try {
             $filePath = storage_path('app/public/' . $info->file_path);
             $originalFileName = pathinfo($info->file_path, PATHINFO_BASENAME);
             $extension = $this->getFileExtension($info->file_path);
             
-            // Log download activity
-            Log::info('File downloaded', [
+            Log::info('File downloaded (legacy storage)', [
                 'file_id' => $info->id,
                 'user_id' => Auth::id(),
                 'file_name' => $originalFileName,
@@ -364,33 +511,50 @@ class InfoFileController extends Controller
             $zip = new \ZipArchive();
             $zipFileName = 'files-' . strtolower($fileType) . '-' . now()->format('Ymd-His') . '.zip';
             $zipFilePath = storage_path('app/temp/' . $zipFileName);
-            
-            // Create temp directory if not exists
+            $tempFiles = [];
+
             if (!file_exists(storage_path('app/temp'))) {
                 mkdir(storage_path('app/temp'), 0755, true);
             }
-            
+
             if ($zip->open($zipFilePath, \ZipArchive::CREATE) === true) {
                 foreach ($filteredFiles as $file) {
-                    $filePath = storage_path('app/public/' . $file->file_path);
-                    
-                    if (file_exists($filePath)) {
-                        $studentName = $file->student->user->name ?? 'Unknown';
-                        $localName = $studentName . '/' . basename($filePath);
-                        $zip->addFile($filePath, $localName);
+                    $studentName = $file->student->user->name ?? 'Unknown';
+
+                    if ($file->file_url) {
+                        try {
+                            [$tempPath, $downloadName] = $this->prepareCloudinaryDownload($file, basename($file->file_path ?? $file->id));
+                            $zip->addFile($tempPath, $studentName . '/' . $downloadName);
+                            $tempFiles[] = $tempPath;
+                        } catch (\Throwable $th) {
+                            Log::warning('Skip file during Cloudinary batch download', [
+                                'file_id' => $file->id,
+                                'error' => $th->getMessage(),
+                            ]);
+                        }
+                    } else {
+                        $filePath = storage_path('app/public/' . $file->file_path);
+                        if (file_exists($filePath)) {
+                            $zip->addFile($filePath, $studentName . '/' . basename($filePath));
+                        }
                     }
                 }
+
                 $zip->close();
-                
+
+                foreach ($tempFiles as $tempPath) {
+                    @unlink($tempPath);
+                }
+
                 Log::info('Batch download by type', [
                     'user_id' => Auth::id(),
                     'file_type' => $fileType,
                     'files_count' => $filteredFiles->count()
                 ]);
-                
+
                 return response()->download($zipFilePath, $zipFileName)->deleteFileAfterSend(true);
             }
-            
+
             return back()->with('error', 'Gagal membuat file ZIP');
         } catch (\Exception $e) {
             Log::error('Download by type error', [

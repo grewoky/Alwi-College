@@ -6,7 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Payment extends Model
 {
-    protected $fillable = ['student_id','month_period','amount','proof_path','status','note'];
+    protected $fillable = [
+        'student_id',
+        'month_period',
+        'amount',
+        'proof_path',
+        'proof_url',
+        'proof_public_id',
+        'status',
+        'note',
+    ];
 
     public function student()
     {

@@ -17,6 +17,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Default Cloud Filesystem Disk
+    |--------------------------------------------------------------------------
+    |
+    | Many applications store user generated content on a "cloud" disk in
+    | addition to the local disk. Here you may specify a default cloud
+    | driver; this disk will be bound to the Storage::cloud() helper.
+    |
+    */
+
+    'cloud' => env('FILESYSTEM_CLOUD', 'cloudinary'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Filesystem Disks
     |--------------------------------------------------------------------------
     |
@@ -29,6 +42,12 @@ return [
     */
 
     'disks' => [
+        'cloudinary' => [
+            'driver' => 'cloudinary',
+            'upload_options' => [
+                'resource_type' => 'auto',
+            ],
+        ],
 
         'local' => [
             'driver' => 'local',

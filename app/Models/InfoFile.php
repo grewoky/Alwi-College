@@ -10,6 +10,8 @@ class InfoFile extends Model
         'student_id',
         'title',
         'file_path',
+        'file_url',
+        'file_public_id',
         'school',
         'class_name',
         'subject',
