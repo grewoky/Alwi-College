@@ -2,22 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\InfoFile;
-use App\Models\Student;
-use App\Models\Lesson;
 use App\Models\Attendance;
-use Illuminate\Support\Facades\Auth;  
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;    // ⬅️ penting
-use Illuminate\Support\Facades\Log;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
-<?php
-
-namespace App\Http\Controllers;
-
 use App\Models\ClassRoom;
 use App\Models\InfoFile;
 use App\Models\Lesson;
@@ -31,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use ZipArchive;
 
 class InfoFileController extends Controller
 {
@@ -51,8 +37,8 @@ class InfoFileController extends Controller
     private function assertStudent(): Student
     {
         $user = Auth::user();
-        abort_unless($user !== null, 403, 'Unauthorized.');
-        abort_unless($this->userHasRole($user, 'student'), 403, 'Unauthorized.');
+        abort_unless($user !== null, 403, 'Unauthorized');
+        abort_unless($this->userHasRole($user, 'student'), 403, 'Unauthorized');
 
         return Student::firstOrCreate(['user_id' => $user->id]);
     }
@@ -60,13 +46,13 @@ class InfoFileController extends Controller
     private function assertAdmin(): void
     {
         $user = Auth::user();
-        abort_unless($this->userHasRole($user, 'admin'), 403, 'Unauthorized.');
+        abort_unless($this->userHasRole($user, 'admin'), 403, 'Unauthorized');
     }
 
     private function assertTeacher(): void
     {
         $user = Auth::user();
-        abort_unless($this->userHasRole($user, 'teacher'), 403, 'Unauthorized.');
+        abort_unless($this->userHasRole($user, 'teacher'), 403, 'Unauthorized');
     }
 
     private function canAccessInfoFile(InfoFile $info, ?object $user): bool
@@ -139,8 +125,6 @@ class InfoFileController extends Controller
                     }
                 }
             } else {
-                $this->enforceImageSizeLimit($request, ['file']);
-
                 $file = $request->file('file');
                 $originalName = $file->getClientOriginalName();
                 $baseName = pathinfo($originalName, PATHINFO_FILENAME);
@@ -173,7 +157,6 @@ class InfoFileController extends Controller
                 $storedFileName = $extension ? $basename . '.' . $extension : $basename;
             }
 
-            $fileType = $this->getFileType($extension ?? '');
             $title = $request->input('title') ?: pathinfo($storedFileName, PATHINFO_FILENAME);
 
             $infoFile = InfoFile::create([
@@ -192,12 +175,10 @@ class InfoFileController extends Controller
                 'student_id' => $student->id,
                 'file_id' => $infoFile->id,
                 'cloudinary_public_id' => $cloudinaryId,
-                'file_url' => $secureUrl,
-                'file_type' => $fileType,
                 'direct_upload' => $hasDirectUpload,
             ]);
 
-            return back()->with('ok', 'File ' . $fileType . ' berhasil diunggah!');
+            return back()->with('ok', 'File berhasil diunggah.');
         } catch (\Throwable $th) {
             Log::error('Info file upload failed', [
                 'user_id' => Auth::id(),
@@ -211,12 +192,12 @@ class InfoFileController extends Controller
     public function destroy(InfoFile $info)
     {
         $user = Auth::user();
-        abort_unless($user !== null, 403, 'Unauthorized.');
+        abort_unless($user !== null, 403, 'Unauthorized');
 
         $isOwner = optional($info->student)->user_id === $user->id;
         $isAdmin = $this->userHasRole($user, 'admin');
 
-        abort_unless($isOwner || $isAdmin, 403, 'Unauthorized.');
+        abort_unless($isOwner || $isAdmin, 403, 'Unauthorized');
 
         try {
             if ($info->file_public_id) {
@@ -390,7 +371,6 @@ class InfoFileController extends Controller
     {
         $user = Auth::user();
         abort_unless($this->canAccessInfoFile($info, $user), 403, 'Tidak diizinkan mengakses file ini.');
-
         if ($info->file_url) {
             return redirect()->away($info->file_url);
         }
@@ -417,7 +397,7 @@ class InfoFileController extends Controller
             return ['percentage' => 0, 'present' => 0, 'total' => 0];
         }
 
-        $presentCount = \App\Models\Attendance::where('student_id', $studentId)
+        $presentCount = Attendance::where('student_id', $studentId)
             ->whereIn('status', ['hadir', 'present', '1'])
             ->count();
 
@@ -511,10 +491,10 @@ class InfoFileController extends Controller
         }
 
         $zipPath = $tempDir . '/' . $zipFileName;
-        $zip = new \ZipArchive();
+        $zip = new ZipArchive();
         $tempFiles = [];
 
-        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
             return back()->with('error', 'Gagal membuat file ZIP.');
         }
 
@@ -624,28 +604,5 @@ class InfoFileController extends Controller
         }
 
         return 'File Lainnya';
-    }
-}
-            $query->whereHas('classRoom', function($q) {
-                $q->whereIn('grade', [10, 11, 12]);
-            });
-        }
-
-        $students = $query->with(['user', 'classRoom', 'attendances'])->get();
-
-        $stats = $students->map(function($student) {
-            $attendance = $this->getAttendancePercentage($student->id);
-            return [
-                'id' => $student->id,
-                'name' => $student->user->name,
-                'class' => $student->classRoom->name,
-                'grade' => $student->classRoom->grade,
-                'attendance' => $attendance['percentage'],
-                'present' => $attendance['present'],
-                'total' => $attendance['total'],
-            ];
-        });
-
-        return $stats;
     }
 }
