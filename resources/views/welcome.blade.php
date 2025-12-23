@@ -183,12 +183,12 @@
             <!-- Main content (will grow) -->
             <main class="flex-1">
               <!-- Hero Section (Tailwind component) -->
-                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4 sm:py-10">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-2 sm:py-10">
                   @include('components.hero')
               </div>
 
       <!-- Features Section -->
-      <div id="features" class="relative -mt-32 sm:-mt-20 md:-mt-16 lg:-mt-10 xl:mt-0 scroll-mt-24 sm:scroll-mt-28">
+      <div id="features" class="relative mt-4 sm:-mt-10 md:-mt-16 lg:-mt-12 xl:-mt-6 2xl:mt-0 scroll-mt-24 sm:scroll-mt-28">
         <!-- Mobile layout -->
         <section class="md:hidden max-w-5xl mx-auto px-4 pt-0 pb-6">
           <h2 class="text-2xl font-semibold text-center text-[#3B63B5] heading-accent"><span class="heading-inline">Mengapa Alwi College?</span></h2>
