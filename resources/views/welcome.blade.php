@@ -183,13 +183,13 @@
             <!-- Main content (will grow) -->
             <main class="flex-1">
               <!-- Hero Section (Tailwind component) -->
-                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-1 sm:pt-10 sm:pb-12">
-                  @include('components.hero')
+              <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2 sm:pt-10 sm:pb-10">
+                @include('components.hero')
               </div>
 
       <!-- Features Section -->
-      <div id="features" class="relative -mt-10 sm:-mt-8 md:-mt-12 lg:-mt-12 xl:-mt-6 2xl:mt-0 scroll-mt-24 sm:scroll-mt-28">
-        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-10">
+      <div id="features" class="relative mt-6 sm:-mt-4 md:-mt-10 lg:-mt-10 xl:-mt-6 2xl:mt-0 scroll-mt-24 sm:scroll-mt-28">
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-10">
           <h2 class="text-2xl sm:text-3xl font-semibold sm:font-bold text-center text-[#3B63B5] heading-accent"><span class="heading-inline">Mengapa Alwi College?</span></h2>
           <p class="text-center text-gray-600 text-base sm:text-lg mt-2 sm:mt-3 max-w-2xl mx-auto">Belajar jadi lebih fokus, menyenangkan, dan terarah dengan pendampingan intensif serta materi yang dirancang untuk hasil terbaik.</p>
           <div class="mt-5 sm:mt-6 grid gap-4 sm:gap-6 md:grid-cols-3">
@@ -219,9 +219,9 @@
       </div>
 
             <!-- About Section -->
-            <section id="about" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 scroll-mt-24 sm:scroll-mt-28">
-               <div class="bg-white rounded-2xl p-8 shadow-md border border-gray-100 card-hover">
-          <div class="grid md:grid-cols-2 gap-8 items-center">
+            <section id="about" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 scroll-mt-24 sm:scroll-mt-28">
+              <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-md border border-gray-100 card-hover">
+                <div class="grid md:grid-cols-2 gap-6 sm:gap-8 items-center">
             <!-- Gambar About Alwi -->
             <div class="flex justify-center md:justify-start fade-up">
               <div class="relative w-full max-w-md">
@@ -231,60 +231,59 @@
               </div>
             </div>
 
-            <!-- Teks Tentang Kami -->
-            <div class="fade-up delay-200">
-              <h2 class="text-3xl font-bold text-[#3B63B5] mb-4 heading-accent-left"><span class="heading-inline">Tentang Kami</span></h2>
-              <p class="text-gray-600 leading-relaxed mb-4">
+                <!-- Teks Tentang Kami -->
+                <div class="fade-up delay-200">
+                  <h2 class="text-2xl sm:text-3xl font-bold text-[#3B63B5] mb-3 sm:mb-4 heading-accent-left"><span class="heading-inline">Tentang Kami</span></h2>
+                  <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-3 sm:mb-4">
                 Alwi College didirikan pada tahun 2003, berawal dari sebuah visi sederhana untuk memberikan pendidikan berkualitas tinggi kepada masyarakat. Dengan komitmen terhadap keunggulan akademik dan pengembangan karakter, kami terus berinovasi dalam metode pembelajaran.
               </p>
-              <p class="text-gray-600 leading-relaxed mb-6">
+                  <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-5 sm:mb-6">
                 Kami percaya bahwa setiap siswa memiliki potensi unik untuk berkembang. Oleh karena itu, Alwi College menyediakan lingkungan belajar yang mendukung, tim pengajar berpengalaman, dan fasilitas modern untuk mendukung perjalanan akademik Anda menuju kesuksesan.
               </p>
-              <div class="flex flex-wrap items-center gap-3">
-                <span class="px-3 py-1 rounded-full text-sm bg-emerald-50 text-emerald-700 border border-emerald-100">Kelas Kecil & Fokus</span>
-                <span class="px-3 py-1 rounded-full text-sm bg-indigo-50 text-indigo-700 border border-indigo-100">Materi Terstruktur</span>
-                <span class="px-3 py-1 rounded-full text-sm bg-pink-50 text-pink-700 border border-pink-100">Pendampingan Intensif</span>
+                  <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <span class="px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm bg-emerald-50 text-emerald-700 border border-emerald-100">Kelas Kecil & Fokus</span>
+                    <span class="px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm bg-indigo-50 text-indigo-700 border border-indigo-100">Materi Terstruktur</span>
+                    <span class="px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm bg-pink-50 text-pink-700 border border-pink-100">Pendampingan Intensif</span>
+                  </div>
+                </div>
               </div>
-    </div>
-  </div>
 
-          <!-- CTA Section -->
-          <div class="mt-10">
-            <div class="bg-[#3B63B5] rounded-2xl p-8 md:p-10 text-center text-white relative overflow-hidden">
-              <div class="absolute -top-10 -left-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-              <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-              <h3 class="text-2xl font-semibold">Siap Tingkatkan Prestasi Belajar?</h3>
-              <p class="opacity-90 mt-2">Gabung sekarang dan rasakan pengalaman belajar yang efektif, seru, dan terukur.</p>
-              <div class="mt-5 flex items-center justify-center gap-3">
-                <a href="{{ route('login') }}" class="px-5 py-2.5 rounded-lg bg-white text-[#2E529F] font-medium shadow-sm hover:shadow btn-glow btn-pop">Mulai Sekarang</a>
+              <!-- CTA Section -->
+              <div class="mt-8 sm:mt-10">
+                <div class="bg-[#3B63B5] rounded-2xl p-6 sm:p-8 md:p-10 text-center text-white relative overflow-hidden">
+                  <div class="absolute -top-10 -left-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+                  <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+                  <h3 class="text-xl sm:text-2xl font-semibold">Siap Tingkatkan Prestasi Belajar?</h3>
+                  <p class="opacity-90 mt-2 text-sm sm:text-base">Gabung sekarang dan rasakan pengalaman belajar yang efektif, seru, dan terukur.</p>
+                  <div class="mt-4 sm:mt-5 flex items-center justify-center gap-3">
+                    <a href="{{ route('login') }}" class="px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg bg-white text-[#2E529F] font-medium shadow-sm hover:shadow btn-glow btn-pop text-sm sm:text-base">Mulai Sekarang</a>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-
             </section>
 
             </main>
 
             <!-- Footer (enhanced) -->
-            <footer class="bg-[#3B63B5] mt-12 text-white w-full left-0 right-0">
+            <footer class="bg-[#3B63B5] mt-10 sm:mt-12 text-white w-full left-0 right-0">
               <div class="w-full">
-                <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                     <!-- Brand / About -->
                     <div>
-                      <div class="flex items-center gap-3 mb-3">
-                        <img src="{{ asset('images/logo.png') }}" class="h-8 w-auto" alt="Alwi College Logo">
-                        <span class="text-xl font-semibold">Alwi College</span>
+                      <div class="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                        <img src="{{ asset('images/logo.png') }}" class="h-7 sm:h-8 w-auto" alt="Alwi College Logo">
+                        <span class="text-lg sm:text-xl font-semibold">Alwi College</span>
                       </div>
-                      <p class="text-white/80 text-sm leading-relaxed">
+                      <p class="text-white/80 text-xs sm:text-sm leading-relaxed">
                         Bimbel fokus, menyenangkan, dan terarah dengan pendampingan intensif serta materi terstruktur untuk hasil terbaik.
                       </p>
                     </div>
 
                     <!-- Quick Links -->
                     <div>
-                      <h4 class="text-lg font-semibold mb-3">Info Lebih Lanjut</h4>
-                      <ul class="space-y-2 text-white/90 text-sm">
+                      <h4 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3">Info Lebih Lanjut</h4>
+                      <ul class="space-y-1.5 sm:space-y-2 text-white/90 text-xs sm:text-sm">
                         <li><a href="#about" class="hover:underline">Tentang Kami</a></li>
                         <li><a href="#features" class="hover:underline">Program & Fitur</a></li>
                         @if (Route::has('login'))
@@ -295,8 +294,8 @@
 
                     <!-- Contact -->
                     <div>
-                      <h4 class="text-lg font-semibold mb-3">Hubungi Kami</h4>
-                      <ul class="space-y-2 text-white/90 text-sm">
+                      <h4 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3">Hubungi Kami</h4>
+                      <ul class="space-y-1.5 sm:space-y-2 text-white/90 text-xs sm:text-sm">
                         <li class="flex items-center gap-2">
                           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2 8l10-6 10 6-10 6L2 8zm0 8l10 6 10-6"/></svg>
                           <span>Jl. — (Alamat institusi)</span>
@@ -314,7 +313,7 @@
 
                     <!-- Socials -->
                     <div>
-                      <h4 class="text-lg font-semibold mb-3">Ikuti Kami</h4>
+                      <h4 class="text-base sm:text-lg font-semibold mb-2 sm:mb-3">Ikuti Kami</h4>
                       <div class="flex items-center gap-3">
                         <!-- Instagram -->
                         <a href="https://www.instagram.com/bimbel_alwi_college/" target="_blank" rel="noopener noreferrer" aria-label="Instagram Alwi College" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center">
@@ -335,9 +334,9 @@
 
                 <!-- Bottom bar copyright -->
                 <div class="bg-black/10">
-                  <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+                  <div class="max-w-7xl mx-auto py-3 sm:py-4 px-4 sm:px-6 lg:px-8">
                     <div class="flex items-center justify-center">
-                      <p class="text-sm text-white/90">© {{ date('Y') }} Alwi College. All Rights Reserved.</p>
+                      <p class="text-xs sm:text-sm text-white/90 text-center">© {{ date('Y') }} Alwi College. All Rights Reserved.</p>
                     </div>
                   </div>
                 </div>
