@@ -183,13 +183,13 @@
             <!-- Main content (will grow) -->
             <main class="flex-1">
               <!-- Hero Section (Tailwind component) -->
-              <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2 sm:pt-10 sm:pb-10">
+              <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 pb-0 sm:pt-8 sm:pb-8">
                 @include('components.hero')
               </div>
 
       <!-- Features Section -->
-      <div id="features" class="relative mt-6 sm:-mt-4 md:-mt-10 lg:-mt-10 xl:-mt-6 2xl:mt-0 scroll-mt-24 sm:scroll-mt-28">
-        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-10">
+      <div id="features" class="relative -mt-20 sm:-mt-8 md:-mt-12 lg:-mt-12 xl:-mt-6 2xl:mt-0 scroll-mt-24 sm:scroll-mt-28 bg-white">
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 pb-10">
           <h2 class="text-2xl sm:text-3xl font-semibold sm:font-bold text-center text-[#3B63B5] heading-accent"><span class="heading-inline">Mengapa Alwi College?</span></h2>
           <p class="text-center text-gray-600 text-base sm:text-lg mt-2 sm:mt-3 max-w-2xl mx-auto">Belajar jadi lebih fokus, menyenangkan, dan terarah dengan pendampingan intensif serta materi yang dirancang untuk hasil terbaik.</p>
           <div class="mt-5 sm:mt-6 grid gap-4 sm:gap-6 md:grid-cols-3">

@@ -1,4 +1,4 @@
-<section class="relative bg-gray-50">
+<section class="relative bg-white">
   <div class="overflow-hidden">
     <div id="poster-carousel" class="relative w-full" role="region" aria-label="Carousel Poster">
       <div class="carousel-track relative w-full h-60 sm:h-72 md:h-[450px] lg:h-[560px]">
