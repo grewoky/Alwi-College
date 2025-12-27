@@ -357,27 +357,33 @@ class AttendanceController extends Controller
                     ->with('error', 'Anda tidak memiliki jadwal aktif untuk kombinasi sekolah dan kelas ini.');
             }
 
-            // Check if attendance already marked for this class TODAY based on actual records
-            $alreadyMarked = Attendance::whereHas('lesson', function ($q) use ($teacher, $classRoomId) {
-                    $q->where('teacher_id', $teacher->id)
-                        ->where('class_room_id', $classRoomId)
-                        ->whereDate('date', today());
-                })
-                ->exists();
-
-            if ($alreadyMarked) {
-                Log::info("markAttendance: Already marked today for this class");
-                return redirect()
-                    ->route('attendance.select.classroom', [
-                        'school' => $classRoom->school->name,
-                        'grade' => $classRoom->grade,
-                    ])
-                    ->with('warning', 'Absensi untuk kelas ini sudah dicatat hari ini. Anda hanya dapat menginput satu kali per hari.');
-            }
+            $todayLesson = Lesson::with(['attendances' => fn($q) => $q->with('student')])
+                ->where('teacher_id', $teacher->id)
+                ->where('class_room_id', $classRoomId)
+                ->whereDate('date', today())
+                ->first();
 
             $lesson = null;
-            
-            Log::info("markAttendance: Returning form view for classRoom=" . $classRoom->name);
+
+            if ($todayLesson && $todayLesson->attendances->isNotEmpty()) {
+                Log::info('markAttendance: Existing attendance found for today', [
+                    'teacher_id' => $teacher->id,
+                    'class_room_id' => $classRoomId,
+                    'count' => $todayLesson->attendances->count(),
+                ]);
+
+                session()->flash('warning', 'Absensi untuk kelas ini sudah dicatat hari ini. Anda dapat memperbarui data di bawah kemudian simpan ulang.');
+                $lesson = $todayLesson;
+            } elseif ($todayLesson) {
+                // Lesson already exists but without attendance records yet (e.g., jadwal otomatis)
+                Log::info('markAttendance: Lesson exists without attendance; rendering fresh form', [
+                    'teacher_id' => $teacher->id,
+                    'class_room_id' => $classRoomId,
+                ]);
+                $lesson = $todayLesson;
+            }
+
+            Log::info("markAttendance: Rendering form view for classRoom=" . $classRoom->name);
             return view('attendance.mark', compact(
                 'classRoom',
                 'students',
