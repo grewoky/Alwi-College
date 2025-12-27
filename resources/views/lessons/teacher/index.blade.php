@@ -79,57 +79,77 @@
                 </form>
             </div>
 
-            <!-- Schedule Table -->
-            <div class="bg-white rounded-md shadow-sm overflow-hidden">
-                <div class="overflow-x-auto">
-                                        <div class="overflow-x-auto -mx-4 sm:mx-0">
-                                            <table class="min-w-[900px] w-full">
-                        <thead class="bg-gray-100 border-b border-gray-200">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Tanggal</th>
-                                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Kelas</th>
-                                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Mata Pelajaran</th>
-                                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Jam</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($lessons as $lesson)
-                                <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4 text-sm text-gray-900">
-                                        {{ \Carbon\Carbon::parse($lesson->date)->format('d M Y') }}
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">
-                                        {{ $lesson->classRoom->name }}
-                                    </td>
-                                    <td class="px-6 py-4 text-sm font-medium text-gray-900">
-                                        {{ $lesson->subject?->name ?? '-' }}
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">
-                                        @if($lesson->start_time && $lesson->end_time)
-                                            {{ $lesson->start_time }} - {{ $lesson->end_time }}
-                                        @else
-                                            <span class="text-gray-400">-</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="px-6 py-8 text-center text-gray-500">
-                                        <p class="font-medium">Belum ada jadwal mengajar</p>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                                            </table>
-                                        </div>
-                </div>
+            <!-- Schedule Grouped by School -->
+            @php
+                $lessonsBySchool = $lessons->groupBy(fn($lesson) => $lesson->classRoom->school->name ?? 'Sekolah Tidak Diketahui');
+            @endphp
 
-                @if($lessons->hasPages())
-                    <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
-                        {{ $lessons->links() }}
+            @forelse($lessonsBySchool as $schoolName => $schoolLessons)
+                <div class="mb-8">
+                    <!-- School Header -->
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-t-lg p-6">
+                        <h2 class="text-2xl font-bold">🏫 {{ $schoolName }}</h2>
+                        <p class="text-blue-100 mt-1">{{ $schoolLessons->count() }} jadwal mengajar</p>
                     </div>
-                @endif
-            </div>
+
+                    <!-- Schedule Table for this School -->
+                    <div class="bg-white rounded-b-lg shadow overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-100 border-b border-gray-200">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Tanggal</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Kelas</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Mata Pelajaran</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Jam</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    @foreach($schoolLessons as $lesson)
+                                        <tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="px-6 py-4 text-sm text-gray-900 font-medium">
+                                                {{ \Carbon\Carbon::parse($lesson->date)->format('d M Y') }}
+                                            </td>
+                                            <td class="px-6 py-4 text-sm text-gray-900">
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                                    {{ $lesson->classRoom->name }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 text-sm text-gray-900">
+                                                {{ $lesson->subject?->name ?? '-' }}
+                                            </td>
+                                            <td class="px-6 py-4 text-sm text-gray-900">
+                                                @if($lesson->start_time && $lesson->end_time)
+                                                    <span class="text-green-700 font-medium">
+                                                        {{ \Carbon\Carbon::parse($lesson->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($lesson->end_time)->format('H:i') }}
+                                                    </span>
+                                                @else
+                                                    <span class="text-gray-400">-</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
+                    <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <p class="text-gray-600 text-lg font-medium">Belum ada jadwal mengajar</p>
+                    <p class="text-gray-500 text-sm mt-1">Jadwal mengajar Anda akan ditampilkan di sini</p>
+                </div>
+            @endforelse
+
+            <!-- Pagination -->
+            @if($lessons->hasPages())
+                <div class="mt-8">
+                    {{ $lessons->links() }}
+                </div>
+            @endif
 
         </div>
     </div>

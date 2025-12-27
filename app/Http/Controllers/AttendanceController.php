@@ -205,9 +205,13 @@ class AttendanceController extends Controller
         $startOfMonth = Carbon::now()->startOfMonth();
         $endOfMonth = Carbon::now()->endOfMonth();
         
-        // Get attendance data for current month only
+        // Get attendance data for current month only with proper relationships
         $attendances = Attendance::whereBetween('created_at', [$startOfMonth, $endOfMonth])
-            ->with(['student.user', 'student.classRoom', 'lesson.teacher'])
+            ->with([
+                'student.user',
+                'student.classRoom.school',
+                'lesson.teacher.user'
+            ])
             ->orderBy('created_at', 'desc')
             ->paginate(50);
         
