@@ -357,13 +357,15 @@ class AttendanceController extends Controller
                     ->with('error', 'Anda tidak memiliki jadwal aktif untuk kombinasi sekolah dan kelas ini.');
             }
 
-            // Check if attendance already marked for this class TODAY
-            $todayLesson = Lesson::where('teacher_id', $teacher->id)
-                ->where('class_room_id', $classRoomId)
-                ->whereDate('date', today())
-                ->first();
-            
-            if ($todayLesson) {
+            // Check if attendance already marked for this class TODAY based on actual records
+            $alreadyMarked = Attendance::whereHas('lesson', function ($q) use ($teacher, $classRoomId) {
+                    $q->where('teacher_id', $teacher->id)
+                        ->where('class_room_id', $classRoomId)
+                        ->whereDate('date', today());
+                })
+                ->exists();
+
+            if ($alreadyMarked) {
                 Log::info("markAttendance: Already marked today for this class");
                 return redirect()
                     ->route('attendance.select.classroom', [
