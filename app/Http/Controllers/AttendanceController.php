@@ -223,7 +223,9 @@ class AttendanceController extends Controller
 
             if ($classRooms->isEmpty()) {
                 Log::warning("No classrooms found for school=$schoolName, grade=$grade, teacher_id=$teacher->id");
-                return back()->with('error', 'Tidak ada kelas tersedia untuk pilihan ini');
+                return redirect()
+                    ->route('attendance.mark.select')
+                    ->with('error', 'Tidak ada kelas tersedia untuk pilihan tersebut. Pastikan jadwal guru masih aktif.');
             }
 
             return view('attendance.select-classroom-variant', compact('teacher', 'schoolName', 'grade', 'classRooms'));
@@ -347,7 +349,12 @@ class AttendanceController extends Controller
 
             if (!$teachesInSameSchoolGrade) {
                 Log::warning("markAttendance: Unauthorized - teacher doesn't teach in this school/grade combination");
-                abort(403, 'Unauthorized to mark attendance for this class.');
+                return redirect()
+                    ->route('attendance.select.classroom', [
+                        'school' => $classRoom->school->name,
+                        'grade' => $classRoom->grade,
+                    ])
+                    ->with('error', 'Anda tidak memiliki jadwal aktif untuk kombinasi sekolah dan kelas ini.');
             }
 
             // Check if attendance already marked for this class TODAY
@@ -358,7 +365,12 @@ class AttendanceController extends Controller
             
             if ($todayLesson) {
                 Log::info("markAttendance: Already marked today for this class");
-                return back()->with('warning', 'Absensi untuk kelas ini sudah dicatat hari ini. Anda hanya dapat menginput satu kali per hari.');
+                return redirect()
+                    ->route('attendance.select.classroom', [
+                        'school' => $classRoom->school->name,
+                        'grade' => $classRoom->grade,
+                    ])
+                    ->with('warning', 'Absensi untuk kelas ini sudah dicatat hari ini. Anda hanya dapat menginput satu kali per hari.');
             }
 
             $lesson = null;
@@ -371,7 +383,9 @@ class AttendanceController extends Controller
             ));
         } catch (\Exception $e) {
             Log::error('markAttendance error: ' . $e->getMessage() . ' - ' . $e->getTraceAsString());
-            return back()->with('error', 'Terjadi kesalahan saat membuka form absensi: ' . $e->getMessage());
+            return redirect()
+                ->route('attendance.mark.select')
+                ->with('error', 'Terjadi kesalahan saat membuka form absensi: ' . $e->getMessage());
         }
     }
 

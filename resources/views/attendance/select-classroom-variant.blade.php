@@ -15,6 +15,18 @@
                 </a>
             </div>
 
+            @if(session('error'))
+                <div class="mb-6 p-4 rounded-lg border border-red-200 bg-red-50 text-red-700">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            @if(session('warning'))
+                <div class="mb-6 p-4 rounded-lg border border-yellow-200 bg-yellow-50 text-yellow-800">
+                    {{ session('warning') }}
+                </div>
+            @endif
+
             <!-- Page Header -->
             <div class="mb-8">
                 <h1 class="text-4xl font-bold text-gray-900 mb-2">📚 Pilih Varian Kelas</h1>

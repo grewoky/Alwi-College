@@ -10,6 +10,18 @@
                 <p class="text-gray-600">Pilih kelas untuk menginput absensi siswa</p>
             </div>
 
+            @if(session('error'))
+                <div class="mb-6 p-4 rounded-lg border border-red-200 bg-red-50 text-red-700">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            @if(session('warning'))
+                <div class="mb-6 p-4 rounded-lg border border-yellow-200 bg-yellow-50 text-yellow-800">
+                    {{ session('warning') }}
+                </div>
+            @endif
+
             <!-- Group by School -->
             @php
                 $schoolOrder = ['Bangau', 'IGS', 'Kumbang', 'Negeri', 'Xavega'];
