@@ -11,6 +11,7 @@ use App\Models\ClassRoom;
 use App\Models\TeacherTrip;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class AttendanceController extends Controller
@@ -164,10 +165,10 @@ class AttendanceController extends Controller
 
         // Get all unique classrooms taught by this teacher with school info
         // Filter: only lessons dari 2 hari terakhir (exclude lessons yang sudah lewat > 2 hari)
-        $twoHoursAgo = now()->subDays(2);
+        $twoHaysAgoDate = now()->subDays(2)->format('Y-m-d');
         
         $lessons = Lesson::where('teacher_id', $teacher->id)
-            ->where('date', '>=', $twoHoursAgo->format('Y-m-d'))
+            ->where('date', '>=', $twoHaysAgoDate)
             ->with(['classRoom.school'])
             ->get();
         $classRooms = $lessons->pluck('classRoom')->unique('id')->filter();
@@ -199,36 +200,37 @@ class AttendanceController extends Controller
     // Select which classroom variant for a specific school and grade
     public function selectClassroomVariant($schoolName, $grade)
     {
-        $user = Auth::user();
-        abort_unless($user !== null, 403, 'Unauthorized.');
+        try {
+            $user = Auth::user();
+            abort_unless($user !== null, 403, 'Unauthorized.');
 
-        $teacher = Teacher::where('user_id', $user->id)->firstOrFail();
+            $teacher = Teacher::where('user_id', $user->id)->firstOrFail();
 
-        // Filter: only lessons dari 2 hari terakhir (exclude lessons yang sudah lewat > 2 hari)
-        $twoHaysAgoDate = now()->subDays(2)->format('Y-m-d');
+            // Filter: only lessons dari 2 hari terakhir (exclude lessons yang sudah lewat > 2 hari)
+            $twoHaysAgoDate = now()->subDays(2)->format('Y-m-d');
 
-        // Get classrooms for this school and grade taught by this teacher
-        $classRooms = ClassRoom::with('school')
-            ->whereHas('school', function($q) use ($schoolName) {
-                $q->where('name', $schoolName);
-            })
-            ->where('grade', (int)$grade)
-            ->get()
-            ->filter(function($classRoom) use ($teacher, $twoHaysAgoDate) {
-                // Filter only classrooms where teacher teaches AND have lessons within last 2 days
-                return $classRoom->lessons()
-                    ->where('teacher_id', $teacher->id)
-                    ->where('date', '>=', $twoHaysAgoDate)
-                    ->exists();
-            })
-            ->sortBy('name')
-            ->values();
+            // Get classrooms for this school and grade taught by this teacher using pure query builder
+            $classRooms = ClassRoom::with('school')
+                ->whereHas('school', function($q) use ($schoolName) {
+                    $q->where('name', $schoolName);
+                })
+                ->where('grade', (int)$grade)
+                ->whereHas('lessons', function($q) use ($teacher, $twoHaysAgoDate) {
+                    $q->where('teacher_id', $teacher->id)
+                      ->where('date', '>=', $twoHaysAgoDate);
+                })
+                ->orderBy('name')
+                ->get();
 
-        if ($classRooms->isEmpty()) {
-            return back()->with('error', 'Tidak ada kelas tersedia untuk pilihan ini');
+            if ($classRooms->isEmpty()) {
+                return back()->with('error', 'Tidak ada kelas tersedia untuk pilihan ini');
+            }
+
+            return view('attendance.select-classroom-variant', compact('teacher', 'schoolName', 'grade', 'classRooms'));
+        } catch (\Exception $e) {
+            Log::error('selectClassroomVariant error: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat memuat kelas');
         }
-
-        return view('attendance.select-classroom-variant', compact('teacher', 'schoolName', 'grade', 'classRooms'));
     }
 
     // Show grades for a specific teacher (drill-down - kept for compatibility)
@@ -259,19 +261,24 @@ class AttendanceController extends Controller
         // Get attendance data for current month only with proper relationships
         $attendances = Attendance::whereBetween('created_at', [$startOfMonth, $endOfMonth])
             ->with([
-                'student.user',
-                'student.classRoom.school',
-                'lesson.teacher.user'
+                'student' => fn($q) => $q->with(['user', 'classRoom' => fn($q2) => $q2->with('school')]),
+                'lesson' => fn($q) => $q->with(['teacher' => fn($q2) => $q2->with('user')])
+            ])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        // Paginate after relationships are loaded
+        $attendancesPaginated = Attendance::whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->with([
+                'student' => fn($q) => $q->with(['user', 'classRoom' => fn($q2) => $q2->with('school')]),
+                'lesson' => fn($q) => $q->with(['teacher' => fn($q2) => $q2->with('user')])
             ])
             ->orderBy('created_at', 'desc')
             ->paginate(50);
         
-        // Get classrooms with school and students
-        $classRooms = ClassRoom::with(['school', 'students.user'])->orderBy('school_id')->orderBy('grade')->get();
-        
         // Calculate monthly statistics
         $stats = [
-            'totalRecords' => $attendances->total(),
+            'totalRecords' => $attendancesPaginated->total(),
             'hadir' => Attendance::whereBetween('created_at', [$startOfMonth, $endOfMonth])->where('status', 'present')->count(),
             'tidakHadir' => Attendance::whereBetween('created_at', [$startOfMonth, $endOfMonth])->where('status', 'alpha')->count(),
             'izin' => Attendance::whereBetween('created_at', [$startOfMonth, $endOfMonth])->where('status', 'izin')->count(),
@@ -281,8 +288,8 @@ class AttendanceController extends Controller
         $currentMonth = $startOfMonth->format('F Y');
         
         return view('attendance.admin-view', compact(
-            'classRooms',
             'attendances',
+            'attendancesPaginated',
             'stats',
             'currentMonth',
             'startOfMonth',

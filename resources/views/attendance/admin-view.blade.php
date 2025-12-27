@@ -60,9 +60,9 @@
 
             <!-- Attendance Records Grouped by School -->
             @php
-                $attendancesBySchool = $attendances->groupBy(fn($attendance) => 
-                    $attendance->student->classRoom->school->name ?? 'Sekolah Tidak Diketahui'
-                );
+                $attendancesBySchool = $attendances->groupBy(function($attendance) {
+                    return optional(optional($attendance->student)->classRoom)->school->name ?? 'Sekolah Tidak Diketahui';
+                });
             @endphp
 
             @forelse($attendancesBySchool as $schoolName => $schoolAttendances)
@@ -133,9 +133,9 @@
             @empty
 
             <!-- Pagination -->
-            @if($attendances->hasPages())
+            @if($attendancesPaginated->hasPages())
                 <div class="mt-8">
-                    {{ $attendances->links() }}
+                    {{ $attendancesPaginated->links() }}
                 </div>
             @endif
 
