@@ -110,6 +110,7 @@ Route::middleware(['auth','role:teacher'])->prefix('teacher')->group(function ()
     Route::get('/jadwal', [LessonController::class,'teacherView'])->name('lessons.teacher');
     Route::get('/attendance', [AttendanceController::class,'teacherView'])->name('attendance.teacher');
     Route::get('/mark-attendance', [AttendanceController::class,'markAttendanceSelect'])->name('attendance.mark.select');
+    Route::get('/mark-attendance/school/{school}/grade/{grade}', [AttendanceController::class,'selectClassroomVariant'])->name('attendance.select.classroom');
     Route::get('/mark-attendance/{classRoom}', [AttendanceController::class,'markAttendance'])->name('attendance.mark');
     Route::post('/mark-attendance/{classRoom}', [AttendanceController::class,'storeMarkAttendance'])->name('attendance.store.mark');
     Route::get('/attendance/grade/{grade}', [AttendanceController::class,'gradeView'])->name('attendance.grade');

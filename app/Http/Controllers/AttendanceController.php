@@ -192,6 +192,35 @@ class AttendanceController extends Controller
         return view('attendance.teacher-select-class', compact('teacher', 'classesBySchoolAndGrade'));
     }
 
+    // Select which classroom variant for a specific school and grade
+    public function selectClassroomVariant($schoolName, $grade)
+    {
+        $user = Auth::user();
+        abort_unless($user !== null, 403, 'Unauthorized.');
+
+        $teacher = Teacher::where('user_id', $user->id)->firstOrFail();
+
+        // Get classrooms for this school and grade taught by this teacher
+        $classRooms = ClassRoom::with('school')
+            ->whereHas('school', function($q) use ($schoolName) {
+                $q->where('name', $schoolName);
+            })
+            ->where('grade', (int)$grade)
+            ->get()
+            ->filter(function($classRoom) use ($teacher) {
+                // Filter only classrooms where teacher teaches
+                return $classRoom->lessons()->where('teacher_id', $teacher->id)->exists();
+            })
+            ->sortBy('name')
+            ->values();
+
+        if ($classRooms->isEmpty()) {
+            return back()->with('error', 'Tidak ada kelas tersedia untuk pilihan ini');
+        }
+
+        return view('attendance.select-classroom-variant', compact('teacher', 'schoolName', 'grade', 'classRooms'));
+    }
+
     // Show grades for a specific teacher (drill-down - kept for compatibility)
     public function gradeView(Request $r, $grade)
     {

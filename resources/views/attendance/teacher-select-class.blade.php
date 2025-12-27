@@ -35,37 +35,27 @@
                             ksort($gradeGroups);
                         @endphp
                         
-                        @forelse($gradeGroups as $grade => $classRooms)
-                            <div class="mb-8">
-                                <h3 class="text-xl font-bold text-gray-900 mb-4 pb-3 border-b-2 border-gray-200">
-                                    Kelas {{ $grade }}
-                                </h3>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    @foreach($classRooms as $classRoom)
-                                        <a href="{{ route('attendance.mark', $classRoom->id) }}" 
-                                           class="block p-6 rounded-lg border-2 border-gray-200 hover:border-green-500 hover:shadow-lg transition group bg-white">
-                                            <div class="flex items-start justify-between mb-3">
-                                                <div class="flex-1">
-                                                    <h4 class="text-lg font-bold text-gray-900 group-hover:text-green-600 transition">
-                                                        {{ $classRoom->name }}
-                                                    </h4>
-                                                    <p class="text-sm text-gray-600 mt-1">
-                                                        👥 {{ $classRoom->students()->count() }} Siswa
-                                                    </p>
-                                                </div>
-                                                <svg class="w-6 h-6 text-gray-400 group-hover:text-green-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                                </svg>
-                                            </div>
-                                            <p class="text-xs text-gray-500 group-hover:text-green-600 transition font-medium">Klik untuk input absensi →</p>
-                                        </a>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @empty
-                            <p class="text-gray-500">Tidak ada kelas untuk sekolah ini</p>
-                        @endforelse
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            @forelse($gradeGroups as $grade => $classRooms)
+                                <a href="{{ route('attendance.select.classroom', ['school' => $schoolName, 'grade' => $grade]) }}" 
+                                   class="block p-8 rounded-lg border-2 border-gray-200 hover:border-green-500 hover:shadow-lg transition group bg-white text-center">
+                                    <div class="mb-4">
+                                        <div class="text-5xl font-bold text-gray-900 group-hover:text-green-600 transition">
+                                            {{ $grade }}
+                                        </div>
+                                    </div>
+                                    <h4 class="text-xl font-bold text-gray-900 group-hover:text-green-600 transition mb-2">
+                                        Kelas {{ $grade }}
+                                    </h4>
+                                    <p class="text-sm text-gray-600">
+                                        {{ count($classRooms) }} varian kelas
+                                    </p>
+                                    <p class="text-xs text-gray-500 group-hover:text-green-600 transition mt-4 font-medium">Klik untuk pilih varian →</p>
+                                </a>
+                            @empty
+                                <p class="text-gray-500">Tidak ada kelas untuk sekolah ini</p>
+                            @endforelse
+                        </div>
                     </div>
                 </div>
             @empty
