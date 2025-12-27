@@ -60,84 +60,102 @@
 
             <!-- Attendance Records Grouped by School -->
             @php
-                $attendancesBySchool = $attendances->groupBy(function($attendance) {
+                $attendancesBySchool = $attendancesPaginated->getCollection()->groupBy(function($attendance) {
                     return optional(optional($attendance->student)->classRoom)->school->name ?? 'Sekolah Tidak Diketahui';
                 });
             @endphp
 
-            @forelse($attendancesBySchool as $schoolName => $schoolAttendances)
-                <div class="mb-8">
-                    <!-- School Header -->
-                    <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-t-lg p-6">
-                        <h2 class="text-2xl font-bold">🏫 {{ $schoolName }}</h2>
-                        <p class="text-blue-100 mt-1">{{ $schoolAttendances->count() }} catatan absensi</p>
+            @if($attendancesPaginated->isEmpty())
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-100 border-b">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Siswa</th>
+                                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Kelas</th>
+                                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
+                                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Guru Penginput</th>
+                                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Tanggal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">
+                                        Belum ada data absensi untuk bulan <strong>{{ $currentMonth }}</strong>.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
+                </div>
+            @else
+                @foreach($attendancesBySchool as $schoolName => $schoolAttendances)
+                    <div class="mb-8">
+                        <!-- School Header -->
+                        <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-t-lg p-6">
+                            <h2 class="text-2xl font-bold">🏫 {{ $schoolName }}</h2>
+                            <p class="text-blue-100 mt-1">{{ $schoolAttendances->count() }} catatan absensi</p>
+                        </div>
 
-                    <!-- Attendance Table for this School -->
-                    <div class="bg-white rounded-b-lg shadow overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="w-full">
-                                <thead class="bg-gray-100 border-b">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Siswa</th>
-                                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Kelas</th>
-                                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
-                                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Guru Penginput</th>
-                                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Tanggal</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200">
-                                    @foreach($schoolAttendances as $attendance)
-                                        <tr class="hover:bg-gray-50 transition-colors">
-                                            <td class="px-6 py-4 text-sm text-gray-900">
-                                                <div class="font-semibold">{{ $attendance->student->user->name ?? '-' }}</div>
-                                                <div class="text-xs text-gray-500">ID: {{ $attendance->student->id }}</div>
-                                            </td>
-                                            <td class="px-6 py-4 text-sm text-gray-900">
-                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                                                    Kelas {{ $attendance->student->classRoom->grade ?? '-' }}
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-4 text-sm">
-                                                @if($attendance->status === 'present')
-                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                                        ✓ Hadir
-                                                    </span>
-                                                @elseif($attendance->status === 'alpha')
-                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
-                                                        ✗ Tidak Hadir
-                                                    </span>
-                                                @elseif($attendance->status === 'izin')
-                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                                                        ~ Izin
-                                                    </span>
-                                                @elseif($attendance->status === 'sakit')
-                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
-                                                        🏥 Sakit
-                                                    </span>
-                                                @endif
-                                            </td>
-                                            <td class="px-6 py-4 text-sm text-gray-900">
-                                                {{ $attendance->lesson->teacher->user->name ?? '-' }}
-                                            </td>
-                                            <td class="px-6 py-4 text-sm text-gray-600">
-                                                {{ $attendance->created_at->format('d M Y H:i') }}
-                                            </td>
+                        <!-- Attendance Table for this School -->
+                        <div class="bg-white rounded-b-lg shadow overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-gray-100 border-b">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Siswa</th>
+                                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Kelas</th>
+                                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
+                                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Guru Penginput</th>
+                                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Tanggal</th>
                                         </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        @foreach($schoolAttendances as $attendance)
+                                            <tr class="hover:bg-gray-50 transition-colors">
+                                                <td class="px-6 py-4 text-sm text-gray-900">
+                                                    <div class="font-semibold">{{ $attendance->student->user->name ?? '-' }}</div>
+                                                    <div class="text-xs text-gray-500">ID: {{ $attendance->student->id }}</div>
+                                                </td>
+                                                <td class="px-6 py-4 text-sm text-gray-900">
+                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                                        Kelas {{ $attendance->student->classRoom->grade ?? '-' }}
+                                                    </span>
+                                                </td>
+                                                <td class="px-6 py-4 text-sm">
+                                                    @if($attendance->status === 'present')
+                                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                                            ✓ Hadir
+                                                        </span>
+                                                    @elseif($attendance->status === 'alpha')
+                                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                                            ✗ Tidak Hadir
+                                                        </span>
+                                                    @elseif($attendance->status === 'izin')
+                                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                                            ~ Izin
+                                                        </span>
+                                                    @elseif($attendance->status === 'sakit')
+                                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                                                            🏥 Sakit
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                <td class="px-6 py-4 text-sm text-gray-900">
+                                                    {{ $attendance->lesson->teacher->user->name ?? '-' }}
+                                                </td>
+                                                <td class="px-6 py-4 text-sm text-gray-600">
+                                                    {{ $attendance->created_at->format('d M Y H:i') }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                </div>
-            @empty
-                <div class="bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
-                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    <p class="text-gray-600 text-lg font-medium">Belum ada data absensi</p>
-                    <p class="text-gray-500 text-sm mt-1">Data absensi untuk bulan <strong>{{ $currentMonth }}</strong> akan ditampilkan di sini setelah guru menginput absensi siswa</p>
-                </div>
+                @endforeach
+            @endif
 
             <!-- Pagination -->
             @if($attendancesPaginated->hasPages())
