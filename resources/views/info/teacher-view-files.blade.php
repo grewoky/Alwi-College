@@ -17,20 +17,7 @@
             <!-- Filters -->
             <div class="mb-6 bg-white rounded-lg shadow p-6">
                 <form method="GET" action="{{ route('info.teacher.student-files') }}" class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <!-- Class Filter -->
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">🏫 Kelas</label>
-                            <select name="class_room_id" class="w-full border-2 border-gray-300 rounded-lg p-2 focus:border-green-600 focus:ring-2 focus:ring-green-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600">
-                                <option value="">-- Semua Kelas --</option>
-                                @foreach($classRooms as $class)
-                                    <option value="{{ $class->id }}" @selected(request('class_room_id') == $class->id)>
-                                        Kelas {{ $class->grade }} - {{ $class->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <!-- Subject Filter -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">📖 Pelajaran</label>

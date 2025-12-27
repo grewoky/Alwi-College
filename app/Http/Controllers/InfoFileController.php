@@ -342,17 +342,8 @@ class InfoFileController extends Controller
     {
         $this->assertTeacher();
 
-        $query = InfoFile::with(['student.user', 'student.classRoom', 'student.attendances'])
-            ->whereHas('student.classRoom', function ($q) {
-                $q->whereIn('grade', [10, 11, 12]);
-            })
+        $query = InfoFile::with(['student.user', 'student.classRoom'])
             ->latest();
-
-        if ($request->filled('class_room_id')) {
-            $query->whereHas('student', function ($q) use ($request) {
-                $q->where('class_room_id', $request->class_room_id);
-            });
-        }
 
         if ($request->filled('subject')) {
             $query->where('subject', 'like', '%' . $request->subject . '%');
@@ -363,12 +354,8 @@ class InfoFileController extends Controller
         }
 
         $files = $query->paginate(20)->withQueryString();
-        $classRooms = ClassRoom::whereIn('grade', [10, 11, 12])
-            ->orderBy('grade')
-            ->orderBy('name')
-            ->get();
 
-        return view('info.teacher-view-files', compact('files', 'classRooms'));
+        return view('info.teacher-view-files', compact('files'));
     }
 
     public function showFile(InfoFile $info)
