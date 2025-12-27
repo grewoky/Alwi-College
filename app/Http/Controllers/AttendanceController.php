@@ -325,42 +325,54 @@ class AttendanceController extends Controller
     // Mark attendance for a class (show form and process)
     public function markAttendance($classRoomId)
     {
-        $user = Auth::user();
-        abort_unless($user !== null, 403, 'Unauthorized.');
+        try {
+            $user = Auth::user();
+            abort_unless($user !== null, 403, 'Unauthorized.');
 
-        $teacher = Teacher::where('user_id', $user->id)->firstOrFail();
-        
-        // Get classroom and its students
-        $classRoom = ClassRoom::findOrFail($classRoomId);
-        $students = $classRoom->students()->with('user')->orderBy('id')->get();
-        
-        // Authorization: allow marking only if the teacher teaches in the same
-        // school + grade combination.
-        $teachesInSameSchoolGrade = Lesson::where('teacher_id', $teacher->id)
-            ->whereHas('classRoom', fn($q) => $q->where('school_id', $classRoom->school_id)->where('grade', $classRoom->grade))
-            ->exists();
+            $teacher = Teacher::where('user_id', $user->id)->firstOrFail();
+            
+            // Get classroom and its students
+            $classRoom = ClassRoom::with('school')->findOrFail($classRoomId);
+            $students = $classRoom->students()->with('user')->orderBy('id')->get();
+            
+            Log::info("markAttendance: classRoomId=$classRoomId, teacher_id=$teacher->id, students count=" . $students->count());
+            
+            // Authorization: allow marking only if the teacher teaches in the same
+            // school + grade combination.
+            $teachesInSameSchoolGrade = Lesson::where('teacher_id', $teacher->id)
+                ->whereHas('classRoom', fn($q) => $q->where('school_id', $classRoom->school_id)->where('grade', $classRoom->grade))
+                ->exists();
 
-        if (!$teachesInSameSchoolGrade) {
-            abort(403, 'Unauthorized to mark attendance for this class.');
+            Log::info("markAttendance: teachesInSameSchoolGrade=$teachesInSameSchoolGrade for school_id=" . $classRoom->school_id . ", grade=" . $classRoom->grade);
+
+            if (!$teachesInSameSchoolGrade) {
+                Log::warning("markAttendance: Unauthorized - teacher doesn't teach in this school/grade combination");
+                abort(403, 'Unauthorized to mark attendance for this class.');
+            }
+
+            // Check if attendance already marked for this class TODAY
+            $todayLesson = Lesson::where('teacher_id', $teacher->id)
+                ->where('class_room_id', $classRoomId)
+                ->whereDate('date', today())
+                ->first();
+            
+            if ($todayLesson) {
+                Log::info("markAttendance: Already marked today for this class");
+                return back()->with('warning', 'Absensi untuk kelas ini sudah dicatat hari ini. Anda hanya dapat menginput satu kali per hari.');
+            }
+
+            $lesson = null;
+            
+            Log::info("markAttendance: Returning form view for classRoom=" . $classRoom->name);
+            return view('attendance.mark', compact(
+                'classRoom',
+                'students',
+                'lesson'
+            ));
+        } catch (\Exception $e) {
+            Log::error('markAttendance error: ' . $e->getMessage() . ' - ' . $e->getTraceAsString());
+            return back()->with('error', 'Terjadi kesalahan saat membuka form absensi: ' . $e->getMessage());
         }
-
-        // Check if attendance already marked for this class TODAY
-        $todayLesson = Lesson::where('teacher_id', $teacher->id)
-            ->where('class_room_id', $classRoomId)
-            ->whereDate('date', today())
-            ->first();
-        
-        if ($todayLesson) {
-            return back()->with('warning', 'Absensi untuk kelas ini sudah dicatat hari ini. Anda hanya dapat menginput satu kali per hari.');
-        }
-
-        $lesson = null;
-        
-        return view('attendance.mark', compact(
-            'classRoom',
-            'students',
-            'lesson'
-        ));
     }
 
     // Store mark attendance

@@ -28,7 +28,9 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @forelse($classRooms as $classRoom)
                     <a href="{{ route('attendance.mark', $classRoom->id) }}" 
-                       class="block p-6 rounded-lg border-2 border-gray-200 hover:border-green-500 hover:shadow-lg transition group bg-white">
+                       class="block p-6 rounded-lg border-2 border-gray-200 hover:border-green-500 hover:shadow-lg transition group bg-white"
+                       data-classroom-id="{{ $classRoom->id }}"
+                       data-classroom-name="{{ $classRoom->name }}">
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex-1">
                                 <h3 class="text-2xl font-bold text-gray-900 group-hover:text-green-600 transition">
