@@ -122,7 +122,7 @@ class AttendanceController extends Controller
         ));
     }
 
-    // Teacher view: list classes
+    // Teacher view: list attendance summary (like student view)
     public function teacherView()
     {
         $user = Auth::user();
@@ -130,29 +130,57 @@ class AttendanceController extends Controller
 
         $teacher = Teacher::where('user_id', $user->id)->firstOrFail();
         
-        // Get classes taught by this teacher
+        // Get all attendance records where this teacher marked the attendance
+        $attendances = Attendance::whereHas('lesson', fn($q) => $q->where('teacher_id', $teacher->id))
+            ->with(['lesson' => ['classRoom', 'subject'], 'student.user', 'student.classRoom'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+        
+        // Calculate statistics
+        $totalSessions = $attendances->total();
+        $hadir = $attendances->where('status', 'present')->count();
+        $tidakHadir = $attendances->where('status', 'alpha')->count();
+        $izin = $attendances->where('status', 'izin')->count();
+        $sakit = $attendances->where('status', 'sakit')->count();
+
+        return view('attendance.teacher-view', compact(
+            'teacher',
+            'attendances',
+            'totalSessions',
+            'hadir',
+            'tidakHadir',
+            'izin',
+            'sakit'
+        ));
+    }
+
+    // Show classes for marking attendance (all grades 10, 11, 12)
+    public function markAttendanceSelect()
+    {
+        $user = Auth::user();
+        abort_unless($user !== null, 403, 'Unauthorized.');
+
+        $teacher = Teacher::where('user_id', $user->id)->firstOrFail();
+
+        // Get all unique classrooms taught by this teacher across all grades
         $lessons = Lesson::where('teacher_id', $teacher->id)
             ->with('classRoom')
             ->get();
         $classRooms = $lessons->pluck('classRoom')->unique('id')->filter()->values();
 
-        // Build a list of grades the teacher teaches (10,11,12) — do not show individual class names at top-level
-        $grades = $classRooms->pluck('grade')->unique()->intersect([10,11,12])->sort()->values();
+        // Ensure only grades 10, 11, 12 are shown
+        $classRooms = $classRooms->filter(fn($c) => in_array($c->grade, [10, 11, 12]));
 
-        // Also prepare mapping grade => classrooms (for drill-down)
+        // Group by grade
         $classesByGrade = [];
-        foreach ($grades as $grade) {
+        foreach ([10, 11, 12] as $grade) {
             $classesByGrade[$grade] = $classRooms->filter(fn($c) => $c->grade == $grade)->values();
         }
 
-        return view('attendance.teacher-view', compact(
-            'teacher',
-            'grades',
-            'classesByGrade'
-        ));
+        return view('attendance.teacher-select-class', compact('teacher', 'classesByGrade'));
     }
 
-    // Show classes for a specific grade for the current teacher (drill-down)
+    // Show grades for a specific teacher (drill-down - kept for compatibility)
     public function gradeView(Request $r, $grade)
     {
         $user = Auth::user();
@@ -170,31 +198,40 @@ class AttendanceController extends Controller
         return view('attendance.teacher-grade', compact('teacher','grade','classRooms'));
     }
 
-    // Admin view: all attendance
-    public function adminView()
+    // Admin view: all attendance data (current month only, read-only)
+    public function adminView(Request $request)
     {
+        // Get start and end of current month
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+        
+        // Get attendance data for current month only
+        $attendances = Attendance::whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->with(['student.user', 'student.classRoom', 'lesson.teacher'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(50);
+        
         // Get classrooms with school and students
         $classRooms = ClassRoom::with(['school', 'students.user'])->orderBy('school_id')->orderBy('grade')->get();
         
-        // Group by School -> then by Grade (Kelas 10, 11, 12)
-        $groupedBySchool = $classRooms->groupBy(function($classroom) {
-            return $classroom->school->name;
-        });
+        // Calculate monthly statistics
+        $stats = [
+            'totalRecords' => $attendances->total(),
+            'hadir' => Attendance::whereBetween('created_at', [$startOfMonth, $endOfMonth])->where('status', 'present')->count(),
+            'tidakHadir' => Attendance::whereBetween('created_at', [$startOfMonth, $endOfMonth])->where('status', 'alpha')->count(),
+            'izin' => Attendance::whereBetween('created_at', [$startOfMonth, $endOfMonth])->where('status', 'izin')->count(),
+            'sakit' => Attendance::whereBetween('created_at', [$startOfMonth, $endOfMonth])->where('status', 'sakit')->count(),
+        ];
         
-        $groupedClasses = [];
-        foreach ($groupedBySchool as $schoolName => $classrooms) {
-            $groupedClasses[$schoolName] = $classrooms->groupBy('grade')->sortKeys();
-        }
-        
-        // Get attendance summary
-        $attendanceSummary = Attendance::selectRaw('student_id, status, COUNT(*) as count')
-            ->groupBy('student_id', 'status')
-            ->get();
+        $currentMonth = $startOfMonth->format('F Y');
         
         return view('attendance.admin-view', compact(
             'classRooms',
-            'groupedClasses',
-            'attendanceSummary'
+            'attendances',
+            'stats',
+            'currentMonth',
+            'startOfMonth',
+            'endOfMonth'
         ));
     }
 
@@ -214,7 +251,7 @@ class AttendanceController extends Controller
         ]);
     }
 
-    // Mark attendance for a class (show form dan process)
+    // Mark attendance for a class (show form and process)
     public function markAttendance($classRoomId)
     {
         $user = Auth::user();
@@ -227,8 +264,7 @@ class AttendanceController extends Controller
         $students = $classRoom->students()->with('user')->orderBy('id')->get();
         
         // Authorization: allow marking only if the teacher teaches in the same
-        // school + grade combination. This prevents teachers from marking
-        // attendance for unrelated schools/grades or for random class variants.
+        // school + grade combination.
         $teachesInSameSchoolGrade = Lesson::where('teacher_id', $teacher->id)
             ->whereHas('classRoom', fn($q) => $q->where('school_id', $classRoom->school_id)->where('grade', $classRoom->grade))
             ->exists();
@@ -237,11 +273,17 @@ class AttendanceController extends Controller
             abort(403, 'Unauthorized to mark attendance for this class.');
         }
 
-        // Get today's lesson (if exists)
-        $lesson = Lesson::where('teacher_id', $teacher->id)
+        // Check if attendance already marked for this class TODAY
+        $todayLesson = Lesson::where('teacher_id', $teacher->id)
             ->where('class_room_id', $classRoomId)
             ->whereDate('date', today())
             ->first();
+        
+        if ($todayLesson) {
+            return back()->with('warning', 'Absensi untuk kelas ini sudah dicatat hari ini. Anda hanya dapat menginput satu kali per hari.');
+        }
+
+        $lesson = null;
         
         return view('attendance.mark', compact(
             'classRoom',

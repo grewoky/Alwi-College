@@ -109,15 +109,15 @@ Route::middleware(['auth','role:teacher'])->prefix('teacher')->group(function ()
     // TEACHER JADWAL (Lihat jadwal mengajar, absensi)
     Route::get('/jadwal', [LessonController::class,'teacherView'])->name('lessons.teacher');
     Route::get('/attendance', [AttendanceController::class,'teacherView'])->name('attendance.teacher');
+    Route::get('/mark-attendance', [AttendanceController::class,'markAttendanceSelect'])->name('attendance.mark.select');
     Route::get('/mark-attendance/{classRoom}', [AttendanceController::class,'markAttendance'])->name('attendance.mark');
     Route::post('/mark-attendance/{classRoom}', [AttendanceController::class,'storeMarkAttendance'])->name('attendance.store.mark');
+    Route::get('/attendance/grade/{grade}', [AttendanceController::class,'gradeView'])->name('attendance.grade');
     
     // TEACHER INFO (Lihat file yang diupload siswa)
     Route::get('/dokumen', [InfoFileController::class,'teacherViewStudentFiles'])->name('info.teacher.student-files');
     // Teacher download single file (allow teacher to download without hitting admin routes)
     Route::get('/dokumen/{info}/download', [InfoFileController::class,'download'])->name('info.teacher.download');
-    // Teacher attendance: view classes by grade
-    Route::get('/attendance/grade/{grade}', [\App\Http\Controllers\AttendanceController::class,'gradeView'])->name('attendance.grade');
 });
 
 // ============ STUDENT AREA ============
