@@ -364,9 +364,13 @@ class LessonController extends Controller
         $user = Auth::user();
         $teacher = Teacher::where('user_id', $user->id)->firstOrFail();
         
+        // Filter: hanya tampilkan lessons dari 2 hari terakhir (exclude lessons > 2 hari lalu)
+        $twoHaysAgoDate = now()->subDays(2)->format('Y-m-d');
+        
         // Get lessons hanya untuk guru yang login (filter grade 10, 11, 12)
         $q = Lesson::with(['subject', 'classRoom.school'])
             ->where('teacher_id', $teacher->id)
+            ->where('date', '>=', $twoHaysAgoDate)
             ->orderBy('date', 'desc');
         
         // Filter by grade if provided
