@@ -13,6 +13,7 @@ use App\Models\School;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
+use App\Models\DeletedLessonLog;
 
 class LessonController extends Controller
 {
@@ -298,20 +299,26 @@ class LessonController extends Controller
     public function deleteLesson(Lesson $lesson)
     {
         try {
-            $lessonInfo = [
-                'date' => $lesson->date,
-                'class' => $lesson->classRoom->name ?? 'Unknown',
-                'teacher' => $lesson->teacher->user->name ?? 'Unknown',
-            ];
-            
+            // Log ke deleted_lessons_log sebelum dihapus
+            DeletedLessonLog::create([
+                'lesson_date' => $lesson->date,
+                'classroom_id' => $lesson->class_room_id,
+                'teacher_id' => $lesson->teacher_id,
+                'subject_id' => $lesson->subject_id,
+                'start_time' => $lesson->start_time,
+                'end_time' => $lesson->end_time,
+                'deleted_by' => Auth::id(),
+                'deletion_reason' => 'Manual deletion by admin',
+            ]);
+
+            // Hapus lesson
             $lesson->delete();
-            
-           
-            
-            return back()->with('ok', 'Jadwal berhasil dihapus');
+
+            // Return dengan success message dan redirect ke jadwal
+            return redirect()->route('lessons.admin')->with('ok', '✅ Jadwal telah dihapus');
         } catch (\Exception $e) {
-           
-            return back()->with('error', 'Gagal menghapus jadwal');
+            Log::error('Delete lesson error: ' . $e->getMessage());
+            return back()->with('error', '❌ Gagal menghapus jadwal');
         }
     }
 

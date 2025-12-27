@@ -163,7 +163,11 @@ class AttendanceController extends Controller
         $teacher = Teacher::where('user_id', $user->id)->firstOrFail();
 
         // Get all unique classrooms taught by this teacher with school info
+        // Filter: only lessons dari 2 hari terakhir (exclude lessons yang sudah lewat > 2 hari)
+        $twoHoursAgo = now()->subDays(2);
+        
         $lessons = Lesson::where('teacher_id', $teacher->id)
+            ->where('date', '>=', $twoHoursAgo->format('Y-m-d'))
             ->with(['classRoom.school'])
             ->get();
         $classRooms = $lessons->pluck('classRoom')->unique('id')->filter();
@@ -200,6 +204,9 @@ class AttendanceController extends Controller
 
         $teacher = Teacher::where('user_id', $user->id)->firstOrFail();
 
+        // Filter: only lessons dari 2 hari terakhir (exclude lessons yang sudah lewat > 2 hari)
+        $twoHoursAgo = now()->subDays(2);
+
         // Get classrooms for this school and grade taught by this teacher
         $classRooms = ClassRoom::with('school')
             ->whereHas('school', function($q) use ($schoolName) {
@@ -207,9 +214,12 @@ class AttendanceController extends Controller
             })
             ->where('grade', (int)$grade)
             ->get()
-            ->filter(function($classRoom) use ($teacher) {
-                // Filter only classrooms where teacher teaches
-                return $classRoom->lessons()->where('teacher_id', $teacher->id)->exists();
+            ->filter(function($classRoom) use ($teacher, $twoHoursAgo) {
+                // Filter only classrooms where teacher teaches AND have lessons within last 2 days
+                return $classRoom->lessons()
+                    ->where('teacher_id', $teacher->id)
+                    ->where('date', '>=', $twoHoursAgo->format('Y-m-d'))
+                    ->exists();
             })
             ->sortBy('name')
             ->values();
