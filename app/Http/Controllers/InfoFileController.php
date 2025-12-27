@@ -358,6 +358,10 @@ class InfoFileController extends Controller
             $query->where('subject', 'like', '%' . $request->subject . '%');
         }
 
+        if ($request->filled('material')) {
+            $query->where('material', 'like', '%' . $request->material . '%');
+        }
+
         $files = $query->paginate(20)->withQueryString();
         $classRooms = ClassRoom::whereIn('grade', [10, 11, 12])
             ->orderBy('grade')
