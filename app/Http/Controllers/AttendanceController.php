@@ -206,30 +206,30 @@ class AttendanceController extends Controller
 
             $teacher = Teacher::where('user_id', $user->id)->firstOrFail();
 
-            // Filter: only lessons dari 2 hari terakhir (exclude lessons yang sudah lewat > 2 hari)
-            $twoHaysAgoDate = now()->subDays(2)->format('Y-m-d');
-
             // Get classrooms for this school and grade taught by this teacher using pure query builder
+            // NOTE: Removed date filter temporarily to test functionality
             $classRooms = ClassRoom::with('school')
                 ->whereHas('school', function($q) use ($schoolName) {
                     $q->where('name', $schoolName);
                 })
                 ->where('grade', (int)$grade)
-                ->whereHas('lessons', function($q) use ($teacher, $twoHaysAgoDate) {
-                    $q->where('teacher_id', $teacher->id)
-                      ->where('date', '>=', $twoHaysAgoDate);
+                ->whereHas('lessons', function($q) use ($teacher) {
+                    $q->where('teacher_id', $teacher->id);
                 })
                 ->orderBy('name')
                 ->get();
 
+            Log::info("selectClassroomVariant: school=$schoolName, grade=$grade, count=" . $classRooms->count());
+
             if ($classRooms->isEmpty()) {
+                Log::warning("No classrooms found for school=$schoolName, grade=$grade, teacher_id=$teacher->id");
                 return back()->with('error', 'Tidak ada kelas tersedia untuk pilihan ini');
             }
 
             return view('attendance.select-classroom-variant', compact('teacher', 'schoolName', 'grade', 'classRooms'));
         } catch (\Exception $e) {
-            Log::error('selectClassroomVariant error: ' . $e->getMessage());
-            return back()->with('error', 'Terjadi kesalahan saat memuat kelas');
+            Log::error('selectClassroomVariant error: ' . $e->getMessage() . ' - ' . $e->getTraceAsString());
+            return back()->with('error', 'Terjadi kesalahan saat memuat kelas: ' . $e->getMessage());
         }
     }
 
@@ -254,47 +254,56 @@ class AttendanceController extends Controller
     // Admin view: all attendance data (current month only, read-only)
     public function adminView(Request $request)
     {
-        // Get start and end of current month
-        $startOfMonth = Carbon::now()->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
-        
-        // Get attendance data for current month only with proper relationships
-        $attendances = Attendance::whereBetween('created_at', [$startOfMonth, $endOfMonth])
-            ->with([
-                'student' => fn($q) => $q->with(['user', 'classRoom' => fn($q2) => $q2->with('school')]),
-                'lesson' => fn($q) => $q->with(['teacher' => fn($q2) => $q2->with('user')])
-            ])
-            ->orderBy('created_at', 'desc')
-            ->get();
-        
-        // Paginate after relationships are loaded
-        $attendancesPaginated = Attendance::whereBetween('created_at', [$startOfMonth, $endOfMonth])
-            ->with([
-                'student' => fn($q) => $q->with(['user', 'classRoom' => fn($q2) => $q2->with('school')]),
-                'lesson' => fn($q) => $q->with(['teacher' => fn($q2) => $q2->with('user')])
-            ])
-            ->orderBy('created_at', 'desc')
-            ->paginate(50);
-        
-        // Calculate monthly statistics
-        $stats = [
-            'totalRecords' => $attendancesPaginated->total(),
-            'hadir' => Attendance::whereBetween('created_at', [$startOfMonth, $endOfMonth])->where('status', 'present')->count(),
-            'tidakHadir' => Attendance::whereBetween('created_at', [$startOfMonth, $endOfMonth])->where('status', 'alpha')->count(),
-            'izin' => Attendance::whereBetween('created_at', [$startOfMonth, $endOfMonth])->where('status', 'izin')->count(),
-            'sakit' => Attendance::whereBetween('created_at', [$startOfMonth, $endOfMonth])->where('status', 'sakit')->count(),
-        ];
-        
-        $currentMonth = $startOfMonth->format('F Y');
-        
-        return view('attendance.admin-view', compact(
-            'attendances',
-            'attendancesPaginated',
-            'stats',
-            'currentMonth',
-            'startOfMonth',
-            'endOfMonth'
-        ));
+        try {
+            // Get start and end of current month
+            $startOfMonth = Carbon::now()->startOfMonth();
+            $endOfMonth = Carbon::now()->endOfMonth();
+            
+            // Get attendance data for current month only with proper relationships
+            $attendances = Attendance::whereBetween('created_at', [$startOfMonth, $endOfMonth])
+                ->with([
+                    'student' => fn($q) => $q->with(['user', 'classRoom' => fn($q2) => $q2->with('school')]),
+                    'lesson' => fn($q) => $q->with(['teacher' => fn($q2) => $q2->with('user')])
+                ])
+                ->orderBy('created_at', 'desc')
+                ->get();
+            
+            Log::info("AdminView: Total attendance records: " . $attendances->count());
+            
+            // Get paginated version for pagination links
+            $attendancesPaginated = Attendance::whereBetween('created_at', [$startOfMonth, $endOfMonth])
+                ->with([
+                    'student' => fn($q) => $q->with(['user', 'classRoom' => fn($q2) => $q2->with('school')]),
+                    'lesson' => fn($q) => $q->with(['teacher' => fn($q2) => $q2->with('user')])
+                ])
+                ->orderBy('created_at', 'desc')
+                ->paginate(50);
+            
+            // Calculate monthly statistics
+            $stats = [
+                'totalRecords' => $attendances->count(),
+                'hadir' => $attendances->where('status', 'present')->count(),
+                'tidakHadir' => $attendances->where('status', 'alpha')->count(),
+                'izin' => $attendances->where('status', 'izin')->count(),
+                'sakit' => $attendances->where('status', 'sakit')->count(),
+            ];
+            
+            $currentMonth = $startOfMonth->format('F Y');
+            
+            Log::info("AdminView Stats: " . json_encode($stats));
+            
+            return view('attendance.admin-view', compact(
+                'attendances',
+                'attendancesPaginated',
+                'stats',
+                'currentMonth',
+                'startOfMonth',
+                'endOfMonth'
+            ));
+        } catch (\Exception $e) {
+            Log::error('AdminView error: ' . $e->getMessage() . ' - ' . $e->getTraceAsString());
+            return back()->with('error', 'Terjadi kesalahan saat memuat data absensi: ' . $e->getMessage());
+        }
     }
 
     // Get attendance data for a specific class (API endpoint)
