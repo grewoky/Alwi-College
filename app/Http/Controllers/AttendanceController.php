@@ -154,7 +154,7 @@ class AttendanceController extends Controller
         ));
     }
 
-    // Show classes for marking attendance (all grades 10, 11, 12)
+    // Show classes for marking attendance (all grades 10, 11, 12) grouped by school
     public function markAttendanceSelect()
     {
         $user = Auth::user();
@@ -162,22 +162,34 @@ class AttendanceController extends Controller
 
         $teacher = Teacher::where('user_id', $user->id)->firstOrFail();
 
-        // Get all unique classrooms taught by this teacher across all grades
+        // Get all unique classrooms taught by this teacher with school info
         $lessons = Lesson::where('teacher_id', $teacher->id)
-            ->with('classRoom')
+            ->with(['classRoom.school'])
             ->get();
-        $classRooms = $lessons->pluck('classRoom')->unique('id')->filter()->values();
+        $classRooms = $lessons->pluck('classRoom')->unique('id')->filter();
 
         // Ensure only grades 10, 11, 12 are shown
         $classRooms = $classRooms->filter(fn($c) => in_array($c->grade, [10, 11, 12]));
 
-        // Group by grade
-        $classesByGrade = [];
-        foreach ([10, 11, 12] as $grade) {
-            $classesByGrade[$grade] = $classRooms->filter(fn($c) => $c->grade == $grade)->values();
+        // Group by School -> Grade
+        $classesBySchoolAndGrade = [];
+        foreach ($classRooms as $classRoom) {
+            $schoolName = $classRoom->school->name ?? 'Sekolah Tidak Diketahui';
+            $grade = $classRoom->grade;
+            
+            if (!isset($classesBySchoolAndGrade[$schoolName])) {
+                $classesBySchoolAndGrade[$schoolName] = [];
+            }
+            if (!isset($classesBySchoolAndGrade[$schoolName][$grade])) {
+                $classesBySchoolAndGrade[$schoolName][$grade] = [];
+            }
+            $classesBySchoolAndGrade[$schoolName][$grade][] = $classRoom;
         }
+        
+        // Sort schools by name (Bangau, IGS, Kumbang, Negeri, Xavega)
+        ksort($classesBySchoolAndGrade);
 
-        return view('attendance.teacher-select-class', compact('teacher', 'classesByGrade'));
+        return view('attendance.teacher-select-class', compact('teacher', 'classesBySchoolAndGrade'));
     }
 
     // Show grades for a specific teacher (drill-down - kept for compatibility)
