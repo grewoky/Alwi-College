@@ -1,7 +1,7 @@
 <section class="relative bg-white pt-4 sm:pt-5 md:pt-6">
-    <div id="poster-carousel" class="relative w-full" role="region" aria-label="Carousel Poster">
+    <div id="poster-carousel" class="relative w-full overflow-hidden rounded-2xl" role="region" aria-label="Carousel Poster">
       <div class="carousel-track relative w-full h-48 sm:h-56 md:h-[420px] lg:h-[520px]">
-        <div class="carousel-inner flex w-full h-full will-change-transform rounded-2xl shadow-lg overflow-hidden">
+        <div class="carousel-inner flex w-full h-full will-change-transform rounded-2xl shadow-lg">
         @php
           // If the controller hasn't provided $posters, build it from files in public/images/posters
           if (!isset($posters) || empty($posters)) {

@@ -26,11 +26,17 @@ class AttendanceTracker extends Model
     }
 
     /**
-     * Check if counter sudah mencapai 30 dan perlu di-reset
+     * Check if sudah memasuki bulan baru dan perlu di-reset (reset tanggal 1 tiap bulan)
      */
-    public function shouldReset(): bool
+    public function shouldResetMonthly(): bool
     {
-        return $this->attendance_count >= 30;
+        if (!$this->period_start_date) {
+            return false;
+        }
+        
+        // Reset jika period_start_date berada di bulan lain
+        return $this->period_start_date->month !== now()->month || 
+               $this->period_start_date->year !== now()->year;
     }
 
     /**
@@ -38,45 +44,37 @@ class AttendanceTracker extends Model
      */
     public function resetCounter()
     {
-        $monthKey = now()->format('Y-m');
+        $monthKey = $this->period_start_date?->format('Y-m') ?? now()->subMonth()->format('Y-m');
         $monthlyRecords = $this->monthly_records ?? [];
         $monthlyRecords[$monthKey] = $this->attendance_count;
 
         $this->update([
             'attendance_count' => 0,
-            'period_start_date' => now(),
             'last_attendance_date' => null,
+            'period_start_date' => now()->startOfMonth(), // Reset ke tanggal 1 bulan ini
             'monthly_records' => $monthlyRecords,
         ]);
     }
 
     /**
-     * Increment counter
+     * Increment counter (no auto-reset here, reset handled in service)
      */
     public function incrementCounter()
     {
         $this->update([
             'attendance_count' => $this->attendance_count + 1,
             'last_attendance_date' => now(),
-            'period_start_date' => $this->period_start_date ?? now(),
+            'period_start_date' => $this->period_start_date ?? now()->startOfMonth(),
         ]);
-
-        // Cek apakah sudah mencapai 30, jika ya auto-reset
-        if ($this->shouldReset()) {
-            $this->resetCounter();
-        }
     }
 
     /**
-     * Get rolling 30 days period info
+     * Get days remaining dalam bulan ini
      */
-    public function getPeriodDaysRemaining()
+    public function getDaysRemainingInMonth()
     {
-        if (!$this->period_start_date) {
-            return 30;
-        }
-        
-        $daysRemaining = 30 - $this->attendance_count;
-        return max(0, $daysRemaining);
+        $daysInMonth = now()->daysInMonth;
+        $dayOfMonth = now()->day;
+        return $daysInMonth - $dayOfMonth + 1; // +1 untuk include hari ini
     }
 }

@@ -48,34 +48,23 @@ class AttendanceService
             ['student_id' => $studentId],
             [
                 'attendance_count' => 0,
-                'period_start_date' => now(),
+                'period_start_date' => now()->startOfMonth(),
                 'monthly_records' => [],
             ]
         );
 
-        // Check apakah perlu reset berdasarkan waktu (30 hari rolling)
-        if ($tracker->period_start_date && now()->diffInDays($tracker->period_start_date) >= 30) {
-            $this->resetTrackerDueToTime($tracker);
+        // Check apakah perlu reset karena bulan baru (tanggal 1)
+        if ($tracker->shouldResetMonthly()) {
+            Log::info("Auto-reset attendance tracker for student {$studentId} - new month started");
+            $tracker->resetCounter();
+            // Refresh tracker after reset
+            $tracker->refresh();
         }
 
         // Increment counter
         $tracker->incrementCounter();
 
-        // Auto-reset jika sudah 30 hari
-        if ($tracker->shouldReset()) {
-            Log::info("Auto-reset attendance tracker for student {$studentId} - reached 30 days");
-        }
-
         return $tracker;
-    }
-
-    /**
-     * Reset tracker karena sudah 30 hari dari period_start_date
-     */
-    public function resetTrackerDueToTime(AttendanceTracker $tracker)
-    {
-        Log::info("Resetting tracker for student {$tracker->student_id} due to time-based 30 day period");
-        $tracker->resetCounter();
     }
 
     /**
@@ -239,7 +228,7 @@ class AttendanceService
             'monthly_stats' => $monthlyStats,
             'counter_30_days' => $tracker?->attendance_count ?? 0,
             'period_start_date' => $tracker?->period_start_date ?? null,
-            'days_remaining' => $tracker?->getPeriodDaysRemaining() ?? 30,
+            'days_remaining' => $tracker?->getDaysRemainingInMonth() ?? now()->daysInMonth,
             'historical_records' => $tracker?->monthly_records ?? [],
         ];
     }

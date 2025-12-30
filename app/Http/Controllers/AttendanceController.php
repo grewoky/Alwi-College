@@ -485,6 +485,7 @@ class AttendanceController extends Controller
 
             // Generate CSV
             $csvConfig = $this->attendanceService->exportToCSV($attendances);
+            $filename = $csvConfig['filename'];
 
             // Create response with CSV content
             $response = response()->streamDownload(function () use ($attendances) {
@@ -526,9 +527,12 @@ class AttendanceController extends Controller
                 }
 
                 fclose($output);
-            }, $csvConfig['filename']);
+            }, $filename);
 
-            return $response->header('Content-Type', $csvConfig['content_type']);
+            return $response
+                ->header('Content-Type', 'text/csv; charset=utf-8')
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+
         } catch (\Exception $e) {
             Log::error('Export attendance CSV error: ' . $e->getMessage());
             return back()->with('error', 'Gagal mengexport data: ' . $e->getMessage());
