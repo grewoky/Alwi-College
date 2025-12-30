@@ -483,11 +483,24 @@ class AttendanceController extends Controller
                 return back()->with('warning', 'Tidak ada data absensi untuk di-export.');
             }
 
+            Log::info('CSV Export - About to download attendance records', [
+                'count' => $attendances->count(),
+                'month' => $filters['month'],
+                'year' => $filters['year'],
+            ]);
+
             // ✅ Use service method untuk download CSV - centralized logic
-            return $this->attendanceService->downloadAttendanceCSV($attendances);
+            $response = $this->attendanceService->downloadAttendanceCSV($attendances);
+            
+            Log::info('CSV Export - Response generated successfully');
+            
+            return $response;
 
         } catch (\Exception $e) {
-            Log::error('Export attendance CSV error: ' . $e->getMessage());
+            Log::error('Export attendance CSV error: ' . $e->getMessage(), [
+                'exception' => $e,
+                'trace' => $e->getTraceAsString(),
+            ]);
             return back()->with('error', 'Gagal mengexport data: ' . $e->getMessage());
         }
     }

@@ -199,8 +199,8 @@ class AttendanceService
 
     /**
      * Download attendance CSV file langsung ke browser
-     * Menggunakan streaming callback - tidak perlu simpan file
-     * Optimal untuk Vercel serverless environment
+     * Generate CSV content dan return sebagai response dengan proper headers
+     * Paling reliable untuk Vercel serverless environment
      */
     public function downloadAttendanceCSV($attendances = null)
     {
@@ -210,50 +210,70 @@ class AttendanceService
 
         $filename = 'attendance_' . now()->format('Y-m-d_His') . '.csv';
 
-        // Stream CSV langsung ke output tanpa simpan file
-        return response()->streamDownload(function () use ($attendances) {
-            $output = fopen('php://output', 'w');
+        // Generate CSV content in memory
+        $csvContent = '';
+        
+        // UTF-8 BOM untuk Excel
+        $csvContent .= chr(0xEF) . chr(0xBB) . chr(0xBF);
 
-            // UTF-8 BOM untuk Excel
-            fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
+        // Headers
+        $headers = [
+            'Tanggal',
+            'Nama Siswa',
+            'NIS',
+            'Kelas',
+            'Sekolah',
+            'Status Absensi',
+            'Guru Penginput',
+            'Mata Pelajaran',
+            'Kehadiran (Hari)',
+            'Tanggal Mulai Period',
+        ];
+        $csvContent .= $this->arrayToCSVLine($headers, ';');
 
-            // Headers
-            $headers = [
-                'Tanggal',
-                'Nama Siswa',
-                'NIS',
-                'Kelas',
-                'Sekolah',
-                'Status Absensi',
-                'Guru Penginput',
-                'Mata Pelajaran',
-                'Kehadiran (Hari)',
-                'Tanggal Mulai Period',
+        // Data rows
+        foreach ($attendances as $attendance) {
+            $row = [
+                $attendance->created_at->format('d-m-Y H:i:s'),
+                optional($attendance->student)->user->name ?? '-',
+                optional($attendance->student)->nis ?? '-',
+                optional(optional($attendance->student)->classRoom)->name ?? '-',
+                optional(optional(optional($attendance->student)->classRoom)->school)->name ?? '-',
+                $this->getStatusLabel($attendance->status),
+                optional($attendance->marker)->name ?? '-',
+                optional($attendance->lesson)->subject->name ?? '-',
+                optional(optional($attendance->student)->attendanceTracker)->attendance_count ?? 0,
+                optional(optional($attendance->student)->attendanceTracker)->period_start_date?->format('d-m-Y') ?? '-',
             ];
-            fputcsv($output, $headers, ';');
+            $csvContent .= $this->arrayToCSVLine($row, ';');
+        }
 
-            // Data rows
-            foreach ($attendances as $attendance) {
-                $row = [
-                    $attendance->created_at->format('d-m-Y H:i:s'),
-                    optional($attendance->student)->user->name ?? '-',
-                    optional($attendance->student)->nis ?? '-',
-                    optional(optional($attendance->student)->classRoom)->name ?? '-',
-                    optional(optional(optional($attendance->student)->classRoom)->school)->name ?? '-',
-                    $this->getStatusLabel($attendance->status),
-                    optional($attendance->marker)->name ?? '-',
-                    optional($attendance->lesson)->subject->name ?? '-',
-                    optional(optional($attendance->student)->attendanceTracker)->attendance_count ?? 0,
-                    optional(optional($attendance->student)->attendanceTracker)->period_start_date?->format('d-m-Y') ?? '-',
-                ];
-                fputcsv($output, $row, ';');
+        // Return response dengan proper headers
+        return response($csvContent)
+            ->header('Content-Type', 'text/csv; charset=utf-8')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
+    }
+
+    /**
+     * Helper: Convert array to CSV line with proper escaping
+     */
+    private function arrayToCSVLine($array, $delimiter = ',')
+    {
+        $output = '';
+        foreach ($array as $item) {
+            // Escape quotes and wrap in quotes if contains delimiter or quotes
+            $item = str_replace('"', '""', $item);
+            if (strpos($item, $delimiter) !== false || strpos($item, '"') !== false || strpos($item, "\n") !== false) {
+                $item = '"' . $item . '"';
             }
-
-            fclose($output);
-        }, $filename, [
-            'Content-Type' => 'text/csv; charset=utf-8',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ]);
+            $output .= $item . $delimiter;
+        }
+        // Remove last delimiter and add newline
+        $output = rtrim($output, $delimiter) . "\n";
+        return $output;
     }
 
     /**
