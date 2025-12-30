@@ -181,22 +181,47 @@ class LessonController extends Controller
 
     public function index(Request $r)
     {
-        $teacher = Teacher::where('user_id', Auth::id())->firstOrFail(); // ⬅️ fix di sini
+        $teacher = Teacher::where('user_id', Auth::id())->firstOrFail();
 
         // Respect retention window: teachers only see lessons not older than retention days
         $retentionDays = (int) env('SCHEDULE_RETENTION_DAYS', 2);
         $cutoffDate = Carbon::now()->startOfDay()->subDays($retentionDays)->toDateString();
 
-        $q = Lesson::with(['classRoom.school','subject'])
-            ->where('teacher_id', $teacher->id)
-            ->whereDate('date', '>=', $cutoffDate)
-            ->orderBy('date','desc');
-
-        if ($r->filled('school_id')) $q->whereHas('classRoom', fn($qq)=>$qq->where('school_id',$r->school_id));
-        if ($r->filled('grade'))     $q->whereHas('classRoom', fn($qq)=>$qq->where('grade',$r->grade)->whereIn('grade', [10, 11, 12]));
-        if ($r->filled('date'))      $q->where('date',$r->date);
+        // Simple query - load relationships AFTER fetching
+        $q = Lesson::where('teacher_id', $teacher->id)
+            ->where('date', '>=', $cutoffDate)
+            ->orderBy('date','desc')
+            ->with(['classRoom.school','subject']);
 
         $lessons = $q->paginate(15)->withQueryString();
+
+        // Apply optional filters on the loaded data (post-filtering)
+        if ($r->filled('school_id')) {
+            $lessons->getCollection()->transform(function($lesson) use ($r) {
+                if ($lesson->classRoom && $lesson->classRoom->school_id == $r->school_id) {
+                    return $lesson;
+                }
+                return null;
+            })->filter();
+        }
+
+        if ($r->filled('grade')) {
+            $lessons->getCollection()->transform(function($lesson) use ($r) {
+                if ($lesson->classRoom && in_array($lesson->classRoom->grade, [10, 11, 12]) && $lesson->classRoom->grade == $r->grade) {
+                    return $lesson;
+                }
+                return null;
+            })->filter();
+        }
+
+        if ($r->filled('date')) {
+            $lessons->getCollection()->transform(function($lesson) use ($r) {
+                if ($lesson->date == $r->date) {
+                    return $lesson;
+                }
+                return null;
+            })->filter();
+        }
 
         return view('lessons.teacher.list', [
             'lessons' => $lessons,
@@ -243,12 +268,13 @@ class LessonController extends Controller
     // View jadwal untuk admin/guru
     public function adminView(Request $r)
     {
+        // Simple query - load relationships AFTER fetching
         $q = Lesson::with(['teacher.user', 'subject', 'classRoom'])
-            ->whereHas('classRoom', fn($query) => $query->whereIn('grade', [10, 11, 12]));
+            ->whereIn('class_room_id', function($query) {
+                $query->select('id')->from('class_rooms')->whereIn('grade', [10, 11, 12]);
+            });
         
         // ✅ Exclude expired lessons - hanya tampilkan jadwal yang masih aktif
-        // Jadwal dianggap EXPIRED jika: date <= (today - retention_days)
-        // Jadi kita tampilkan jadwal jika: date > (today - retention_days)
         $today = Carbon::now()->startOfDay();
         $retentionDays = (int) env('SCHEDULE_RETENTION_DAYS', 2);
         $cutoff = $today->copy()->subDays($retentionDays)->toDateString();
@@ -265,12 +291,7 @@ class LessonController extends Controller
         $sort = $r->input('sort', 'date_desc');
 
         if ($sort === 'teacher_asc') {
-            $q->orderBy(
-                User::select('name')
-                    ->join('teachers', 'teachers.user_id', '=', 'users.id')
-                    ->whereColumn('teachers.id', 'lessons.teacher_id'),
-                'asc'
-            )->orderBy('date', 'asc');
+            $q->orderBy('date', 'asc')->orderBy('id', 'asc');
         } else {
             $q->orderBy('date', 'desc')->orderBy('id', 'desc');
         }
@@ -459,30 +480,39 @@ class LessonController extends Controller
         $retentionDays = (int) env('SCHEDULE_RETENTION_DAYS', 2);
         $cutoff = Carbon::now()->startOfDay()->subDays($retentionDays)->toDateString();
         
-        // Get lessons hanya untuk guru yang login (filter grade 10, 11, 12)
-        $q = Lesson::with(['subject', 'classRoom.school'])
-            ->where('teacher_id', $teacher->id)
+        // Get lessons hanya untuk guru yang login
+        $q = Lesson::where('teacher_id', $teacher->id)
             ->where('date', '>', $cutoff)  // ✅ Exclude expired lessons
-            ->orderBy('date', 'desc');
-        
-        // Filter by grade if provided
-        if ($r->filled('grade')) {
-            $q->whereHas('classRoom', function($query) use ($r) {
-                $query->where('grade', $r->grade)->whereIn('grade', [10, 11, 12]);
-            });
-        } else {
-            $q->whereHas('classRoom', fn($query) => $query->whereIn('grade', [10, 11, 12]));
-        }
+            ->orderBy('date', 'desc')
+            ->with(['subject', 'classRoom.school']);
         
         if ($r->filled('date')) {
             $q->whereDate('date', $r->date);
         }
-        
+
         if ($r->filled('class_room_id')) {
             $q->where('class_room_id', $r->class_room_id);
         }
         
         $lessons = $q->paginate(20)->withQueryString();
+        
+        // Filter by grade on loaded data if provided
+        if ($r->filled('grade')) {
+            $lessons->getCollection()->transform(function($lesson) use ($r) {
+                if ($lesson->classRoom && in_array($lesson->classRoom->grade, [10, 11, 12]) && $lesson->classRoom->grade == $r->grade) {
+                    return $lesson;
+                }
+                return null;
+            })->filter();
+        } else {
+            // Filter all to only grades 10, 11, 12
+            $lessons->getCollection()->transform(function($lesson) {
+                if ($lesson->classRoom && in_array($lesson->classRoom->grade, [10, 11, 12])) {
+                    return $lesson;
+                }
+                return null;
+            })->filter();
+        }
         
         // Get classes yang diajari guru ini untuk filter (hanya grade 10, 11, 12)
         $teacherClasses = ClassRoom::whereIn('id', function($query) use ($teacher) {

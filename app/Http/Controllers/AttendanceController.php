@@ -460,61 +460,6 @@ class AttendanceController extends Controller
     }
 
     /**
-     * Export attendance data to CSV
-     */
-    public function exportAttendanceCSV(Request $request)
-    {
-        try {
-            // Validate admin access
-            abort_unless(Auth::user()?->role === 'admin', 403, 'Unauthorized. Only admins can export attendance.');
-
-            // Get filters
-            $filters = [
-                'month' => $request->input('month', now()->month),
-                'year' => $request->input('year', now()->year),
-                'school_id' => $request->input('school_id'),
-                'class_room_id' => $request->input('class_room_id'),
-            ];
-
-            Log::info('CSV Export - Filters received', ['filters' => $filters]);
-
-            // Get attendance data
-            $attendances = $this->attendanceService->getAttendanceDataForExport($filters);
-            
-            Log::info('CSV Export - Attendance data retrieved', [
-                'count' => $attendances->count(),
-                'month' => $filters['month'],
-                'year' => $filters['year'],
-            ]);
-
-            if ($attendances->isEmpty()) {
-                Log::warning('CSV Export - No attendance data found', ['filters' => $filters]);
-                return back()->with('warning', 'Tidak ada data absensi untuk di-export.');
-            }
-
-            Log::info('CSV Export - About to download attendance records', [
-                'count' => $attendances->count(),
-                'month' => $filters['month'],
-                'year' => $filters['year'],
-            ]);
-
-            // ✅ Use service method untuk download CSV - centralized logic
-            $response = $this->attendanceService->downloadAttendanceCSV($attendances);
-            
-            Log::info('CSV Export - Response generated successfully');
-            
-            return $response;
-
-        } catch (\Exception $e) {
-            Log::error('Export attendance CSV error: ' . $e->getMessage(), [
-                'exception' => $e,
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return back()->with('error', 'Gagal mengexport data: ' . $e->getMessage());
-        }
-    }
-
-    /**
      * Get status label dalam bahasa Indonesia
      */
     private function getStatusLabelIndonesian($status)

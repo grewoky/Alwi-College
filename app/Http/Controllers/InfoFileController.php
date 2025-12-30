@@ -233,7 +233,10 @@ class InfoFileController extends Controller
     {
         $this->assertAdmin();
 
-        $files = InfoFile::with(['student.user', 'student.classRoom'])->latest()->get();
+        // Simple query - load relationships directly
+        $files = InfoFile::with(['student.user', 'student.classRoom'])
+            ->latest()
+            ->get();
 
         return view('info.list', compact('files'));
     }
@@ -270,7 +273,11 @@ class InfoFileController extends Controller
             return back()->with('error', 'Tipe file tidak ditentukan');
         }
 
-        $files = InfoFile::with('student.user')->get()->filter(function (InfoFile $file) use ($type) {
+        // Fetch all files with relationships
+        $allFiles = InfoFile::with('student.user')->get();
+        
+        // Filter on collection (post-load filtering)
+        $files = $allFiles->filter(function (InfoFile $file) use ($type) {
             $extension = $this->getFileExtension($file->file_path ?? '');
             return strcasecmp($this->getFileType($extension), $type) === 0;
         });
