@@ -319,15 +319,17 @@
     </div>
   </div>
   @once
-    <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
+    <script src="https://widget.cloudinary.com/v2.0/global/all.js" type="text/javascript"></script>
   @endonce
-  <script>
+  <script type="text/javascript">
+    window.cloudinaryInfoInitialized = false;
+    
     // Wait for Cloudinary script to load before initializing
-    function initCloudinaryWidget() {
+    function initCloudinaryWidget(retryCount = 0) {
       const cloudName = @json($infoCloudName);
       const uploadPreset = @json($infoUploadPreset);
       
-      console.log('initCloudinaryWidget called', { cloudName, uploadPreset });
+      console.log('initCloudinaryWidget called (attempt ' + (retryCount + 1) + ')', { cloudName, uploadPreset, cloudinaryReady: !!window.cloudinary });
       
       const uploadButton = document.getElementById('infoUploadButton');
       const replaceButton = document.getElementById('infoReplaceButton');
@@ -355,13 +357,19 @@
         return;
       }
 
-      // Check if Cloudinary is available
+      // Check if Cloudinary is available - with max retry attempts
       if (!window.cloudinary) {
-        console.warn('Cloudinary widget not loaded. Retrying...');
-        setTimeout(initCloudinaryWidget, 500);
+        if (retryCount < 20) {
+          console.warn('Cloudinary widget not loaded (attempt ' + (retryCount + 1) + '/20). Retrying in 500ms...');
+          setTimeout(() => initCloudinaryWidget(retryCount + 1), 500);
+        } else {
+          console.error('Cloudinary widget failed to load after 20 attempts');
+        }
         return;
       }
-
+      
+      // Mark as initialized
+      window.cloudinaryInfoInitialized = true;
       console.log('Cloudinary widget initialization started');
 
       const resetSelection = function () {
@@ -451,10 +459,18 @@
     }
 
     // Initialize Cloudinary widget when page loads
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initCloudinaryWidget);
-    } else {
-      initCloudinaryWidget();
+    function startCloudinaryInit() {
+      console.log('Starting info Cloudinary initialization...');
+      initCloudinaryWidget(0);
     }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', startCloudinaryInit);
+    } else {
+      startCloudinaryInit();
+    }
+    
+    // Also wait a bit more to ensure script is loaded
+    setTimeout(startCloudinaryInit, 1000);
   </script>
 </x-app-layout>

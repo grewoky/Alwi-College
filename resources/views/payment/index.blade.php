@@ -88,15 +88,17 @@
 </div>
 
 @once
-  <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
+  <script src="https://widget.cloudinary.com/v2.0/global/all.js" type="text/javascript"></script>
 @endonce
-<script>
+<script type="text/javascript">
+  window.cloudinaryInitialized = false;
+  
   // Wait for Cloudinary widget to load before initializing
-  function initPaymentCloudinaryWidget() {
+  function initPaymentCloudinaryWidget(retryCount = 0) {
     const cloudName = @json($cloudName);
     const uploadPreset = @json($uploadPreset);
     
-    console.log('initPaymentCloudinaryWidget called', { cloudName, uploadPreset });
+    console.log('initPaymentCloudinaryWidget called (attempt ' + (retryCount + 1) + ')', { cloudName, uploadPreset, cloudinaryReady: !!window.cloudinary });
     
     const uploadButton = document.getElementById('paymentUploadButton');
     const preview = document.getElementById('paymentUploadPreview');
@@ -120,13 +122,19 @@
       return;
     }
 
-    // Check if Cloudinary is available
+    // Check if Cloudinary is available - with max retry attempts
     if (!window.cloudinary) {
-      console.warn('Cloudinary widget not loaded. Retrying...');
-      setTimeout(initPaymentCloudinaryWidget, 500);
+      if (retryCount < 20) {
+        console.warn('Cloudinary widget not loaded (attempt ' + (retryCount + 1) + '/20). Retrying in 500ms...');
+        setTimeout(() => initPaymentCloudinaryWidget(retryCount + 1), 500);
+      } else {
+        console.error('Cloudinary widget failed to load after 20 attempts');
+      }
       return;
     }
-
+    
+    // Mark as initialized
+    window.cloudinaryPaymentInitialized = true;
     console.log('Payment Cloudinary widget initialization started');
 
     const widget = window.cloudinary.createUploadWidget({
@@ -198,10 +206,18 @@
   }
 
   // Initialize Cloudinary widget when page loads
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initPaymentCloudinaryWidget);
-  } else {
-    initPaymentCloudinaryWidget();
+  function startPaymentCloudinaryInit() {
+    console.log('Starting payment Cloudinary initialization...');
+    initPaymentCloudinaryWidget(0);
   }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startPaymentCloudinaryInit);
+  } else {
+    startPaymentCloudinaryInit();
+  }
+  
+  // Also wait a bit more to ensure script is loaded
+  setTimeout(startPaymentCloudinaryInit, 1000);
 </script>
 </x-app-layout>
