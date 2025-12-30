@@ -47,7 +47,7 @@
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-bold text-gray-900 mb-3">Jam Mulai</label>
-            <select name="start_time" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
+            <select name="start_time" id="start_time" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
               <option value="">-- Pilih Jam Mulai --</option>
               @php
                 $times = [];
@@ -69,7 +69,7 @@
           </div>
           <div>
             <label class="block text-sm font-bold text-gray-900 mb-3">Jam Selesai</label>
-            <select name="end_time" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
+            <select name="end_time" id="end_time" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
               <option value="">-- Pilih Jam Selesai --</option>
               @foreach($times as $time)
                 <option value="{{ $time }}" @if($lesson->end_time == $time) selected @endif>
@@ -82,6 +82,52 @@
             @enderror
           </div>
         </div>
+
+        <!-- Description (Deskripsi Pelajaran) -->
+        <div>
+          <label class="block text-sm font-bold text-gray-900 mb-3">Deskripsi Pelajaran (Opsional)</label>
+          <textarea name="description" rows="3" placeholder="Tuliskan catatan atau deskripsi pelajaran..." 
+            class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 resize-none">{{ old('description', $lesson->description ?? '') }}</textarea>
+          @error('description')
+            <span class="text-red-600 text-sm mt-1">{{ $message }}</span>
+          @enderror
+        </div>
+
+        <!-- Client-side validation script -->
+        <script>
+          (function() {
+            const startSelect = document.getElementById('start_time');
+            const endSelect = document.getElementById('end_time');
+            const form = startSelect?.closest('form');
+
+            if (startSelect && endSelect && form) {
+              // Validate on form submit
+              form.addEventListener('submit', function(e) {
+                const startVal = startSelect.value;
+                const endVal = endSelect.value;
+
+                // Only validate if both times are selected
+                if (startVal && endVal && startVal >= endVal) {
+                  e.preventDefault();
+                  alert('⚠️ Jam selesai harus lebih besar dari jam mulai!');
+                  endSelect.focus();
+                  return false;
+                }
+              });
+
+              // Visual feedback on change
+              startSelect.addEventListener('change', function() {
+                if (startVal && endVal && startVal >= endVal) {
+                  endSelect.style.borderColor = '#dc2626';
+                  endSelect.style.backgroundColor = '#fee2e2';
+                } else {
+                  endSelect.style.borderColor = '#d1d5db';
+                  endSelect.style.backgroundColor = '';
+                }
+              });
+            }
+          })();
+        </script>
 
         <!-- Buttons -->
         <div class="flex gap-3">

@@ -95,6 +95,27 @@ class LessonController extends Controller
                 for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
                     foreach ($classRooms as $classRoom) {
                         try {
+                            // 🔴 BUG FIX #2: Check for schedule conflicts
+                            // Prevent teacher from being scheduled in multiple classes at the same time
+                            if ($r->start_time && $r->end_time) {
+                                $conflict = Lesson::where('teacher_id', $r->teacher_id)
+                                    ->whereDate('date', $date->toDateString())
+                                    ->where(function($q) use ($r) {
+                                        // Check if new lesson overlaps with existing lessons
+                                        $q->whereRaw("(start_time IS NOT NULL AND end_time IS NOT NULL)")
+                                          ->where(function($q2) use ($r) {
+                                              $q2->where('start_time', '<', $r->end_time)
+                                                 ->where('end_time', '>', $r->start_time);
+                                          });
+                                    })
+                                    ->first();
+                                
+                                if ($conflict) {
+                                    $errors[] = "Konflik jadwal pada {$date->format('d-m-Y')}: Guru sudah dijadwalkan jam {$conflict->start_time}-{$conflict->end_time} untuk kelas {$conflict->classRoom->name}";
+                                    continue; // Skip this classroom, move to next
+                                }
+                            }
+
                             $attrs = [
                                 'date' => $date->toDateString(),
                                 'class_room_id' => $classRoom->id,
@@ -270,9 +291,10 @@ class LessonController extends Controller
             'subject_id' => 'nullable|exists:subjects,id',
             'start_time' => 'nullable|date_format:H:i',
             'end_time'   => 'nullable|date_format:H:i',
+            'description' => 'nullable|string|max:500',
         ]);
         
-        // Validate time logic if both times provided
+        // 🔴 BUG FIX #1: Validate time logic if both times provided
         if ($r->filled('start_time') && $r->filled('end_time')) {
             if ($r->start_time >= $r->end_time) {
                 return back()
@@ -286,9 +308,10 @@ class LessonController extends Controller
                 'subject_id' => $r->subject_id,
                 'start_time' => $r->start_time,
                 'end_time'   => $r->end_time,
+                'description' => $r->description,
             ]);
             
-            return back()->with('ok', 'Jadwal berhasil diperbarui');
+            return back()->with('ok', '✅ Jadwal berhasil diperbarui');
         } catch (\Exception $e) {
            
             return back()->with('error', 'Gagal memperbarui jadwal');
