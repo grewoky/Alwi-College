@@ -1,7 +1,7 @@
 <section class="relative bg-white">
   <div class="overflow-hidden">
     <div id="poster-carousel" class="relative w-full" role="region" aria-label="Carousel Poster">
-      <div class="carousel-track relative w-full h-44 sm:h-60 md:h-[450px] lg:h-[560px]">
+      <div class="carousel-track relative w-full h-48 sm:h-56 md:h-[420px] lg:h-[520px]">
         <div class="carousel-inner flex w-full h-full will-change-transform rounded-2xl shadow-lg overflow-hidden">
         @php
           // If the controller hasn't provided $posters, build it from files in public/images/posters
