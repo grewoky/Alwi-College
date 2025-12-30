@@ -476,10 +476,19 @@ class AttendanceController extends Controller
                 'class_room_id' => $request->input('class_room_id'),
             ];
 
+            Log::info('CSV Export - Filters received', ['filters' => $filters]);
+
             // Get attendance data
             $attendances = $this->attendanceService->getAttendanceDataForExport($filters);
+            
+            Log::info('CSV Export - Attendance data retrieved', [
+                'count' => $attendances->count(),
+                'month' => $filters['month'],
+                'year' => $filters['year'],
+            ]);
 
             if ($attendances->isEmpty()) {
+                Log::warning('CSV Export - No attendance data found', ['filters' => $filters]);
                 return back()->with('warning', 'Tidak ada data absensi untuk di-export.');
             }
 

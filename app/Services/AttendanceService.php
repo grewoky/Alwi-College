@@ -101,26 +101,33 @@ class AttendanceService
     public function getAttendanceDataForExport($filters = [])
     {
         $query = Attendance::with([
-            'student' => fn($q) => $q->with(['user', 'classRoom' => fn($q2) => $q2->with('school'), 'attendanceTracker']),
-            'lesson' => fn($q) => $q->with(['teacher' => fn($q2) => $q2->with('user'), 'classRoom']),
-            'marker:id,name,email'  // ✅ Fixed: Eager-load marker dengan user fields
+            'student.user',
+            'student.classRoom.school',
+            'student.attendanceTracker',
+            'lesson.subject',
+            'lesson.teacher.user',
+            'lesson.classRoom',
+            'marker:id,name,email'
         ]);
 
-        // Apply filters
-        if (isset($filters['month']) && isset($filters['year'])) {
+        // Default: current month
+        $startDate = now()->startOfMonth();
+        $endDate = now()->endOfMonth();
+        
+        // Apply month/year filter if provided
+        if (!empty($filters['month']) && !empty($filters['year'])) {
             $startDate = Carbon::createFromDate($filters['year'], $filters['month'], 1)->startOfMonth();
             $endDate = $startDate->copy()->endOfMonth();
-            $query->whereBetween('created_at', [$startDate, $endDate]);
-        } else {
-            // Default: current month
-            $query->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()]);
         }
+        
+        $query->whereBetween('created_at', [$startDate, $endDate]);
 
-        if (isset($filters['school_id'])) {
+        // Apply optional filters
+        if (!empty($filters['school_id'])) {
             $query->whereHas('student.classRoom', fn($q) => $q->where('school_id', $filters['school_id']));
         }
 
-        if (isset($filters['class_room_id'])) {
+        if (!empty($filters['class_room_id'])) {
             $query->whereHas('student', fn($q) => $q->where('class_room_id', $filters['class_room_id']));
         }
 
