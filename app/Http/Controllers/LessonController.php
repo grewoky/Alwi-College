@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth; // ⬅️ penting
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 use App\Models\Lesson;
 use App\Models\ClassRoom;
@@ -352,28 +353,40 @@ class LessonController extends Controller
     public function deleteLesson(Lesson $lesson)
     {
         try {
-            // ✅ AUTHORIZATION: Verifikasi user adalah admin
-            if (Auth::check() === false || Auth::user()->role !== 'admin') {
-                Log::warning('Unauthorized delete attempt by user ' . Auth::id());
+            // ✅ AUTHORIZATION: Route sudah dilindungi middleware role:admin.
+            // Tetap lakukan guard ringan tanpa bergantung pada kolom user->role.
+            $user = Auth::user();
+            if (!$user) {
+                Log::warning('Unauthorized delete attempt (no auth user).');
                 return back()->with('error', '❌ Anda tidak memiliki akses untuk menghapus jadwal');
             }
 
+            // Middleware role:admin sudah memastikan user admin.
+
             // ✅ VALIDATION: Cek apakah jadwal masih belum melewati batas penghapusan
             // Jadwal yang sudah terlalu lama tidak boleh dihapus manual (harus via auto-cleanup)
-            $retentionDays = env('LESSON_RETENTION_DAYS', 2);
+            $retentionDays = (int) env('SCHEDULE_RETENTION_DAYS', env('LESSON_RETENTION_DAYS', 2));
             $cutoffDate = Carbon::today()->subDays($retentionDays);
             
             if ($lesson->date < $cutoffDate) {
                 return back()->with('error', '⚠️ Jadwal terlalu lama, tidak dapat dihapus manual. Hubungi admin database.');
             }
 
-            // ✅ WARNING: Jika ada attendance records, berikan peringatan
-            $attendanceCount = DB::table('attendances')
-                ->where('lesson_id', $lesson->id)
-                ->count();
-            
-            if ($attendanceCount > 0) {
-                return back()->with('warning', '⚠️ Perhatian: Ada ' . $attendanceCount . ' record absensi yang terhubung. Pastikan sudah backup data absensi.');
+            // ✅ INFO: Hitung attendance records jika tabel tersedia.
+            // Jangan gagalkan penghapusan jika tabel tidak ada / error (DB baru/migrasi belum lengkap).
+            $attendanceCount = 0;
+            try {
+                if (Schema::hasTable('attendances')) {
+                    $attendanceCount = (int) DB::table('attendances')
+                        ->where('lesson_id', $lesson->id)
+                        ->count();
+                }
+            } catch (\Exception $attendanceError) {
+                Log::warning('Failed to check attendance count (continuing deletion).', [
+                    'lesson_id' => $lesson->id,
+                    'error' => $attendanceError->getMessage(),
+                ]);
+                $attendanceCount = 0;
             }
 
             // ✅ LOG: Catat penghapusan ke deleted_lessons_log (dengan error handling)
@@ -386,7 +399,7 @@ class LessonController extends Controller
                     'start_time' => $lesson->start_time,
                     'end_time' => $lesson->end_time,
                     'deleted_by' => Auth::id(),
-                    'deletion_reason' => 'Manual deletion by admin ' . Auth::user()->name,
+                    'deletion_reason' => 'Manual deletion by admin ' . ($user->name ?? 'unknown'),
                 ]);
             } catch (\Exception $logError) {
                 Log::warning('Failed to create deleted lesson log', [
@@ -404,12 +417,17 @@ class LessonController extends Controller
                 'lesson_id' => $lesson->id,
                 'date' => $lesson->date,
                 'teacher' => $lesson->teacher->user->name ?? 'Unknown',
-                'deleted_by' => Auth::user()->name,
+                'deleted_by' => $user->name ?? 'unknown',
                 'attendance_records' => $attendanceCount
             ]);
 
             // ✅ Return dengan success message dan redirect ke jadwal
-            return redirect()->route('lessons.admin')->with('ok', '✅ Jadwal telah dihapus dan dicatat dalam log');
+            $msg = '✅ Jadwal telah dihapus dan dicatat dalam log';
+            if ($attendanceCount > 0) {
+                $msg .= ' (Perhatian: ada ' . $attendanceCount . ' data absensi terkait)';
+            }
+
+            return redirect()->route('lessons.admin')->with('ok', $msg);
         } catch (\Exception $e) {
             Log::error('Delete lesson error: ' . $e->getMessage(), [
                 'lesson_id' => $lesson->id ?? null,
