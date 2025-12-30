@@ -123,7 +123,7 @@
                                             <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Siswa</th>
                                             <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Kelas</th>
                                             <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
-                                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Counter 30 Hari</th>
+                                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Kehadiran (Hari)</th>
                                             <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Guru Penginput</th>
                                             <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Tanggal</th>
                                         </tr>

@@ -160,7 +160,7 @@ class AttendanceService
             'Status Absensi',
             'Guru Penginput',
             'Mata Pelajaran',
-            'Counter 30 Hari',
+            'Kehadiran (Hari)',
             'Tanggal Mulai Period',
         ];
 

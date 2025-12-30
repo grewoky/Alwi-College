@@ -1,5 +1,4 @@
 <section class="relative bg-white pt-4 sm:pt-5 md:pt-6">
-  <div class="overflow-hidden">
     <div id="poster-carousel" class="relative w-full" role="region" aria-label="Carousel Poster">
       <div class="carousel-track relative w-full h-48 sm:h-56 md:h-[420px] lg:h-[520px]">
         <div class="carousel-inner flex w-full h-full will-change-transform rounded-2xl shadow-lg overflow-hidden">
@@ -53,10 +52,9 @@
         @endforeach
         </div>
       </div>
-    </div>
 
     <!-- Indicators (overlaid, centered bottom) -->
-    <div class="absolute left-0 right-0 flex justify-center pointer-events-none">
+    <div class="absolute left-0 right-0 flex justify-center pointer-events-none" style="bottom: 12px;">
       <div class="carousel-dots mt-0 mb-2 flex justify-center gap-3 pointer-events-auto" aria-hidden="false">
         @foreach($posters as $i => $src)
           <button class="carousel-dot w-3 h-3 sm:w-3 sm:h-3 md:w-3 md:h-3 rounded-full bg-white/60 border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2E529F]" data-index="{{ $i }}" aria-label="Slide {{ $i + 1 }}" aria-pressed="false"></button>
@@ -64,7 +62,7 @@
       </div>
     </div>
     </div>
-  </div>
+
 
   <script>
     (function(){

@@ -446,18 +446,13 @@ class AttendanceController extends Controller
             ]
         );
         
-        // Save attendance records
+        // Save attendance records menggunakan service
         foreach ($validated['attendances'] as $studentId => $status) {
-            Attendance::updateOrCreate(
-                [
-                    'lesson_id' => $lesson->id,
-                    'student_id' => $studentId,
-                ],
-                [
-                    'status' => $status,
-                    'marked_by' => $user->id,
-                    'marked_at' => now(),
-                ]
+            $this->attendanceService->recordAttendance(
+                $lesson->id,
+                $studentId,
+                $status,
+                $user->id
             );
         }
         
@@ -508,7 +503,7 @@ class AttendanceController extends Controller
                     'Status Absensi',
                     'Guru Penginput',
                     'Mata Pelajaran',
-                    'Counter 30 Hari',
+                    'Kehadiran (Hari)',
                     'Tanggal Mulai Period',
                 ];
                 fputcsv($output, $headers, ';');
