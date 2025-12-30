@@ -376,17 +376,25 @@ class LessonController extends Controller
                 return back()->with('warning', '⚠️ Perhatian: Ada ' . $attendanceCount . ' record absensi yang terhubung. Pastikan sudah backup data absensi.');
             }
 
-            // ✅ LOG: Catat penghapusan ke deleted_lessons_log
-            DeletedLessonLog::create([
-                'lesson_date' => $lesson->date,
-                'classroom_id' => $lesson->class_room_id,
-                'teacher_id' => $lesson->teacher_id,
-                'subject_id' => $lesson->subject_id,
-                'start_time' => $lesson->start_time,
-                'end_time' => $lesson->end_time,
-                'deleted_by' => Auth::id(),
-                'deletion_reason' => 'Manual deletion by admin ' . Auth::user()->name,
-            ]);
+            // ✅ LOG: Catat penghapusan ke deleted_lessons_log (dengan error handling)
+            try {
+                DeletedLessonLog::create([
+                    'lesson_date' => $lesson->date,
+                    'classroom_id' => $lesson->class_room_id,
+                    'teacher_id' => $lesson->teacher_id,
+                    'subject_id' => $lesson->subject_id,
+                    'start_time' => $lesson->start_time,
+                    'end_time' => $lesson->end_time,
+                    'deleted_by' => Auth::id(),
+                    'deletion_reason' => 'Manual deletion by admin ' . Auth::user()->name,
+                ]);
+            } catch (\Exception $logError) {
+                Log::warning('Failed to create deleted lesson log', [
+                    'lesson_id' => $lesson->id,
+                    'error' => $logError->getMessage()
+                ]);
+                // Continue with deletion even if log fails
+            }
 
             // ✅ DELETE: Hapus lesson
             $lesson->delete();
