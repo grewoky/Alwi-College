@@ -1,6 +1,15 @@
 @php
-    $cloudName = env('CLOUDINARY_CLOUD_NAME', '');
-    $uploadPreset = env('CLOUDINARY_UPLOAD_PRESET', '');
+    $cloudName = config('cloudinary.cloud_name') ?? env('CLOUDINARY_CLOUD_NAME');
+    $uploadPreset = config('cloudinary.upload_preset') ?? env('CLOUDINARY_UPLOAD_PRESET');
+    // Debug: Log if values are empty
+    if (!$cloudName || !$uploadPreset) {
+        \Log::warning('Cloudinary config missing', [
+            'cloudName' => $cloudName,
+            'uploadPreset' => $uploadPreset,
+            'env_name' => env('CLOUDINARY_CLOUD_NAME'),
+            'env_preset' => env('CLOUDINARY_UPLOAD_PRESET'),
+        ]);
+    }
 @endphp
 
 <x-app-layout>
@@ -113,11 +122,21 @@
     const form = document.getElementById('paymentUploadForm');
 
     // Check if all required elements exist
-    if (!uploadButton || !cloudName || !uploadPreset) {
-      console.error('Payment upload form elements missing.', {
-        uploadButton: !!uploadButton,
-        cloudName: cloudName,
-        uploadPreset: uploadPreset
+    if (!uploadButton) {
+      console.error('Payment upload button not found. Check if id="paymentUploadButton" exists in HTML.');
+      return;
+    }
+    if (!cloudName) {
+      console.error('CLOUDINARY_CLOUD_NAME is empty. Check .env file or config/cloudinary.php', {
+        cloudName,
+        uploadPreset
+      });
+      return;
+    }
+    if (!uploadPreset) {
+      console.error('CLOUDINARY_UPLOAD_PRESET is empty. Check .env file or config/cloudinary.php', {
+        cloudName,
+        uploadPreset
       });
       return;
     }

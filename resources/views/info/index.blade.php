@@ -2,8 +2,17 @@
   <x-slot name="title">Info • Unggah Kisi-kisi</x-slot>
 
   @php
-      $infoCloudName = env('CLOUDINARY_CLOUD_NAME', '');
-      $infoUploadPreset = env('CLOUDINARY_UPLOAD_PRESET', '');
+      $infoCloudName = config('cloudinary.cloud_name') ?? env('CLOUDINARY_CLOUD_NAME');
+      $infoUploadPreset = config('cloudinary.upload_preset') ?? env('CLOUDINARY_UPLOAD_PRESET');
+      // Debug: Log if values are empty
+      if (!$infoCloudName || !$infoUploadPreset) {
+          \Log::warning('Cloudinary config missing (info page)', [
+              'cloudName' => $infoCloudName,
+              'uploadPreset' => $infoUploadPreset,
+              'env_name' => env('CLOUDINARY_CLOUD_NAME'),
+              'env_preset' => env('CLOUDINARY_UPLOAD_PRESET'),
+          ]);
+      }
   @endphp
 
   <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50">
@@ -348,11 +357,21 @@
       const form = document.getElementById('infoUploadForm');
 
       // Check if all required elements exist
-      if (!uploadButton || !cloudName || !uploadPreset) {
-        console.error('Info upload form elements missing.', {
-          uploadButton: !!uploadButton,
-          cloudName: cloudName,
-          uploadPreset: uploadPreset
+      if (!uploadButton) {
+        console.error('Info upload button not found. Check if id="infoUploadButton" exists in HTML.');
+        return;
+      }
+      if (!cloudName) {
+        console.error('CLOUDINARY_CLOUD_NAME is empty. Check .env file or config/cloudinary.php', {
+          cloudName,
+          uploadPreset
+        });
+        return;
+      }
+      if (!uploadPreset) {
+        console.error('CLOUDINARY_UPLOAD_PRESET is empty. Check .env file or config/cloudinary.php', {
+          cloudName,
+          uploadPreset
         });
         return;
       }
