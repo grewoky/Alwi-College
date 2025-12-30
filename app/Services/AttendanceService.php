@@ -103,7 +103,7 @@ class AttendanceService
         $query = Attendance::with([
             'student' => fn($q) => $q->with(['user', 'classRoom' => fn($q2) => $q2->with('school'), 'attendanceTracker']),
             'lesson' => fn($q) => $q->with(['teacher' => fn($q2) => $q2->with('user'), 'classRoom']),
-            'marker'
+            'marker:id,name,email'  // ✅ Fixed: Eager-load marker dengan user fields
         ]);
 
         // Apply filters
@@ -172,7 +172,7 @@ class AttendanceService
     }
 
     /**
-     * Generate CSV content
+     * Generate CSV content (deprecated - use downloadAttendanceCSV instead)
      */
     private function generateCSVContent($headers, $rows, $filename)
     {
@@ -195,6 +195,62 @@ class AttendanceService
             'filename' => $filename,
             'content_type' => 'text/csv; charset=utf-8',
         ];
+    }
+
+    /**
+     * Download attendance CSV file langsung
+     * Centralized CSV generation untuk avoid duplikasi logic
+     */
+    public function downloadAttendanceCSV($attendances = null)
+    {
+        if (!$attendances) {
+            $attendances = $this->getAttendanceDataForExport();
+        }
+
+        $filename = 'attendance_' . now()->format('Y-m-d_His') . '.csv';
+
+        return response()->streamDownload(function () use ($attendances) {
+            $output = fopen('php://output', 'w');
+
+            // UTF-8 BOM untuk Excel
+            fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            // Headers
+            $headers = [
+                'Tanggal',
+                'Nama Siswa',
+                'NIS',
+                'Kelas',
+                'Sekolah',
+                'Status Absensi',
+                'Guru Penginput',
+                'Mata Pelajaran',
+                'Kehadiran (Hari)',
+                'Tanggal Mulai Period',
+            ];
+            fputcsv($output, $headers, ';');
+
+            // Data rows
+            foreach ($attendances as $attendance) {
+                $row = [
+                    $attendance->created_at->format('d-m-Y H:i:s'),
+                    optional($attendance->student)->user->name ?? '-',
+                    optional($attendance->student)->nis ?? '-',
+                    optional(optional($attendance->student)->classRoom)->name ?? '-',
+                    optional(optional(optional($attendance->student)->classRoom)->school)->name ?? '-',
+                    $this->getStatusLabel($attendance->status),
+                    optional($attendance->marker)->name ?? '-',  // ✅ Fixed: Gunakan marker relasi yang di-eager-load
+                    optional($attendance->lesson)->subject->name ?? '-',
+                    optional(optional($attendance->student)->attendanceTracker)->attendance_count ?? 0,
+                    optional(optional($attendance->student)->attendanceTracker)->period_start_date?->format('d-m-Y') ?? '-',
+                ];
+                fputcsv($output, $row, ';');
+            }
+
+            fclose($output);
+        }, $filename)
+            ->header('Content-Type', 'text/csv; charset=utf-8')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 
     /**

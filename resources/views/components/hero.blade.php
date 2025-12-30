@@ -1,66 +1,69 @@
-<section class="relative bg-white pt-4 sm:pt-5 md:pt-6">
-    <div id="poster-carousel" class="relative w-full overflow-hidden rounded-2xl" role="region" aria-label="Carousel Poster">
-      <div class="carousel-track relative w-full h-48 sm:h-56 md:h-[420px] lg:h-[520px]">
-        <div class="carousel-inner flex w-full h-full will-change-transform rounded-2xl shadow-lg">
-        @php
-          // If the controller hasn't provided $posters, build it from files in public/images/posters
-          if (!isset($posters) || empty($posters)) {
-            $posters = [];
-            try {
-              $files = \Illuminate\Support\Facades\File::glob(public_path('images/posters/*.{jpg,jpeg,png,webp,gif,svg}'), GLOB_BRACE) ?: [];
-              foreach ($files as $filePath) {
-                $posters[] = asset('images/posters/' . basename($filePath));
-              }
-              // Prioritize a specific poster as the first slide if it exists
-              $priorityName = 'Alwi_CollegeDisc.png';
-              $priorityIndex = null;
-              foreach ($posters as $idx => $url) {
-                $name = basename(parse_url($url, PHP_URL_PATH));
-                if ($name === $priorityName) { $priorityIndex = $idx; break; }
-              }
-              if ($priorityIndex !== null) {
-                $priorityUrl = $posters[$priorityIndex];
-                unset($posters[$priorityIndex]);
-                array_unshift($posters, $priorityUrl);
-                $posters = array_values($posters);
-              }
-            } catch (\Throwable $e) {
+<section class="relative bg-white pt-4 sm:pt-5 md:pt-8 lg:pt-10">
+    <!-- Carousel Container dengan padding untuk breathing room -->
+    <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+      <div id="poster-carousel" class="relative w-full overflow-hidden rounded-2xl shadow-lg" role="region" aria-label="Carousel Poster">
+        <div class="carousel-track relative w-full h-56 sm:h-64 md:h-96 lg:h-[500px]">
+          <div class="carousel-inner flex w-full h-full will-change-transform rounded-2xl">
+          @php
+            // If the controller hasn't provided $posters, build it from files in public/images/posters
+            if (!isset($posters) || empty($posters)) {
               $posters = [];
+              try {
+                $files = \Illuminate\Support\Facades\File::glob(public_path('images/posters/*.{jpg,jpeg,png,webp,gif,svg}'), GLOB_BRACE) ?: [];
+                foreach ($files as $filePath) {
+                  $posters[] = asset('images/posters/' . basename($filePath));
+                }
+                // Prioritize a specific poster as the first slide if it exists
+                $priorityName = 'Alwi_CollegeDisc.png';
+                $priorityIndex = null;
+                foreach ($posters as $idx => $url) {
+                  $name = basename(parse_url($url, PHP_URL_PATH));
+                  if ($name === $priorityName) { $priorityIndex = $idx; break; }
+                }
+                if ($priorityIndex !== null) {
+                  $priorityUrl = $posters[$priorityIndex];
+                  unset($posters[$priorityIndex]);
+                  array_unshift($posters, $priorityUrl);
+                  $posters = array_values($posters);
+                }
+              } catch (\Throwable $e) {
+                $posters = [];
+              }
             }
-          }
-        @endphp
+          @endphp
 
-        @foreach($posters as $i => $src)
-          <div class="carousel-slide flex-shrink-0 w-full h-full relative" data-index="{{ $i }}" aria-hidden="{{ $i === 0 ? 'false' : 'true' }}">
-            <img src="{{ $src }}" alt="Poster {{ $i + 1 }}" class="w-full h-full object-cover object-center" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" decoding="async">
+          @foreach($posters as $i => $src)
+            <div class="carousel-slide flex-shrink-0 w-full h-full relative" data-index="{{ $i }}" aria-hidden="{{ $i === 0 ? 'false' : 'true' }}">
+              <img src="{{ $src }}" alt="Poster {{ $i + 1 }}" class="w-full h-full object-cover object-center" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" decoding="async">
 
-            <!-- CTA overlay on poster (center-left alignment, hidden on mobile) -->
-            <div class="absolute inset-0 hidden md:flex items-center justify-center md:justify-start md:pl-10 pointer-events-none">
-              <a href="{{ route('login') }}" class="pointer-events-auto px-5 py-2.5 rounded-lg bg-white/95 text-[#2E529F] font-medium shadow hover:shadow-lg hover:bg-white focus:ring-4 focus:ring-[#2E529F]/30 transition-all duration-150 ease-in-out">
-                Daftar Sekarang
-              </a>
+              <!-- CTA overlay on poster (center-left alignment, hidden on mobile) -->
+              <div class="absolute inset-0 hidden md:flex items-center justify-center md:justify-start md:pl-8 lg:pl-12 pointer-events-none">
+                <a href="{{ route('login') }}" class="pointer-events-auto px-5 py-2.5 rounded-lg bg-white/95 text-[#2E529F] font-medium shadow hover:shadow-lg hover:bg-white focus:ring-4 focus:ring-[#2E529F]/30 transition-all duration-150 ease-in-out">
+                  Daftar Sekarang
+                </a>
+              </div>
+
+              <!-- Overlay masks to hide corner watermarks; keep them minimal so posters stay visible -->
+              <div class="absolute inset-0 pointer-events-none">
+                <div class="absolute top-0 left-0 w-24 h-16 sm:w-28 sm:h-20 md:w-36 md:h-28 rounded-br-xl" style="background:linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.0) 60%);"></div>
+                <div class="absolute bottom-0 right-0 w-24 h-16 sm:w-28 sm:h-20 md:w-36 md:h-28 rounded-tl-xl" style="background:linear-gradient(-45deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.0) 60%);"></div>
+                <!-- soft vignette for better contrast at edges -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black/5 via-transparent to-black/5"></div>
+              </div>
             </div>
-
-            <!-- Overlay masks to hide corner watermarks; keep them minimal so posters stay visible -->
-            <div class="absolute inset-0 pointer-events-none">
-              <div class="absolute top-0 left-0 w-28 h-20 md:w-36 md:h-24 rounded-br-xl" style="background:linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.0) 60%);"></div>
-              <div class="absolute bottom-0 right-0 w-28 h-20 md:w-36 md:h-24 rounded-tl-xl" style="background:linear-gradient(-45deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.0) 60%);"></div>
-              <!-- soft vignette for better contrast at edges -->
-              <div class="absolute inset-0 bg-gradient-to-t from-black/6 via-transparent to-black/6"></div>
-            </div>
+          @endforeach
           </div>
-        @endforeach
+        </div>
+
+        <!-- Indicators (overlaid, centered bottom) -->
+        <div class="absolute left-0 right-0 flex justify-center pointer-events-none" style="bottom: 14px;">
+          <div class="carousel-dots mt-0 mb-2 flex justify-center gap-2 sm:gap-3 pointer-events-auto" aria-hidden="false">
+            @foreach($posters as $i => $src)
+              <button class="carousel-dot w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 rounded-full bg-white/60 border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2E529F] transition-all duration-200" data-index="{{ $i }}" aria-label="Slide {{ $i + 1 }}" aria-pressed="false"></button>
+            @endforeach
+          </div>
         </div>
       </div>
-
-    <!-- Indicators (overlaid, centered bottom) -->
-    <div class="absolute left-0 right-0 flex justify-center pointer-events-none" style="bottom: 12px;">
-      <div class="carousel-dots mt-0 mb-2 flex justify-center gap-3 pointer-events-auto" aria-hidden="false">
-        @foreach($posters as $i => $src)
-          <button class="carousel-dot w-3 h-3 sm:w-3 sm:h-3 md:w-3 md:h-3 rounded-full bg-white/60 border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2E529F]" data-index="{{ $i }}" aria-label="Slide {{ $i + 1 }}" aria-pressed="false"></button>
-        @endforeach
-      </div>
-    </div>
     </div>
 
 

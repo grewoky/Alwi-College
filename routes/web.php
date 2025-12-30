@@ -43,13 +43,17 @@ Route::middleware(['auth','role:admin'])->prefix('admin')->group(function () {
     Route::get('/jadwal', [LessonController::class,'adminDashboard'])->name('lessons.admin.dashboard');
     Route::get('/jadwal/list', [LessonController::class,'adminView'])->name('lessons.admin');
     Route::get('/jadwal/generate', [LessonController::class,'showGenerate'])->name('lessons.generate.form');
+    
+    // PENTING: GET routes harus SEBELUM resource routes dengan parameter {lesson}
+    // Ini mencegah conflict dengan route /jadwal/{lesson}
+    Route::get('/jadwal/deleted-log', [LessonController::class,'showDeletedLog'])->name('lessons.logs.deleted');
+    Route::get('/jadwal/expired', [LessonController::class,'showExpiredLessons'])->name('lessons.logs.expired');
+    
+    // Resource routes untuk lesson management
     Route::post('/jadwal/generate', [LessonController::class,'generate'])->name('lessons.generate');
     Route::get('/jadwal/{lesson}/edit', [LessonController::class,'editLesson'])->name('lessons.edit');
     Route::put('/jadwal/{lesson}', [LessonController::class,'updateLesson'])->name('lessons.update');
     Route::delete('/jadwal/{lesson}', [LessonController::class,'deleteLesson'])->name('lessons.destroy');
-    // Deleted / expired logs
-    Route::get('/jadwal/deleted-log', [LessonController::class,'showDeletedLog'])->name('lessons.logs.deleted');
-    Route::get('/jadwal/expired', [LessonController::class,'showExpiredLessons'])->name('lessons.logs.expired');
     
     // ADMIN INFO (Lihat file yang diupload siswa)
     Route::get('/info', [InfoFileController::class,'listAll'])->name('info.admin.list');

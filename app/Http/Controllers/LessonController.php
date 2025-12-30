@@ -322,7 +322,31 @@ class LessonController extends Controller
     public function deleteLesson(Lesson $lesson)
     {
         try {
-            // Log ke deleted_lessons_log sebelum dihapus
+            // ✅ AUTHORIZATION: Verifikasi user adalah admin
+            if (Auth::check() === false || Auth::user()->role !== 'admin') {
+                Log::warning('Unauthorized delete attempt by user ' . Auth::id());
+                return back()->with('error', '❌ Anda tidak memiliki akses untuk menghapus jadwal');
+            }
+
+            // ✅ VALIDATION: Cek apakah jadwal masih belum melewati batas penghapusan
+            // Jadwal yang sudah terlalu lama tidak boleh dihapus manual (harus via auto-cleanup)
+            $retentionDays = env('LESSON_RETENTION_DAYS', 2);
+            $cutoffDate = Carbon::today()->subDays($retentionDays);
+            
+            if ($lesson->date < $cutoffDate) {
+                return back()->with('error', '⚠️ Jadwal terlalu lama, tidak dapat dihapus manual. Hubungi admin database.');
+            }
+
+            // ✅ WARNING: Jika ada attendance records, berikan peringatan
+            $attendanceCount = DB::table('attendances')
+                ->where('lesson_id', $lesson->id)
+                ->count();
+            
+            if ($attendanceCount > 0) {
+                return back()->with('warning', '⚠️ Perhatian: Ada ' . $attendanceCount . ' record absensi yang terhubung. Pastikan sudah backup data absensi.');
+            }
+
+            // ✅ LOG: Catat penghapusan ke deleted_lessons_log
             DeletedLessonLog::create([
                 'lesson_date' => $lesson->date,
                 'classroom_id' => $lesson->class_room_id,
@@ -331,17 +355,30 @@ class LessonController extends Controller
                 'start_time' => $lesson->start_time,
                 'end_time' => $lesson->end_time,
                 'deleted_by' => Auth::id(),
-                'deletion_reason' => 'Manual deletion by admin',
+                'deletion_reason' => 'Manual deletion by admin ' . Auth::user()->name,
             ]);
 
-            // Hapus lesson
+            // ✅ DELETE: Hapus lesson
             $lesson->delete();
 
-            // Return dengan success message dan redirect ke jadwal
-            return redirect()->route('lessons.admin')->with('ok', '✅ Jadwal telah dihapus');
+            // ✅ Logging for audit trail
+            Log::info('Lesson deleted successfully', [
+                'lesson_id' => $lesson->id,
+                'date' => $lesson->date,
+                'teacher' => $lesson->teacher->user->name ?? 'Unknown',
+                'deleted_by' => Auth::user()->name,
+                'attendance_records' => $attendanceCount
+            ]);
+
+            // ✅ Return dengan success message dan redirect ke jadwal
+            return redirect()->route('lessons.admin')->with('ok', '✅ Jadwal telah dihapus dan dicatat dalam log');
         } catch (\Exception $e) {
-            Log::error('Delete lesson error: ' . $e->getMessage());
-            return back()->with('error', '❌ Gagal menghapus jadwal');
+            Log::error('Delete lesson error: ' . $e->getMessage(), [
+                'lesson_id' => $lesson->id ?? null,
+                'user_id' => Auth::id(),
+                'exception' => $e
+            ]);
+            return back()->with('error', '❌ Gagal menghapus jadwal: ' . $e->getMessage());
         }
     }
 
@@ -437,23 +474,33 @@ class LessonController extends Controller
     public function showExpiredLessons()
     {
         $today = Carbon::now()->startOfDay();
-
         $retentionDays = (int) env('SCHEDULE_RETENTION_DAYS', 2);
+        
+        // 🔴 BUG FIX: Jadwal EXPIRED jika sudah LEWAT lebih dari retention days
+        // Contoh: Hari ini 30 Des, retention 2 hari
+        //   Cutoff = 30 - 2 = 28 Des
+        //   EXPIRED = date <= 28 Des (jadi: 27, 28 Des dan sebelumnya)
+        // 
+        // SEBELUMNYA (SALAH):
+        //   where('date', '<', today) AND where('date', '>=', cutoff)
+        //   Ini hanya ambil hari kemarin sampai 2 hari lalu
+        //   Jadwal lebih dari 2 hari tidak ditampilkan!
+        
         $cutoff = $today->copy()->subDays($retentionDays)->toDateString();
 
-        // Ambil jadwal yang sudah lewat tetapi masih dalam retention window:
-        // date < today AND date >= cutoff
+        // Ambil jadwal yang sudah melampaui retention window:
+        // date <= (today - retention_days) = sudah expired dan akan dihapus
         $expiredLessons = Lesson::with(['classRoom.school', 'teacher.user', 'subject'])
             ->whereHas('classRoom', fn($q) => $q->whereIn('grade', [10, 11, 12]))
-            ->where('date', '<', $today->toDateString())
-            ->where('date', '>=', $cutoff)
+            ->where('date', '<=', $cutoff)  // ← Changed from '<' to '<='
             ->orderBy('date', 'desc')
             ->paginate(20);
 
         return view('lessons.admin.logs.expired', [
             'expiredLessons' => $expiredLessons,
             'totalExpired' => Lesson::whereHas('classRoom', fn($q) => $q->whereIn('grade', [10, 11, 12]))
-                ->where('date', '<', $today->toDateString())->where('date', '>=', $cutoff)->count(),
+                ->where('date', '<=', $cutoff)  // ← Changed from '<' to '<='
+                ->count(),
         ]);
     }
 

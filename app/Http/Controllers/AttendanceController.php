@@ -483,55 +483,8 @@ class AttendanceController extends Controller
                 return back()->with('warning', 'Tidak ada data absensi untuk di-export.');
             }
 
-            // Generate CSV
-            $csvConfig = $this->attendanceService->exportToCSV($attendances);
-            $filename = $csvConfig['filename'];
-
-            // Create response with CSV content
-            $response = response()->streamDownload(function () use ($attendances) {
-                $output = fopen('php://output', 'w');
-
-                // UTF-8 BOM untuk Excel
-                fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
-
-                // Headers
-                $headers = [
-                    'Tanggal',
-                    'Nama Siswa',
-                    'NIS',
-                    'Kelas',
-                    'Sekolah',
-                    'Status Absensi',
-                    'Guru Penginput',
-                    'Mata Pelajaran',
-                    'Kehadiran (Hari)',
-                    'Tanggal Mulai Period',
-                ];
-                fputcsv($output, $headers, ';');
-
-                // Data rows
-                foreach ($attendances as $attendance) {
-                    $row = [
-                        $attendance->created_at->format('d-m-Y H:i:s'),
-                        optional($attendance->student)->user->name ?? '-',
-                        optional($attendance->student)->nis ?? '-',
-                        optional(optional($attendance->student)->classRoom)->name ?? '-',
-                        optional(optional(optional($attendance->student)->classRoom)->school)->name ?? '-',
-                        $this->getStatusLabelIndonesian($attendance->status),
-                        optional($attendance->marker)->name ?? '-',
-                        optional($attendance->lesson)->subject->name ?? '-',
-                        optional(optional($attendance->student)->attendanceTracker)->attendance_count ?? 0,
-                        optional(optional($attendance->student)->attendanceTracker)->period_start_date?->format('d-m-Y') ?? '-',
-                    ];
-                    fputcsv($output, $row, ';');
-                }
-
-                fclose($output);
-            }, $filename);
-
-            return $response
-                ->header('Content-Type', 'text/csv; charset=utf-8')
-                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+            // ✅ Use service method untuk download CSV - centralized logic
+            return $this->attendanceService->downloadAttendanceCSV($attendances);
 
         } catch (\Exception $e) {
             Log::error('Export attendance CSV error: ' . $e->getMessage());
