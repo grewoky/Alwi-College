@@ -1,16 +1,8 @@
-@php
-    $cloudName = config('cloudinary.cloud_name') ?? env('CLOUDINARY_CLOUD_NAME');
-    $uploadPreset = config('cloudinary.upload_preset') ?? env('CLOUDINARY_UPLOAD_PRESET');
-    // Debug: Log if values are empty
-    if (!$cloudName || !$uploadPreset) {
-        \Log::warning('Cloudinary config missing', [
-            'cloudName' => $cloudName,
-            'uploadPreset' => $uploadPreset,
-            'env_name' => env('CLOUDINARY_CLOUD_NAME'),
-            'env_preset' => env('CLOUDINARY_UPLOAD_PRESET'),
-        ]);
-    }
-@endphp
+<div id="paymentCloudinaryConfig"
+   data-cloud-name="{{ config('cloudinary.cloud_name') ?? env('CLOUDINARY_CLOUD_NAME', '') }}"
+   data-upload-preset="{{ config('cloudinary.upload_preset') ?? env('CLOUDINARY_UPLOAD_PRESET', '') }}"
+   class="hidden"
+></div>
 
 <x-app-layout>
 <div class="p-6 max-w-3xl mx-auto">
@@ -104,8 +96,9 @@
   
   // Wait for Cloudinary widget to load before initializing
   function initPaymentCloudinaryWidget(retryCount = 0) {
-    const cloudName = @json($cloudName);
-    const uploadPreset = @json($uploadPreset);
+    const configEl = document.getElementById('paymentCloudinaryConfig');
+    const cloudName = configEl?.dataset?.cloudName?.trim() || 'dln4ok2h5';
+    const uploadPreset = configEl?.dataset?.uploadPreset?.trim() || 'JadwalMurid';
     
     console.log('initPaymentCloudinaryWidget called (attempt ' + (retryCount + 1) + ')', { cloudName, uploadPreset, cloudinaryReady: !!window.cloudinary });
     

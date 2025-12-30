@@ -1,19 +1,11 @@
 <x-app-layout>
   <x-slot name="title">Info • Unggah Kisi-kisi</x-slot>
 
-  @php
-      $infoCloudName = config('cloudinary.cloud_name') ?? env('CLOUDINARY_CLOUD_NAME');
-      $infoUploadPreset = config('cloudinary.upload_preset') ?? env('CLOUDINARY_UPLOAD_PRESET');
-      // Debug: Log if values are empty
-      if (!$infoCloudName || !$infoUploadPreset) {
-          \Log::warning('Cloudinary config missing (info page)', [
-              'cloudName' => $infoCloudName,
-              'uploadPreset' => $infoUploadPreset,
-              'env_name' => env('CLOUDINARY_CLOUD_NAME'),
-              'env_preset' => env('CLOUDINARY_UPLOAD_PRESET'),
-          ]);
-      }
-  @endphp
+    <div id="infoCloudinaryConfig"
+       data-cloud-name="{{ config('cloudinary.cloud_name') ?? env('CLOUDINARY_CLOUD_NAME', '') }}"
+       data-upload-preset="{{ config('cloudinary.upload_preset') ?? env('CLOUDINARY_UPLOAD_PRESET', '') }}"
+       class="hidden"
+    ></div>
 
   <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50">
 
@@ -335,8 +327,9 @@
     
     // Wait for Cloudinary script to load before initializing
     function initCloudinaryWidget(retryCount = 0) {
-      const cloudName = @json($infoCloudName);
-      const uploadPreset = @json($infoUploadPreset);
+      const configEl = document.getElementById('infoCloudinaryConfig');
+      const cloudName = configEl?.dataset?.cloudName?.trim() || 'dln4ok2h5';
+      const uploadPreset = configEl?.dataset?.uploadPreset?.trim() || 'JadwalMurid';
       
       console.log('initCloudinaryWidget called (attempt ' + (retryCount + 1) + ')', { cloudName, uploadPreset, cloudinaryReady: !!window.cloudinary });
       
