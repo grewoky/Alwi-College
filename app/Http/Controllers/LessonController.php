@@ -394,23 +394,35 @@ class LessonController extends Controller
     // Admin dashboard - jadwal yang di-upload
     public function adminDashboard()
     {
-        // Statistik jadwal total (filter only grade 10, 11, 12)
-        $totalLessons = Lesson::whereHas('classRoom', fn($q) => $q->whereIn('grade', [10, 11, 12]))->count();
-        $totalTeachers = Lesson::whereHas('classRoom', fn($q) => $q->whereIn('grade', [10, 11, 12]))->distinct('teacher_id')->count();
-        $totalClasses = Lesson::whereHas('classRoom', fn($q) => $q->whereIn('grade', [10, 11, 12]))->distinct('class_room_id')->count();
+        // ✅ Get retention cutoff for filtering active lessons only
+        $today = Carbon::now()->startOfDay();
+        $retentionDays = (int) env('SCHEDULE_RETENTION_DAYS', 2);
+        $cutoff = $today->copy()->subDays($retentionDays)->toDateString();
         
-        // Jadwal per status
+        // ✅ Statistik jadwal AKTIF SAJA (exclude jadwal kadaluarsa)
+        // Only count lessons yang: date > cutoff AND grade 10,11,12
+        $totalLessons = Lesson::whereHas('classRoom', fn($q) => $q->whereIn('grade', [10, 11, 12]))
+            ->where('date', '>', $cutoff)  // ✅ Exclude expired
+            ->count();
+        
+        $totalTeachers = Lesson::whereHas('classRoom', fn($q) => $q->whereIn('grade', [10, 11, 12]))
+            ->where('date', '>', $cutoff)  // ✅ Exclude expired
+            ->distinct('teacher_id')
+            ->count();
+        
+        $totalClasses = Lesson::whereHas('classRoom', fn($q) => $q->whereIn('grade', [10, 11, 12]))
+            ->where('date', '>', $cutoff)  // ✅ Exclude expired
+            ->distinct('class_room_id')
+            ->count();
+        
+        // Jadwal per status (hanya yang aktif)
         $lessonsWithoutTime = Lesson::whereHas('classRoom', fn($q) => $q->whereIn('grade', [10, 11, 12]))
+            ->where('date', '>', $cutoff)  // ✅ Exclude expired
             ->where(function($q) {
                 $q->whereNull('start_time')->orWhereNull('end_time');
             })->count();
         
         // ✅ Jadwal terbaru - EXCLUDE expired lessons from dashboard
-        // Only show lessons NOT older than retention days
-        $today = Carbon::now()->startOfDay();
-        $retentionDays = (int) env('SCHEDULE_RETENTION_DAYS', 2);
-        $cutoff = $today->copy()->subDays($retentionDays)->toDateString();
-        
         $recentLessons = Lesson::with(['teacher.user', 'subject', 'classRoom'])
             ->whereHas('classRoom', fn($q) => $q->whereIn('grade', [10, 11, 12]))
             ->where('date', '>', $cutoff)  // ✅ Filter: exclude expired
@@ -418,8 +430,11 @@ class LessonController extends Controller
             ->limit(10)
             ->get();
         
-        // Jadwal per guru
-        $teachersLessonCount = Teacher::withCount(['lessons' => fn($q) => $q->whereHas('classRoom', fn($qq) => $qq->whereIn('grade', [10, 11, 12]))])
+        // Jadwal per guru (hanya yang aktif)
+        $teachersLessonCount = Teacher::withCount(['lessons' => fn($q) => 
+            $q->whereHas('classRoom', fn($qq) => $qq->whereIn('grade', [10, 11, 12]))
+              ->where('date', '>', $cutoff)  // ✅ Exclude expired
+        ])
             ->orderBy('lessons_count', 'desc')
             ->get();
 
