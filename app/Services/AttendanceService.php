@@ -249,8 +249,9 @@ class AttendanceService
         }
 
         // Return response dengan proper headers
-        return response($csvContent)
-            ->header('Content-Type', 'text/csv; charset=utf-8')
+        return response($csvContent, 200)
+            ->header('Content-Type', 'application/csv; charset=utf-8')
+            ->header('Content-Length', strlen($csvContent))
             ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
             ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
             ->header('Pragma', 'no-cache')
