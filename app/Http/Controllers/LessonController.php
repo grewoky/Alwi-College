@@ -216,12 +216,13 @@ class LessonController extends Controller
 
         $student = \App\Models\Student::with('classRoom.school')->where('user_id', $user->id)->firstOrFail();
 
-        // Respect retention window: students only see lessons not older than retention days
+        // ✅ Respect retention window: students only see lessons NOT expired
+        // Expired = date <= cutoff, so we show: date > cutoff
         $retentionDays = (int) env('SCHEDULE_RETENTION_DAYS', 2);
         $cutoffDate = Carbon::now()->startOfDay()->subDays($retentionDays)->toDateString();
 
         $q = Lesson::with(['teacher.user', 'subject', 'classRoom.school'])
-            ->whereDate('date', '>=', $cutoffDate)
+            ->where('date', '>', $cutoffDate)  // ✅ Changed from '>=' to '>'
             ->orderBy('date', 'asc');
 
         if ($r->filled('grade')) {
@@ -244,6 +245,14 @@ class LessonController extends Controller
     {
         $q = Lesson::with(['teacher.user', 'subject', 'classRoom'])
             ->whereHas('classRoom', fn($query) => $query->whereIn('grade', [10, 11, 12]));
+        
+        // ✅ Exclude expired lessons - hanya tampilkan jadwal yang masih aktif
+        // Jadwal dianggap EXPIRED jika: date <= (today - retention_days)
+        // Jadi kita tampilkan jadwal jika: date > (today - retention_days)
+        $today = Carbon::now()->startOfDay();
+        $retentionDays = (int) env('SCHEDULE_RETENTION_DAYS', 2);
+        $cutoff = $today->copy()->subDays($retentionDays)->toDateString();
+        $q->where('date', '>', $cutoff);  // ✅ Filter: exclude expired
         
         if ($r->filled('teacher_id')) {
             $q->where('teacher_id', $r->teacher_id);
@@ -424,13 +433,15 @@ class LessonController extends Controller
         $user = Auth::user();
         $teacher = Teacher::where('user_id', $user->id)->firstOrFail();
         
-        // Filter: hanya tampilkan lessons dari 2 hari terakhir (exclude lessons > 2 hari lalu)
-        $twoHaysAgoDate = now()->subDays(2)->format('Y-m-d');
+        // ✅ Filter: exclude expired lessons (date <= cutoff)
+        // Show only: date > cutoff
+        $retentionDays = (int) env('SCHEDULE_RETENTION_DAYS', 2);
+        $cutoff = Carbon::now()->startOfDay()->subDays($retentionDays)->toDateString();
         
         // Get lessons hanya untuk guru yang login (filter grade 10, 11, 12)
         $q = Lesson::with(['subject', 'classRoom.school'])
             ->where('teacher_id', $teacher->id)
-            ->where('date', '>=', $twoHaysAgoDate)
+            ->where('date', '>', $cutoff)  // ✅ Exclude expired lessons
             ->orderBy('date', 'desc');
         
         // Filter by grade if provided
