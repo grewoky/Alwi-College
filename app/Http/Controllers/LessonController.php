@@ -405,9 +405,15 @@ class LessonController extends Controller
                 $q->whereNull('start_time')->orWhereNull('end_time');
             })->count();
         
-        // Jadwal terbaru
+        // ✅ Jadwal terbaru - EXCLUDE expired lessons from dashboard
+        // Only show lessons NOT older than retention days
+        $today = Carbon::now()->startOfDay();
+        $retentionDays = (int) env('SCHEDULE_RETENTION_DAYS', 2);
+        $cutoff = $today->copy()->subDays($retentionDays)->toDateString();
+        
         $recentLessons = Lesson::with(['teacher.user', 'subject', 'classRoom'])
             ->whereHas('classRoom', fn($q) => $q->whereIn('grade', [10, 11, 12]))
+            ->where('date', '>', $cutoff)  // ✅ Filter: exclude expired
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();

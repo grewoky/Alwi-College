@@ -199,7 +199,8 @@ class AttendanceService
 
     /**
      * Download attendance CSV file langsung ke browser
-     * File masuk ke local storage/Downloads folder user
+     * Menggunakan streaming callback - tidak perlu simpan file
+     * Optimal untuk Vercel serverless environment
      */
     public function downloadAttendanceCSV($attendances = null)
     {
@@ -208,59 +209,51 @@ class AttendanceService
         }
 
         $filename = 'attendance_' . now()->format('Y-m-d_His') . '.csv';
-        
-        // Generate CSV content
-        $tempPath = storage_path('temp/' . $filename);
-        
-        // Ensure temp directory exists
-        if (!file_exists(storage_path('temp'))) {
-            mkdir(storage_path('temp'), 0755, true);
-        }
 
-        $output = fopen($tempPath, 'w');
+        // Stream CSV langsung ke output tanpa simpan file
+        return response()->streamDownload(function () use ($attendances) {
+            $output = fopen('php://output', 'w');
 
-        // UTF-8 BOM untuk Excel
-        fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            // UTF-8 BOM untuk Excel
+            fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-        // Headers
-        $headers = [
-            'Tanggal',
-            'Nama Siswa',
-            'NIS',
-            'Kelas',
-            'Sekolah',
-            'Status Absensi',
-            'Guru Penginput',
-            'Mata Pelajaran',
-            'Kehadiran (Hari)',
-            'Tanggal Mulai Period',
-        ];
-        fputcsv($output, $headers, ';');
-
-        // Data rows
-        foreach ($attendances as $attendance) {
-            $row = [
-                $attendance->created_at->format('d-m-Y H:i:s'),
-                optional($attendance->student)->user->name ?? '-',
-                optional($attendance->student)->nis ?? '-',
-                optional(optional($attendance->student)->classRoom)->name ?? '-',
-                optional(optional(optional($attendance->student)->classRoom)->school)->name ?? '-',
-                $this->getStatusLabel($attendance->status),
-                optional($attendance->marker)->name ?? '-',
-                optional($attendance->lesson)->subject->name ?? '-',
-                optional(optional($attendance->student)->attendanceTracker)->attendance_count ?? 0,
-                optional(optional($attendance->student)->attendanceTracker)->period_start_date?->format('d-m-Y') ?? '-',
+            // Headers
+            $headers = [
+                'Tanggal',
+                'Nama Siswa',
+                'NIS',
+                'Kelas',
+                'Sekolah',
+                'Status Absensi',
+                'Guru Penginput',
+                'Mata Pelajaran',
+                'Kehadiran (Hari)',
+                'Tanggal Mulai Period',
             ];
-            fputcsv($output, $row, ';');
-        }
+            fputcsv($output, $headers, ';');
 
-        fclose($output);
+            // Data rows
+            foreach ($attendances as $attendance) {
+                $row = [
+                    $attendance->created_at->format('d-m-Y H:i:s'),
+                    optional($attendance->student)->user->name ?? '-',
+                    optional($attendance->student)->nis ?? '-',
+                    optional(optional($attendance->student)->classRoom)->name ?? '-',
+                    optional(optional(optional($attendance->student)->classRoom)->school)->name ?? '-',
+                    $this->getStatusLabel($attendance->status),
+                    optional($attendance->marker)->name ?? '-',
+                    optional($attendance->lesson)->subject->name ?? '-',
+                    optional(optional($attendance->student)->attendanceTracker)->attendance_count ?? 0,
+                    optional(optional($attendance->student)->attendanceTracker)->period_start_date?->format('d-m-Y') ?? '-',
+                ];
+                fputcsv($output, $row, ';');
+            }
 
-        // Download langsung ke browser - masuk ke Downloads folder
-        return response()->download($tempPath, $filename, [
+            fclose($output);
+        }, $filename, [
             'Content-Type' => 'text/csv; charset=utf-8',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ])->deleteFileAfterSend(true);
+        ]);
     }
 
     /**
