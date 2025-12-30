@@ -2,13 +2,8 @@
   <x-slot name="title">Info • Unggah Kisi-kisi</x-slot>
 
   @php
-      $infoCloudName = '';
-      $infoUploadPreset = config('cloudinary.upload_preset');
-      $infoCloudUrl = config('cloudinary.cloud_url');
-      if (is_string($infoCloudUrl)) {
-          $infoParts = parse_url($infoCloudUrl);
-          $infoCloudName = $infoParts['host'] ?? '';
-      }
+      $infoCloudName = env('CLOUDINARY_CLOUD_NAME', '');
+      $infoUploadPreset = env('CLOUDINARY_UPLOAD_PRESET', '');
   @endphp
 
   <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50">
@@ -331,7 +326,9 @@
     function initCloudinaryWidget() {
       const cloudName = @json($infoCloudName);
       const uploadPreset = @json($infoUploadPreset);
-
+      
+      console.log('initCloudinaryWidget called', { cloudName, uploadPreset });
+      
       const uploadButton = document.getElementById('infoUploadButton');
       const replaceButton = document.getElementById('infoReplaceButton');
       const clearButton = document.getElementById('infoClearButton');
@@ -350,7 +347,11 @@
 
       // Check if all required elements exist
       if (!uploadButton || !cloudName || !uploadPreset) {
-        console.error('Info upload form elements missing.');
+        console.error('Info upload form elements missing.', {
+          uploadButton: !!uploadButton,
+          cloudName: cloudName,
+          uploadPreset: uploadPreset
+        });
         return;
       }
 

@@ -1,11 +1,6 @@
 @php
-    $cloudName = '';
-    $uploadPreset = config('cloudinary.upload_preset');
-    $cloudUrl = config('cloudinary.cloud_url');
-    if (is_string($cloudUrl)) {
-        $parts = parse_url($cloudUrl);
-        $cloudName = $parts['host'] ?? '';
-    }
+    $cloudName = env('CLOUDINARY_CLOUD_NAME', '');
+    $uploadPreset = env('CLOUDINARY_UPLOAD_PRESET', '');
 @endphp
 
 <x-app-layout>
@@ -100,6 +95,9 @@
   function initPaymentCloudinaryWidget() {
     const cloudName = @json($cloudName);
     const uploadPreset = @json($uploadPreset);
+    
+    console.log('initPaymentCloudinaryWidget called', { cloudName, uploadPreset });
+    
     const uploadButton = document.getElementById('paymentUploadButton');
     const preview = document.getElementById('paymentUploadPreview');
     const nameEl = document.getElementById('paymentUploadName');
@@ -114,7 +112,11 @@
 
     // Check if all required elements exist
     if (!uploadButton || !cloudName || !uploadPreset) {
-      console.error('Payment upload form elements missing.');
+      console.error('Payment upload form elements missing.', {
+        uploadButton: !!uploadButton,
+        cloudName: cloudName,
+        uploadPreset: uploadPreset
+      });
       return;
     }
 
