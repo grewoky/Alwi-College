@@ -1,6 +1,6 @@
-<section class="relative bg-white pt-4 sm:pt-5 md:pt-8 lg:pt-10 px-3 sm:px-4 md:px-6 lg:px-8">
-    <!-- Carousel Container - padding sudah dari section, max-w-7xl untuk max width constraint saja -->
-    <div class="max-w-7xl mx-auto">
+<section class="relative bg-white w-full pt-4 sm:pt-5 md:pt-8 lg:pt-10">
+    <!-- Carousel Container - full width without extra padding -->
+    <div class="w-full px-3 sm:px-4 md:px-6 lg:px-8">
       <div id="poster-carousel" class="relative w-full overflow-hidden rounded-2xl shadow-lg" role="region" aria-label="Carousel Poster">
         <div class="carousel-track relative w-full h-56 sm:h-64 md:h-96 lg:h-[500px]">
           <div class="carousel-inner flex w-full h-full will-change-transform rounded-2xl" style="min-width: 100%;">
