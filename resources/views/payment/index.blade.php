@@ -93,10 +93,11 @@
 </div>
 
 @once
-  <script src="https://widget.cloudinary.com/v2.0/global/all.js" defer></script>
+  <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
 @endonce
 <script>
-  window.addEventListener('load', function () {
+  // Wait for Cloudinary widget to load before initializing
+  function initPaymentCloudinaryWidget() {
     const cloudName = @json($cloudName);
     const uploadPreset = @json($uploadPreset);
     const uploadButton = document.getElementById('paymentUploadButton');
@@ -111,10 +112,20 @@
     const fallbackInput = document.getElementById('paymentFallbackFile');
     const form = document.getElementById('paymentUploadForm');
 
-    if (!uploadButton || !cloudName || !uploadPreset || !window.cloudinary) {
-      console.warn('Cloudinary widget belum dikonfigurasi dengan benar.');
+    // Check if all required elements exist
+    if (!uploadButton || !cloudName || !uploadPreset) {
+      console.error('Payment upload form elements missing.');
       return;
     }
+
+    // Check if Cloudinary is available
+    if (!window.cloudinary) {
+      console.warn('Cloudinary widget not loaded. Retrying...');
+      setTimeout(initPaymentCloudinaryWidget, 500);
+      return;
+    }
+
+    console.log('Payment Cloudinary widget initialization started');
 
     const widget = window.cloudinary.createUploadWidget({
       cloudName: cloudName,
@@ -182,6 +193,13 @@
         }
       });
     }
-  });
+  }
+
+  // Initialize Cloudinary widget when page loads
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPaymentCloudinaryWidget);
+  } else {
+    initPaymentCloudinaryWidget();
+  }
 </script>
 </x-app-layout>

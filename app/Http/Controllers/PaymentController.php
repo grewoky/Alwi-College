@@ -207,14 +207,14 @@ class PaymentController extends Controller
                 'student_name' => $studentName,
             ]);
 
-            return back()->with('ok', 'Data pembayaran dihapus.');
+            return redirect()->route('pay.list')->with('ok', 'Data pembayaran dihapus.');
         } catch (\Throwable $th) {
             Log::error('Payment delete failed', [
                 'payment_id' => $payment->id,
                 'error' => $th->getMessage(),
             ]);
 
-            return back()->with('error', 'Gagal menghapus data pembayaran');
+            return redirect()->route('pay.list')->with('error', 'Gagal menghapus data pembayaran');
         }
     }
 

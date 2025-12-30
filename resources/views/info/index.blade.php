@@ -324,10 +324,11 @@
     </div>
   </div>
   @once
-    <script src="https://widget.cloudinary.com/v2.0/global/all.js" defer></script>
+    <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
   @endonce
   <script>
-    window.addEventListener('load', function () {
+    // Wait for Cloudinary script to load before initializing
+    function initCloudinaryWidget() {
       const cloudName = @json($infoCloudName);
       const uploadPreset = @json($infoUploadPreset);
 
@@ -347,10 +348,20 @@
       const fallbackInput = document.getElementById('infoFallbackFile');
       const form = document.getElementById('infoUploadForm');
 
-      if (!uploadButton || !cloudName || !uploadPreset || !window.cloudinary) {
-        console.warn('Cloudinary widget belum siap digunakan.');
+      // Check if all required elements exist
+      if (!uploadButton || !cloudName || !uploadPreset) {
+        console.error('Info upload form elements missing.');
         return;
       }
+
+      // Check if Cloudinary is available
+      if (!window.cloudinary) {
+        console.warn('Cloudinary widget not loaded. Retrying...');
+        setTimeout(initCloudinaryWidget, 500);
+        return;
+      }
+
+      console.log('Cloudinary widget initialization started');
 
       const resetSelection = function () {
         publicIdInput.value = '';
@@ -436,6 +447,13 @@
           }
         });
       }
-    });
+    }
+
+    // Initialize Cloudinary widget when page loads
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initCloudinaryWidget);
+    } else {
+      initCloudinaryWidget();
+    }
   </script>
 </x-app-layout>
