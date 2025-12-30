@@ -198,9 +198,8 @@ class AttendanceService
     }
 
     /**
-     * Download attendance CSV file langsung
-     * Centralized CSV generation untuk avoid duplikasi logic
-     * Uses temporary file storage for better compatibility with serverless (Vercel)
+     * Download attendance CSV file langsung ke browser
+     * File masuk ke local storage/Downloads folder user
      */
     public function downloadAttendanceCSV($attendances = null)
     {
@@ -210,7 +209,7 @@ class AttendanceService
 
         $filename = 'attendance_' . now()->format('Y-m-d_His') . '.csv';
         
-        // Generate CSV content to temporary file (better for Vercel serverless)
+        // Generate CSV content
         $tempPath = storage_path('temp/' . $filename);
         
         // Ensure temp directory exists
@@ -247,7 +246,7 @@ class AttendanceService
                 optional(optional($attendance->student)->classRoom)->name ?? '-',
                 optional(optional(optional($attendance->student)->classRoom)->school)->name ?? '-',
                 $this->getStatusLabel($attendance->status),
-                optional($attendance->marker)->name ?? '-',  // ✅ Fixed: Gunakan marker relasi yang di-eager-load
+                optional($attendance->marker)->name ?? '-',
                 optional($attendance->lesson)->subject->name ?? '-',
                 optional(optional($attendance->student)->attendanceTracker)->attendance_count ?? 0,
                 optional(optional($attendance->student)->attendanceTracker)->period_start_date?->format('d-m-Y') ?? '-',
@@ -257,7 +256,7 @@ class AttendanceService
 
         fclose($output);
 
-        // Return file download response
+        // Download langsung ke browser - masuk ke Downloads folder
         return response()->download($tempPath, $filename, [
             'Content-Type' => 'text/csv; charset=utf-8',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',

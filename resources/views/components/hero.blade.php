@@ -3,7 +3,7 @@
     <div class="max-w-7xl mx-auto">
       <div id="poster-carousel" class="relative w-full overflow-hidden rounded-2xl shadow-lg" role="region" aria-label="Carousel Poster">
         <div class="carousel-track relative w-full h-56 sm:h-64 md:h-96 lg:h-[500px]">
-          <div class="carousel-inner flex w-full h-full will-change-transform rounded-2xl">
+          <div class="carousel-inner flex w-full h-full will-change-transform rounded-2xl" style="min-width: 100%;">
           @php
             // If the controller hasn't provided $posters, build it from files in public/images/posters
             if (!isset($posters) || empty($posters)) {
@@ -34,7 +34,7 @@
 
           @foreach($posters as $i => $src)
             <div class="carousel-slide flex-shrink-0 w-full h-full relative" data-index="{{ $i }}" aria-hidden="{{ $i === 0 ? 'false' : 'true' }}">
-              <img src="{{ $src }}" alt="Poster {{ $i + 1 }}" class="w-full h-full object-cover object-center" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" decoding="async">
+              <img src="{{ $src }}" alt="Poster {{ $i + 1 }}" class="w-full h-full min-w-full min-h-full object-cover object-center" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" decoding="async">
 
               <!-- CTA overlay on poster (center-left alignment, hidden on mobile) -->
               <div class="absolute inset-0 hidden md:flex items-center justify-center md:justify-start md:pl-8 lg:pl-12 pointer-events-none">
