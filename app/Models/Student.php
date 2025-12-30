@@ -10,5 +10,6 @@ class Student extends Model
     public function user(){ return $this->belongsTo(\App\Models\User::class); }
     public function classRoom(){ return $this->belongsTo(ClassRoom::class); }
     public function attendances(){ return $this->hasMany(\App\Models\Attendance::class); }
+    public function attendanceTracker(){ return $this->hasOne(\App\Models\AttendanceTracker::class); }
 }
 

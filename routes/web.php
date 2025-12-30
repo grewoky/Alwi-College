@@ -78,6 +78,8 @@ Route::middleware(['auth','role:admin'])->prefix('admin')->group(function () {
     // ADMIN ABSENSI (Lihat laporan kehadiran siswa)
     Route::get('/attendance', [AttendanceController::class,'adminView'])->name('attendance.admin');
     Route::get('/attendance/report', [AttendanceController::class,'report'])->name('attendance.report');
+    Route::post('/attendance/export-csv', [AttendanceController::class,'exportAttendanceCSV'])->name('attendance.export.csv');
+    Route::get('/attendance/student/{student}/tracking', [AttendanceController::class,'getStudentTrackingSummary'])->name('attendance.student.tracking');
 
     // ADMIN USER MANAGEMENT (verifikasi pendaftar, tambah guru)
     Route::get('/users/pending', [\App\Http\Controllers\AdminUserController::class,'pending'])->name('admin.users.pending');

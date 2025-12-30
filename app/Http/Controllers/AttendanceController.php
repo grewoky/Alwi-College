@@ -9,6 +9,7 @@ use App\Models\Student;
 use App\Models\Teacher;
 use App\Models\ClassRoom;
 use App\Models\TeacherTrip;
+use App\Services\AttendanceService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -16,6 +17,12 @@ use Carbon\Carbon;
 
 class AttendanceController extends Controller
 {
+    protected $attendanceService;
+
+    public function __construct(AttendanceService $attendanceService)
+    {
+        $this->attendanceService = $attendanceService;
+    }
     // Form absen: list siswa kelas tsb
     public function show(Lesson $lesson)
     {
@@ -43,9 +50,12 @@ class AttendanceController extends Controller
         DB::transaction(function() use ($lesson, $students, $payload, $teacher) {
             foreach ($students as $sid) {
                 $status = $payload[$sid] ?? 'alpha';
-                Attendance::updateOrCreate(
-                    ['lesson_id'=>$lesson->id, 'student_id'=>$sid],
-                    ['status'=>$status, 'marked_by'=>Auth::id(), 'marked_at'=>now()]
+                // Use AttendanceService untuk record dan update tracker
+                $this->attendanceService->recordAttendance(
+                    $lesson->id,
+                    $sid,
+                    $status,
+                    Auth::id()
                 );
             }
 
@@ -452,5 +462,110 @@ class AttendanceController extends Controller
         }
         
         return back()->with('ok', 'Absensi berhasil dicatat!');
+    }
+
+    /**
+     * Export attendance data to CSV
+     */
+    public function exportAttendanceCSV(Request $request)
+    {
+        try {
+            // Validate admin access
+            abort_unless(Auth::user()?->role === 'admin', 403, 'Unauthorized. Only admins can export attendance.');
+
+            // Get filters
+            $filters = [
+                'month' => $request->input('month', now()->month),
+                'year' => $request->input('year', now()->year),
+                'school_id' => $request->input('school_id'),
+                'class_room_id' => $request->input('class_room_id'),
+            ];
+
+            // Get attendance data
+            $attendances = $this->attendanceService->getAttendanceDataForExport($filters);
+
+            if ($attendances->isEmpty()) {
+                return back()->with('warning', 'Tidak ada data absensi untuk di-export.');
+            }
+
+            // Generate CSV
+            $csvConfig = $this->attendanceService->exportToCSV($attendances);
+
+            // Create response with CSV content
+            $response = response()->streamDownload(function () use ($attendances) {
+                $output = fopen('php://output', 'w');
+
+                // UTF-8 BOM untuk Excel
+                fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+                // Headers
+                $headers = [
+                    'Tanggal',
+                    'Nama Siswa',
+                    'NIS',
+                    'Kelas',
+                    'Sekolah',
+                    'Status Absensi',
+                    'Guru Penginput',
+                    'Mata Pelajaran',
+                    'Counter 30 Hari',
+                    'Tanggal Mulai Period',
+                ];
+                fputcsv($output, $headers, ';');
+
+                // Data rows
+                foreach ($attendances as $attendance) {
+                    $row = [
+                        $attendance->created_at->format('d-m-Y H:i:s'),
+                        optional($attendance->student)->user->name ?? '-',
+                        optional($attendance->student)->nis ?? '-',
+                        optional(optional($attendance->student)->classRoom)->name ?? '-',
+                        optional(optional(optional($attendance->student)->classRoom)->school)->name ?? '-',
+                        $this->getStatusLabelIndonesian($attendance->status),
+                        optional($attendance->marker)->name ?? '-',
+                        optional($attendance->lesson)->subject->name ?? '-',
+                        optional(optional($attendance->student)->attendanceTracker)->attendance_count ?? 0,
+                        optional(optional($attendance->student)->attendanceTracker)->period_start_date?->format('d-m-Y') ?? '-',
+                    ];
+                    fputcsv($output, $row, ';');
+                }
+
+                fclose($output);
+            }, $csvConfig['filename']);
+
+            return $response->header('Content-Type', $csvConfig['content_type']);
+        } catch (\Exception $e) {
+            Log::error('Export attendance CSV error: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengexport data: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get status label dalam bahasa Indonesia
+     */
+    private function getStatusLabelIndonesian($status)
+    {
+        $labels = [
+            'present' => 'Hadir',
+            'alpha' => 'Tidak Hadir',
+            'izin' => 'Izin',
+            'sakit' => 'Sakit',
+        ];
+
+        return $labels[$status] ?? ucfirst($status);
+    }
+
+    /**
+     * Get student attendance tracking summary
+     */
+    public function getStudentTrackingSummary(int $studentId)
+    {
+        try {
+            $summary = $this->attendanceService->getStudentAttendanceSummary($studentId);
+            return response()->json($summary);
+        } catch (\Exception $e) {
+            Log::error('Get student tracking summary error: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

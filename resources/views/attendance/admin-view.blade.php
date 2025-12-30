@@ -5,9 +5,26 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             <!-- Page Header -->
-            <div class="mb-8">
-                <h1 class="text-4xl font-bold text-gray-900 mb-2">📊 Pantau Kehadiran Siswa</h1>
-                <p class="text-gray-600">Data absensi bulan <strong>{{ $currentMonth }}</strong> (Read-only - Hanya Pantau)</p>
+            <div class="mb-8 flex justify-between items-start">
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-900 mb-2">📊 Pantau Kehadiran Siswa</h1>
+                    <p class="text-gray-600">Data absensi bulan <strong>{{ $currentMonth }}</strong> (Read-only - Hanya Pantau)</p>
+                </div>
+                
+                <!-- Export CSV Button -->
+                <div class="flex gap-2">
+                    <form action="{{ route('attendance.export.csv') }}" method="POST" class="inline">
+                        @csrf
+                        <input type="hidden" name="month" value="{{ $startOfMonth->month }}">
+                        <input type="hidden" name="year" value="{{ $startOfMonth->year }}">
+                        <button type="submit" class="inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold shadow transition-colors duration-200">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Export CSV
+                        </button>
+                    </form>
+                </div>
             </div>
 
             <!-- Statistics Cards -->
@@ -106,6 +123,7 @@
                                             <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Siswa</th>
                                             <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Kelas</th>
                                             <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
+                                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Counter 30 Hari</th>
                                             <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Guru Penginput</th>
                                             <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Tanggal</th>
                                         </tr>
@@ -140,6 +158,24 @@
                                                             🏥 Sakit
                                                         </span>
                                                     @endif
+                                                </td>
+                                                <td class="px-6 py-4 text-sm">
+                                                    @php
+                                                        $tracker = $attendance->student->attendanceTracker;
+                                                        $count = $tracker?->attendance_count ?? 0;
+                                                        $percentage = ($count / 30) * 100;
+                                                    @endphp
+                                                    <div class="flex items-center gap-2">
+                                                        <div class="flex-1">
+                                                            <div class="text-sm font-semibold text-gray-900">{{ $count }}/30</div>
+                                                            <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                                                <div class="h-full bg-blue-500" style="width: {{ $percentage }}%"></div>
+                                                            </div>
+                                                        </div>
+                                                        @if($count >= 30)
+                                                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-800">✓ Reset</span>
+                                                        @endif
+                                                    </div>
                                                 </td>
                                                 <td class="px-6 py-4 text-sm text-gray-900">
                                                     {{ $attendance->lesson->teacher->user->name ?? '-' }}
