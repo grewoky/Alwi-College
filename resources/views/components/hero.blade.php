@@ -1,8 +1,8 @@
 <section class="relative bg-white w-full pt-4 sm:pt-5 md:pt-8 lg:pt-10">
     <!-- Carousel Container - full width without extra padding -->
     <div class="w-full px-3 sm:px-4 md:px-6 lg:px-8">
-      <div id="poster-carousel" class="relative w-full overflow-hidden rounded-2xl shadow-lg" role="region" aria-label="Carousel Poster">
-        <div class="carousel-track relative w-full h-52 sm:h-64 md:h-80 lg:h-[550px]">
+      <div id="poster-carousel" class="relative w-full overflow-hidden rounded-2xl shadow-lg bg-gray-900" role="region" aria-label="Carousel Poster">
+        <div class="carousel-track relative w-full h-56 sm:h-72 md:h-80 lg:h-[550px]">
           <div class="carousel-inner flex w-full h-full will-change-transform rounded-2xl" style="min-width: 100%;">
           @php
             // If the controller hasn't provided $posters, build it from files in public/images/posters
@@ -33,8 +33,8 @@
           @endphp
 
           @foreach($posters as $i => $src)
-            <div class="carousel-slide flex-shrink-0 w-full h-full relative" data-index="{{ $i }}" aria-hidden="{{ $i === 0 ? 'false' : 'true' }}">
-              <img src="{{ $src }}" alt="Poster {{ $i + 1 }}" class="w-full h-full object-cover object-center" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" decoding="async">
+            <div class="carousel-slide flex-shrink-0 w-full h-full relative flex items-center justify-center" data-index="{{ $i }}" aria-hidden="{{ $i === 0 ? 'false' : 'true' }}">
+              <img src="{{ $src }}" alt="Poster {{ $i + 1 }}" class="w-full h-full object-contain object-center" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" decoding="async">
 
               <!-- CTA overlay on poster (center-left alignment, hidden on mobile) -->
               <div class="absolute inset-0 hidden md:flex items-center justify-center md:justify-start md:pl-8 lg:pl-12 pointer-events-none">
