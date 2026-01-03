@@ -1,8 +1,8 @@
 <section class="relative bg-white w-full pt-4 sm:pt-5 md:pt-8 lg:pt-10">
     <!-- Carousel Container - full width without extra padding -->
     <div class="w-full px-3 sm:px-4 md:px-6 lg:px-8">
-      <div id="poster-carousel" class="relative w-full overflow-hidden rounded-2xl shadow-lg bg-gray-200" role="region" aria-label="Carousel Poster">
-        <div class="carousel-track relative w-full h-80 sm:h-96 md:h-96 lg:h-[500px]">
+      <div id="poster-carousel" class="relative w-full overflow-hidden rounded-2xl shadow-lg bg-gray-100" role="region" aria-label="Carousel Poster">
+        <div class="carousel-track relative w-full aspect-video">
           <div class="carousel-inner flex w-full h-full will-change-transform rounded-2xl" style="min-width: 100%;">
           @php
             // If the controller hasn't provided $posters, build it from files in public/images/posters
