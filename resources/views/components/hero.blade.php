@@ -30,12 +30,12 @@
       @endphp
 
       <!-- MOBILE CAROUSEL (hidden on md and up) -->
-      <div id="poster-carousel-mobile" class="relative w-full overflow-hidden rounded-none md:rounded-2xl shadow-lg md:hidden bg-gray-900" role="region" aria-label="Carousel Poster Mobile">
-        <div class="carousel-track-mobile relative w-full h-80">
+      <div id="poster-carousel-mobile" class="relative w-full overflow-hidden rounded-none md:rounded-2xl shadow-lg md:hidden mb-8" role="region" aria-label="Carousel Poster Mobile">
+        <div class="carousel-track-mobile relative w-full h-96">
           <div class="carousel-inner-mobile flex w-full h-full will-change-transform" style="min-width: 100%;">
           @foreach($posters as $i => $src)
-            <div class="carousel-slide-mobile flex-shrink-0 w-full h-full relative flex items-center justify-center" data-index="{{ $i }}" aria-hidden="{{ $i === 0 ? 'false' : 'true' }}">
-              <img src="{{ $src }}" alt="Poster {{ $i + 1 }}" class="w-full h-full object-contain object-center" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" decoding="async">
+            <div class="carousel-slide-mobile flex-shrink-0 w-full h-full relative" data-index="{{ $i }}" aria-hidden="{{ $i === 0 ? 'false' : 'true' }}">
+              <img src="{{ $src }}" alt="Poster {{ $i + 1 }}" class="w-full h-full object-cover object-center" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" decoding="async">
 
               <!-- Overlay masks -->
               <div class="absolute inset-0 pointer-events-none">
