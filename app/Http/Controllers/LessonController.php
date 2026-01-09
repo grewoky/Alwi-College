@@ -782,4 +782,4 @@ class LessonController extends Controller
             }
         }
     }
-
+}
