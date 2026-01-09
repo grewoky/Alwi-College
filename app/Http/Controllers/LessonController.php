@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth; // ⬅️ penting
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 use App\Models\Lesson;
@@ -14,7 +15,9 @@ use App\Models\School;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
+use App\Models\Student;
 use App\Models\DeletedLessonLog;
+use App\Mail\ScheduleCreatedNotification;
 
 class LessonController extends Controller
 {
@@ -91,8 +94,9 @@ class LessonController extends Controller
             $created = 0;
             $skipped = 0;
             $errors = [];
+            $newLessons = []; // Track newly created lessons for email
 
-            DB::transaction(function() use ($r, $classRooms, $start, $end, &$created, &$skipped, &$errors) {
+            DB::transaction(function() use ($r, $classRooms, $start, $end, &$created, &$skipped, &$errors, &$newLessons) {
                 for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
                     foreach ($classRooms as $classRoom) {
                         try {
@@ -134,6 +138,7 @@ class LessonController extends Controller
 
                             if ($lesson->wasRecentlyCreated) {
                                 $created++;
+                                $newLessons[] = $lesson; // Track for email sending
                             } else {
                                 $skipped++;
                             }
@@ -151,6 +156,14 @@ class LessonController extends Controller
                 Log::warning('Lesson generation dengan error', ['errors' => $errors]);
                 $errorMsg = implode(', ', array_slice($errors, 0, 3)); // Tampilkan 3 error pertama
                 return back()->with('warning', "⚠️ Jadwal dibuat dengan error: $errorMsg");
+            }
+
+            // Send emails to teacher and students
+            try {
+                $this->sendScheduleNotificationEmails($newLessons, $r->teacher_id, $school);
+            } catch (\Exception $e) {
+                Log::warning('Failed to send schedule notification emails', ['error' => $e->getMessage()]);
+                // Don't fail the operation if email sending fails
             }
 
             $msg = "✅ Jadwal berhasil digenerate! {$created} jadwal baru dibuat untuk {$classRooms->count()} kelas grade {$r->grade} di {$school->name}, {$skipped} duplikat diabaikan. Rentang tanggal: {$start->format('d M Y')} - {$end->format('d M Y')}";
@@ -249,7 +262,11 @@ class LessonController extends Controller
 
         $q = Lesson::with(['teacher.user', 'subject', 'classRoom.school'])
             ->where('date', '>', $cutoffDate)  // ✅ Changed from '>=' to '>'
-            ->orderBy('date', 'asc');
+            ->join('class_rooms', 'lessons.class_room_id', '=', 'class_rooms.id')
+            ->join('schools', 'class_rooms.school_id', '=', 'schools.id')
+            ->orderBy('schools.name', 'asc')  // Sort by school name first (student's school first)
+            ->orderBy('lessons.date', 'asc')   // Then by date
+            ->select('lessons.*');
 
         if ($r->filled('grade')) {
             $q->whereHas('classRoom', function($query) use ($r) {
@@ -648,5 +665,121 @@ class LessonController extends Controller
 
         return back()->with('ok', '✅ Jadwal berhasil dihapus');
     }
-}
+
+    /**
+     * Send schedule notification emails to teacher and students
+     */
+    private function sendScheduleNotificationEmails($lessons, $teacherId, $school)
+    {
+        if ($lessons->isEmpty()) {
+            return;
+        }
+
+        // Get teacher info
+        $teacher = Teacher::with('user')->find($teacherId);
+        if (!$teacher || !$teacher->user) {
+            return;
+        }
+
+        // Send email to teacher
+        try {
+            $firstLesson = $lessons->first();
+            $scheduleInfo = [
+                'date' => $firstLesson->date,
+                'subject_name' => $firstLesson->subject?->name ?? '-',
+                'teacher_name' => $teacher->user->name,
+                'class_name' => $firstLesson->classRoom?->name ?? '-',
+                'school_name' => $school->name,
+                'start_time' => $firstLesson->start_time,
+                'end_time' => $firstLesson->end_time,
+            ];
+
+            Mail::to($teacher->user->email)->send(new ScheduleCreatedNotification(
+                $teacher->user->name,
+                $teacher->user->email,
+                $scheduleInfo,
+                'guru'
+            ));
+
+            Log::info('Schedule notification sent to teacher', [
+                'teacher_id' => $teacherId,
+                'teacher_email' => $teacher->user->email,
+                'lessons_count' => $lessons->count(),
+            ]);
+        } catch (\Exception $e) {
+            Log::warning('Failed to send schedule notification to teacher', [
+                'teacher_id' => $teacherId,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        // Get unique class rooms and send emails to students
+        $classRoomIds = $lessons->pluck('class_room_id')->unique();
+
+        foreach ($classRoomIds as $classRoomId) {
+            try {
+                // Get all students in this class
+                $students = Student::where('class_room_id', $classRoomId)
+                    ->with('user')
+                    ->get();
+
+                if ($students->isEmpty()) {
+                    continue;
+                }
+
+                // Get first lesson for this class room for schedule info
+                $classLessons = $lessons->filter(function($lesson) use ($classRoomId) {
+                    return $lesson->class_room_id == $classRoomId;
+                });
+
+                $firstLesson = $classLessons->first();
+                if (!$firstLesson) {
+                    continue;
+                }
+
+                $scheduleInfo = [
+                    'date' => $firstLesson->date,
+                    'subject_name' => $firstLesson->subject?->name ?? '-',
+                    'teacher_name' => $teacher->user->name,
+                    'class_name' => $firstLesson->classRoom?->name ?? '-',
+                    'school_name' => $school->name,
+                    'start_time' => $firstLesson->start_time,
+                    'end_time' => $firstLesson->end_time,
+                ];
+
+                // Send email to each student
+                foreach ($students as $student) {
+                    if (!$student->user || !$student->user->email) {
+                        continue;
+                    }
+
+                    try {
+                        Mail::to($student->user->email)->send(new ScheduleCreatedNotification(
+                            $student->user->name,
+                            $student->user->email,
+                            $scheduleInfo,
+                            'siswa'
+                        ));
+                    } catch (\Exception $e) {
+                        Log::warning('Failed to send schedule notification to student', [
+                            'student_id' => $student->id,
+                            'student_email' => $student->user->email,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                }
+
+                Log::info('Schedule notifications sent to students', [
+                    'class_room_id' => $classRoomId,
+                    'students_count' => $students->count(),
+                    'lessons_count' => $classLessons->count(),
+                ]);
+            } catch (\Exception $e) {
+                Log::warning('Failed to send schedule notifications to class', [
+                    'class_room_id' => $classRoomId,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+    }
 
