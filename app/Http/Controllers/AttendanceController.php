@@ -302,7 +302,41 @@ class AttendanceController extends Controller
             
             $currentMonth = $startOfMonth->format('F Y');
             
+            // Get start and end of previous month
+            $startOfPreviousMonth = Carbon::now()->subMonthNoOverflow()->startOfMonth();
+            $endOfPreviousMonth = Carbon::now()->subMonthNoOverflow()->endOfMonth();
+            
+            // Get attendance data for previous month
+            $previousMonthAttendances = Attendance::whereBetween('created_at', [$startOfPreviousMonth, $endOfPreviousMonth])
+                ->with([
+                    'student' => fn($q) => $q->with(['user', 'classRoom' => fn($q2) => $q2->with('school')]),
+                    'lesson' => fn($q) => $q->with(['teacher' => fn($q2) => $q2->with('user')])
+                ])
+                ->orderBy('created_at', 'desc')
+                ->get();
+            
+            // Get paginated version for previous month
+            $previousMonthAttendancesPaginated = Attendance::whereBetween('created_at', [$startOfPreviousMonth, $endOfPreviousMonth])
+                ->with([
+                    'student' => fn($q) => $q->with(['user', 'classRoom' => fn($q2) => $q2->with('school')]),
+                    'lesson' => fn($q) => $q->with(['teacher' => fn($q2) => $q2->with('user')])
+                ])
+                ->orderBy('created_at', 'desc')
+                ->paginate(50, ['*'], 'prev_page');
+            
+            // Calculate previous month statistics
+            $previousMonthStats = [
+                'totalRecords' => $previousMonthAttendances->count(),
+                'hadir' => $previousMonthAttendances->where('status', 'present')->count(),
+                'tidakHadir' => $previousMonthAttendances->where('status', 'alpha')->count(),
+                'izin' => $previousMonthAttendances->where('status', 'izin')->count(),
+                'sakit' => $previousMonthAttendances->where('status', 'sakit')->count(),
+            ];
+            
+            $previousMonth = $startOfPreviousMonth->format('F Y');
+            
             Log::info("AdminView Stats: " . json_encode($stats));
+            Log::info("PreviousMonthView Stats: " . json_encode($previousMonthStats));
             
             return view('attendance.admin-view', compact(
                 'attendances',
@@ -310,7 +344,13 @@ class AttendanceController extends Controller
                 'stats',
                 'currentMonth',
                 'startOfMonth',
-                'endOfMonth'
+                'endOfMonth',
+                'previousMonthAttendances',
+                'previousMonthAttendancesPaginated',
+                'previousMonthStats',
+                'previousMonth',
+                'startOfPreviousMonth',
+                'endOfPreviousMonth'
             ));
         } catch (\Exception $e) {
             Log::error('AdminView error: ' . $e->getMessage() . ' - ' . $e->getTraceAsString());
