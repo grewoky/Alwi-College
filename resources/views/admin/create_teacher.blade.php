@@ -40,6 +40,13 @@
                             <input type="password" name="password_confirmation" required class="mt-1 block w-full border rounded px-3 py-2">
                             @error('password_confirmation') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
           </div>
+          <div class="mb-4">
+              <label class="flex items-center gap-3">
+                  <input type="checkbox" name="is_active" value="1" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" {{ old('is_active', true) ? 'checked' : '' }}>
+                  <span class="text-sm font-medium text-gray-700">Akun Aktif</span>
+              </label>
+              <p class="text-xs text-gray-500 mt-1">Jika dicentang, guru dapat melakukan login. Jika tidak, akun tidak bisa login.</p>
+          </div>
           <div>
               <button class="px-4 py-2 bg-[#2E529F] text-white rounded">Simpan</button>
           </div>

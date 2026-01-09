@@ -1,6 +1,10 @@
 <x-admin-layout>
     <x-slot name="title">Jadwal Pelajaran • Admin</x-slot>
 
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+
     <div class="min-h-screen bg-gray-50 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Back Link -->
@@ -37,7 +41,7 @@
                     <!-- Teacher Filter -->
                     <div>
                         <label for="teacher_filter" class="block text-sm font-medium text-gray-700 mb-1">Pengajar</label>
-                        <select id="teacher_filter" name="teacher_id" class="w-full px-3 py-2 rounded-md border border-gray-300 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <select id="teacher_filter" name="teacher_id" class="w-full px-3 py-2 rounded-md border border-gray-300 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent select2-teacher">
                             <option value="">-- Semua --</option>
                             @foreach($teachers as $teacher)
                                 <option value="{{ $teacher->id }}" {{ request('teacher_id') == $teacher->id ? 'selected' : '' }}>
@@ -152,3 +156,75 @@
     </div>
 
 </x-admin-layout>
+
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Select2 for teacher filter
+    $('#teacher_filter').select2({
+      theme: 'bootstrap-5',
+      width: '100%',
+      allowClear: true,
+      placeholder: 'Cari pengajar...',
+      language: 'id',
+      matcher: customMatcher,
+      templateSelection: formatSelection,
+      templateResult: formatResult,
+    });
+
+    function customMatcher(params, data) {
+      if ($.trim(params.term) === '') {
+        return data;
+      }
+      var term = params.term.toLowerCase();
+      var text = data.text.toLowerCase();
+      if (text.indexOf(term) > -1) {
+        return $.extend({}, data, { highlighted: true });
+      }
+      return null;
+    }
+
+    function formatSelection(data) {
+      if (!data.id) return data.text;
+      return data.text;
+    }
+
+    function formatResult(data) {
+      if (!data.id) return data.text;
+      return $('<div class="py-2">' + data.text + '</div>');
+    }
+  });
+</script>
+
+<style>
+  .select2-container--bootstrap-5 .select2-selection--single {
+    height: 38px;
+    border: 1px solid #d1d5db !important;
+    border-radius: 0.375rem;
+    padding-top: 0.35rem;
+  }
+
+  .select2-container--bootstrap-5.select2-container--open .select2-selection--single {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  }
+
+  .select2-container--bootstrap-5 .select2-dropdown {
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    margin-top: 2px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .select2-results__option {
+    padding: 8px 12px;
+  }
+
+  .select2-results__option--highlighted[aria-selected] {
+    background-color: #3b82f6;
+    color: white;
+  }
+</style>

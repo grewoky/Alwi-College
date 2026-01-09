@@ -49,6 +49,13 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // Check if account is active
+        if ($userModel && property_exists($userModel, 'is_active') && $userModel->is_active === false) {
+            throw ValidationException::withMessages([
+                'email' => 'Akun Anda telah dinonaktifkan. Hubungi administrator untuk mengaktifkan akun Anda.',
+            ]);
+        }
+
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
@@ -63,6 +70,14 @@ class LoginRequest extends FormRequest
             Auth::logout();
             throw ValidationException::withMessages([
                 'email' => 'Akun Anda belum diverifikasi oleh admin. Silakan tunggu konfirmasi.',
+            ]);
+        }
+
+        // prevent login if account is not active (double-check)
+        if ($user && property_exists($user, 'is_active') && $user->is_active === false) {
+            Auth::logout();
+            throw ValidationException::withMessages([
+                'email' => 'Akun Anda telah dinonaktifkan. Hubungi administrator untuk mengaktifkan akun Anda.',
             ]);
         }
 

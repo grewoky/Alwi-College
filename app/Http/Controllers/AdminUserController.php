@@ -8,6 +8,8 @@ use App\Models\Student;
 use App\Models\UserAudit;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\AccountCreatedNotification;
 use App\Models\ClassRoom;
 use App\Models\Teacher;
 
@@ -41,6 +43,7 @@ class AdminUserController extends Controller
 			'email' => 'required|email|unique:users,email',
 			'password' => 'required|string|min:8|confirmed',
 			'phone' => 'nullable|string|max:30|unique:users,phone',
+			'is_active' => 'nullable|in:0,1',
 		]);
 
 		$user = User::create([
@@ -48,6 +51,7 @@ class AdminUserController extends Controller
 			'email' => $request->email,
 			'password' => bcrypt($request->password),
 			'is_approved' => true,
+			'is_active' => (bool) $request->input('is_active', true),
 			'phone' => $request->phone ?? null,
 		]);
 
@@ -66,7 +70,19 @@ class AdminUserController extends Controller
 			Log::warning('Failed to create Teacher record for new user', ['error' => $e->getMessage()]);
 		}
 
-		return redirect()->route('admin.teachers.index')->with('success','Guru berhasil ditambahkan.');
+		// Send account creation email notification
+		try {
+			Mail::to($user->email)->send(new AccountCreatedNotification(
+				$user->name,
+				$user->email,
+				$request->password,
+				'guru'
+			));
+		} catch (\Exception $e) {
+			Log::warning('Failed to send account creation email to teacher', ['email' => $user->email, 'error' => $e->getMessage()]);
+		}
+
+		return redirect()->route('admin.teachers.index')->with('success','Guru berhasil ditambahkan dan email notifikasi telah dikirim.');
 	}
 
 	/**
@@ -102,6 +118,7 @@ class AdminUserController extends Controller
 			'employee_code' => 'nullable|string|max:50',
 			'phone' => 'nullable|string|max:30|unique:users,phone,' . $user->id,
 			'is_approved' => 'nullable|in:0,1',
+			'is_active' => 'nullable|in:0,1',
 		]);
 
 		try {
@@ -110,6 +127,9 @@ class AdminUserController extends Controller
 			$user->phone = $request->phone ?? null;
 			if ($request->filled('is_approved')) {
 				$user->is_approved = (bool) $request->is_approved;
+			}
+			if ($request->filled('is_active')) {
+				$user->is_active = (bool) $request->is_active;
 			}
 			$user->save();
 
@@ -253,6 +273,7 @@ class AdminUserController extends Controller
 			'nis' => 'nullable|string|max:50',
 			'phone' => 'nullable|string|max:30|unique:users,phone,' . $user->id,
 			'is_approved' => 'nullable|in:0,1',
+			'is_active' => 'nullable|in:0,1',
 		]);
 
 		try {
@@ -261,6 +282,9 @@ class AdminUserController extends Controller
 			$user->phone = $request->phone ?? null;
 			if ($request->filled('is_approved')) {
 				$user->is_approved = (bool) $request->is_approved;
+			}
+			if ($request->filled('is_active')) {
+				$user->is_active = (bool) $request->is_active;
 			}
 			$user->save();
 
@@ -296,6 +320,7 @@ class AdminUserController extends Controller
 			'class_room_id' => 'nullable|exists:class_rooms,id',
 			'nis' => 'nullable|string|max:50',
 			'phone' => 'nullable|string|max:30|unique:users,phone',
+			'is_active' => 'nullable|in:0,1',
 		]);
 
 		$user = User::create([
@@ -303,6 +328,7 @@ class AdminUserController extends Controller
 			'email' => $request->email,
 			'password' => bcrypt($request->password),
 			'is_approved' => true, // admin-created accounts are approved
+			'is_active' => (bool) $request->input('is_active', true),
 			'phone' => $request->phone ?? null,
 		]);
 
@@ -325,7 +351,19 @@ class AdminUserController extends Controller
 			Log::warning('Failed to create Student record for new user', ['error' => $e->getMessage()]);
 		}
 
-		return redirect()->route('admin.students.index')->with('success', 'Siswa berhasil ditambahkan.');
+		// Send account creation email notification
+		try {
+			Mail::to($user->email)->send(new AccountCreatedNotification(
+				$user->name,
+				$user->email,
+				$request->password,
+				'siswa'
+			));
+		} catch (\Exception $e) {
+			Log::warning('Failed to send account creation email to student', ['email' => $user->email, 'error' => $e->getMessage()]);
+		}
+
+		return redirect()->route('admin.students.index')->with('success', 'Siswa berhasil ditambahkan dan email notifikasi telah dikirim.');
 	}
 
 	/**

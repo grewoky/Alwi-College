@@ -1,4 +1,9 @@
 <x-admin-layout>
+
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+
 <div class="min-h-screen bg-gray-50 py-12">
   <div class="max-w-2xl mx-auto px-4">
     <div class="mb-6">
@@ -29,7 +34,7 @@
         <!-- Materi -->
         <div>
           <label class="block text-sm font-bold text-gray-900 mb-3">Pilih Materi</label>
-          <select name="subject_id" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
+          <select name="subject_id" id="subjectSelect" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 select2-input">
             <option value="">-- Tanpa Materi --</option>
             @forelse($subjectsList as $sbj)
               <option value="{{ $sbj->id }}" @if($lesson->subject_id == $sbj->id) selected @endif>
@@ -154,3 +159,76 @@
   </div>
 </div>
 </x-admin-layout>
+
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Select2 for subject select
+    $('.select2-input').select2({
+      theme: 'bootstrap-5',
+      width: '100%',
+      allowClear: true,
+      placeholder: 'Cari materi...',
+      language: 'id',
+      matcher: customMatcher,
+      templateSelection: formatSelection,
+      templateResult: formatResult,
+    });
+
+    function customMatcher(params, data) {
+      if ($.trim(params.term) === '') {
+        return data;
+      }
+      var term = params.term.toLowerCase();
+      var text = data.text.toLowerCase();
+      if (text.indexOf(term) > -1) {
+        return $.extend({}, data, { highlighted: true });
+      }
+      return null;
+    }
+
+    function formatSelection(data) {
+      if (!data.id) return data.text;
+      return data.text;
+    }
+
+    function formatResult(data) {
+      if (!data.id) return data.text;
+      return $('<div class="py-2">' + data.text + '</div>');
+    }
+  });
+</script>
+
+<style>
+  .select2-container--bootstrap-5 .select2-selection--single {
+    height: 44px;
+    border: 2px solid #d1d5db;
+    border-radius: 0.5rem;
+    padding-top: 0.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .select2-container--bootstrap-5.select2-container--open .select2-selection--single {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+  }
+
+  .select2-container--bootstrap-5 .select2-dropdown {
+    border: 2px solid #d1d5db;
+    border-radius: 0.5rem;
+    margin-top: 4px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .select2-results__option {
+    padding: 10px 12px;
+  }
+
+  .select2-results__option--highlighted[aria-selected] {
+    background-color: #3b82f6;
+    color: white;
+  }
+</style>

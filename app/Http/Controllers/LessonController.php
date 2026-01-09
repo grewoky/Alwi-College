@@ -20,8 +20,8 @@ class LessonController extends Controller
 {
     public function showGenerate()
     {
-        $teachersList = Teacher::with('user')->orderBy('id')->get();
-        $subjectsList = Subject::orderBy('name')->get();
+        $teachersList = Teacher::with('user')->orderBy('id', 'desc')->get();
+        $subjectsList = Subject::orderBy('name', 'desc')->get();
         
         return view('lessons.admin.generate', [
             'teachersList' => $teachersList,
@@ -298,7 +298,7 @@ class LessonController extends Controller
         }
         
         $lessons = $q->paginate(20)->withQueryString();
-        $teachers = Teacher::with('user')->orderBy('id')->get();
+        $teachers = Teacher::with('user')->orderBy('id', 'desc')->get();
         
         return view('lessons.admin.index', compact(
             'lessons',
@@ -310,7 +310,7 @@ class LessonController extends Controller
     // Edit jadwal individual
     public function editLesson(Lesson $lesson)
     {
-        $subjectsList = Subject::orderBy('name')->get();
+        $subjectsList = Subject::orderBy('name', 'desc')->get();
         return view('lessons.admin.edit', compact('lesson', 'subjectsList'));
     }
 

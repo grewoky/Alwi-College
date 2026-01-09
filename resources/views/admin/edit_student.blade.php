@@ -57,7 +57,15 @@
           <option value="1" @selected(old('is_approved', $student->user->is_approved ?? 1) == 1)>Aktif</option>
           <option value="0" @selected(old('is_approved', $student->user->is_approved ?? 1) == 0)>Nonaktif</option>
         </select>
-        <p class="text-xs text-gray-500 mt-1">Perubahan status hanya bisa dilakukan di halaman ini.</p>
+        <p class="text-xs text-gray-500 mt-1">Status verifikasi dari admin (belum memperhatikan akses login).</p>
+      </div>
+
+      <div class="mb-3">
+        <label class="flex items-center gap-3">
+          <input type="checkbox" name="is_active" value="1" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" {{ old('is_active', $student->user->is_active ?? true) ? 'checked' : '' }}>
+          <span class="text-sm font-medium">Akun Dapat Login</span>
+        </label>
+        <p class="text-xs text-gray-500 mt-1">Jika dicentang, siswa dapat melakukan login. Jika tidak, akun tidak bisa login meskipun password benar.</p>
       </div>
 
       <div class="flex gap-2">

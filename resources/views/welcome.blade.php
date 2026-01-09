@@ -241,7 +241,7 @@
                 Kami percaya bahwa setiap siswa memiliki potensi unik untuk berkembang. Oleh karena itu, Alwi College menyediakan lingkungan belajar yang mendukung, tim pengajar berpengalaman, dan fasilitas modern untuk mendukung perjalanan akademik Anda menuju kesuksesan.
               </p>
                   <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-                    <span class="px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm bg-emerald-50 text-emerald-700 border border-emerald-100">Kelas Kecil & Fokus</span>
+                    <span class="px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm bg-emerald-50 text-emerald-700 border border-emerald-100">Kelas aktif & Berkompeten</span>
                     <span class="px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm bg-indigo-50 text-indigo-700 border border-indigo-100">Materi Terstruktur</span>
                     <span class="px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm bg-pink-50 text-pink-700 border border-pink-100">Pendampingan Intensif</span>
                   </div>
