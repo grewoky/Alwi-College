@@ -88,11 +88,6 @@
           </div>
         </div>
 
-        <!-- Reset Button untuk Jam -->
-        <button type="button" id="resetTimeBtn" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 rounded-lg transition flex items-center justify-center gap-2">
-          ↺ Reset Jam Saja
-        </button>
-
         <!-- Description (Deskripsi Pelajaran) -->
         <div>
           <label class="block text-sm font-bold text-gray-900 mb-3">Deskripsi Pelajaran (Opsional)</label>
@@ -102,59 +97,6 @@
             <span class="text-red-600 text-sm mt-1">{{ $message }}</span>
           @enderror
         </div>
-
-        <!-- Client-side validation script -->
-        <script>
-          (function() {
-            const startSelect = document.getElementById('start_time');
-            const endSelect = document.getElementById('end_time');
-            const resetBtn = document.getElementById('resetTimeBtn');
-            const form = startSelect?.closest('form');
-
-            if (startSelect && endSelect && form) {
-              // Validate on form submit
-              form.addEventListener('submit', function(e) {
-                const startVal = startSelect.value;
-                const endVal = endSelect.value;
-
-                // Only validate if both times are selected
-                if (startVal && endVal && startVal >= endVal) {
-                  e.preventDefault();
-                  alert('⚠️ Jam selesai harus lebih besar dari jam mulai!');
-                  endSelect.focus();
-                  return false;
-                }
-              });
-
-              // Visual feedback on change
-              startSelect.addEventListener('change', function() {
-                const startVal = startSelect.value;
-                const endVal = endSelect.value;
-                if (startVal && endVal && startVal >= endVal) {
-                  endSelect.style.borderColor = '#dc2626';
-                  endSelect.style.backgroundColor = '#fee2e2';
-                } else {
-                  endSelect.style.borderColor = '#d1d5db';
-                  endSelect.style.backgroundColor = '';
-                }
-              });
-            }
-
-            // Reset button untuk jam saja
-            if (resetBtn) {
-              resetBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                startSelect.value = '';
-                endSelect.value = '';
-                startSelect.style.borderColor = '#d1d5db';
-                startSelect.style.backgroundColor = '';
-                endSelect.style.borderColor = '#d1d5db';
-                endSelect.style.backgroundColor = '';
-                startSelect.focus();
-              });
-            }
-          })();
-        </script>
 
         <!-- Buttons -->
         <div class="flex gap-3">

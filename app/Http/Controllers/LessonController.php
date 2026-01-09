@@ -18,6 +18,7 @@ use App\Models\User;
 use App\Models\Student;
 use App\Models\DeletedLessonLog;
 use App\Mail\ScheduleCreatedNotification;
+use App\Http\Requests\GenerateLessonRequest;
 
 class LessonController extends Controller
 {
@@ -32,21 +33,18 @@ class LessonController extends Controller
         ]);
     }
 
-    public function generate(Request $r)
+    public function generate(GenerateLessonRequest $r)
     {
-        // Validasi input
-        $r->validate([
-            'school'     => 'required|in:Negeri,IGS,Xavega,Bangau,Kumbang',
-            'grade'      => 'required|in:10,11,12',
-            'teacher_id' => 'required|exists:teachers,id',
-            'subject_id' => 'nullable|exists:subjects,id',
-            'per_variant' => 'nullable',
-            'description' => 'nullable|string|max:500',
-            'start_date' => 'required|date',
-            'end_date'   => 'required|date|after_or_equal:start_date',
-            'start_time' => 'nullable|date_format:H:i',
-            'end_time'   => 'nullable|date_format:H:i',
-        ]);
+        // Input sudah validated dan error handling sudah di FormRequest
+        // Hanya butuh custom validation untuk time logic
+        
+        // ✅ CUSTOM: Jika start_time & end_time ada, validasi bahwa start < end
+        // Jika error, hanya reset start_time & end_time, field lain tetap terisi
+        if ($r->start_time && $r->end_time && $r->start_time >= $r->end_time) {
+            return back()
+                ->withErrors(['end_time' => 'Jam selesai harus lebih besar dari jam mulai'])
+                ->withInput($r->except(['start_time', 'end_time'])); // ← Hanya reset field time
+        }
 
         try {
             // Pastikan sekolah tersedia atau buat baru bila belum ada
@@ -342,11 +340,12 @@ class LessonController extends Controller
             'description' => 'nullable|string|max:500',
         ]);
         
-        // 🔴 BUG FIX #1: Validate time logic if both times provided
+        // ✅ CUSTOM: Validate time logic if both times provided
+        // Jika error, hanya reset start_time & end_time, field lain tetap terisi
         if ($r->filled('start_time') && $r->filled('end_time')) {
             if ($r->start_time >= $r->end_time) {
                 return back()
-                    ->withInput()
+                    ->withInput($r->except(['start_time', 'end_time'])) // ← Hanya reset field time
                     ->withErrors(['end_time' => 'Jam selesai harus lebih besar dari jam mulai']);
             }
         }

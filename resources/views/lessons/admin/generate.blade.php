@@ -197,24 +197,6 @@
           </div>
         </div>
 
-        <!-- Reset Button untuk Jam -->
-        <div class="flex gap-2">
-          <button type="button" id="resetTimeBtn" class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 rounded-lg transition flex items-center justify-center gap-2">
-            ↺ Reset Jam
-          </button>
-          <small class="text-gray-500 py-2">Reset hanya jam saja</small>
-        </div>
-
-        <!-- JavaScript untuk Reset -->
-        <script>
-          document.getElementById('resetTimeBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('start_time').value = '';
-            document.getElementById('end_time').value = '';
-            document.getElementById('start_time').focus();
-          });
-        </script>
-
         <!-- Submit -->
         <!-- Option: generate per-variant classes -->
         <div class="flex items-center gap-3">
