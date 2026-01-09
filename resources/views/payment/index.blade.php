@@ -20,8 +20,8 @@
       @error('month_period')<div class="text-red-600 text-sm">{{ $message }}</div>@enderror
     </div>
     <div>
-      <label class="block text-sm font-medium">Nominal (opsional)</label>
-      <input type="number" name="amount" class="border w-full p-2 rounded" min="0">
+      <label class="block text-sm font-medium">Nominal <span class="text-red-600">*</span></label>
+      <input type="number" name="amount" class="border w-full p-2 rounded" min="0" required>
       @error('amount')<div class="text-red-600 text-sm">{{ $message }}</div>@enderror
     </div>
     <div>

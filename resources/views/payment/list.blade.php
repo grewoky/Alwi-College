@@ -26,6 +26,24 @@
     <button class="bg-gray-800 text-white px-3 py-2 rounded">Filter</button>
   </form>
 
+  <!-- Total Pembayaran Per Bulan -->
+  @if($monthlyTotals && $monthlyTotals->count() > 0)
+  <div class="mb-6 grid grid-cols-1 gap-4">
+    <div class="bg-blue-50 rounded-lg border border-blue-200 p-4">
+      <h3 class="text-sm font-semibold text-gray-700 mb-3">📊 Total Pembayaran Per Bulan</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        @foreach($monthlyTotals as $monthlyData)
+        <div class="bg-white rounded border border-blue-100 p-3">
+          <div class="text-xs text-gray-600">{{ $monthlyData['month'] ?? 'Tanpa Periode' }}</div>
+          <div class="text-lg font-bold text-blue-600">Rp {{ number_format($monthlyData['total'], 0, ',', '.') }}</div>
+          <div class="text-xs text-gray-500">{{ $monthlyData['count'] }} pembayaran</div>
+        </div>
+        @endforeach
+      </div>
+    </div>
+  </div>
+  @endif
+
   <div class="overflow-x-auto rounded-xl shadow">
     <div class="overflow-x-auto -mx-4 sm:mx-0">
       <table class="min-w-[900px] w-full text-sm">
@@ -46,9 +64,9 @@
           <td class="p-3">{{ $p->student->user->name ?? '-' }}</td>
           <td class="p-3">{{ $p->created_at->format('d M Y H:i') }}</td>
           <td class="p-3">{{ $p->month_period ?? '-' }}</td>
-          <td class="p-3">{{ $p->amount ? number_format($p->amount,0,',','.') : '-' }}</td>
+          <td class="p-3">Rp {{ $p->amount ? number_format($p->amount,0,',','.') : '-' }}</td>
           <td class="p-3"><a href="{{ route('pay.proof',$p->id) }}" target="_blank" class="text-blue-600 underline">Lihat</a></td>
-          <td class="p-3">{{ ucfirst($p->status) }}</td>
+          <td class="p-3"><span class="px-2 py-1 rounded text-xs font-semibold @if($p->status === 'approved') bg-green-100 text-green-800 @elseif($p->status === 'rejected') bg-red-100 text-red-800 @else bg-yellow-100 text-yellow-800 @endif">{{ ucfirst($p->status) }}</span></td>
           <td class="p-3">
             <a href="{{ route('pay.edit', $p->id) }}" class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">

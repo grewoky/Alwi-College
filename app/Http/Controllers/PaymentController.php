@@ -30,7 +30,7 @@ class PaymentController extends Controller
     {
         $r->validate([
             'month_period' => 'nullable|date_format:Y-m',
-            'amount' => 'nullable|integer|min:0',
+            'amount' => 'required|integer|min:1',
             'cloudinary_public_id' => 'nullable|string|max:255',
             'cloudinary_secure_url' => 'nullable|url|max:2048',
             'cloudinary_format' => 'nullable|string|max:20',
@@ -111,7 +111,23 @@ class PaymentController extends Controller
 
         $payments = $query->paginate(20)->withQueryString();
 
-        return view('payment.list', compact('payments'));
+        // Hitung total per bulan
+        $monthlyTotals = Payment::with('student.user')
+            ->when($r->filled('status'), fn($q) => $q->where('status', $r->status))
+            ->when($r->filled('month_period'), fn($q) => $q->where('month_period', $r->month_period))
+            ->get()
+            ->groupBy('month_period')
+            ->map(function ($items, $month) {
+                return [
+                    'month' => $month ?? 'Tanpa Periode',
+                    'total' => $items->sum('amount'),
+                    'count' => $items->count()
+                ];
+            })
+            ->sortByDesc('month')
+            ->values();
+
+        return view('payment.list', compact('payments', 'monthlyTotals'));
     }
 
     public function edit(Payment $payment)

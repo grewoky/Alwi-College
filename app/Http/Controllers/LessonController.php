@@ -314,7 +314,7 @@ class LessonController extends Controller
             $q->orderBy('date', 'desc')->orderBy('id', 'desc');
         }
         
-        $lessons = $q->paginate(20)->withQueryString();
+        $lessons = $q->paginate(10)->withQueryString();
         $teachers = Teacher::with('user')->orderBy('id', 'desc')->get();
         
         return view('lessons.admin.index', compact(

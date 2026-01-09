@@ -87,6 +87,7 @@
                             <tr class="bg-gray-100 border-b border-gray-200">
                                 <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Tanggal</th>
                                 <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Mata Pelajaran</th>
+                                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Sekolah</th>
                                 <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Kelas</th>
                                 <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Pengajar</th>
                                 <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Jam</th>
@@ -101,6 +102,9 @@
                                     </td>
                                     <td class="px-6 py-4 text-sm font-medium text-gray-900">
                                         {{ $lesson->subject?->name ?? 'N/A' }}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">{{ $lesson->classRoom?->school?->name ?? '-' }}</span>
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-900">
                                         {{ $lesson->classRoom->name }}

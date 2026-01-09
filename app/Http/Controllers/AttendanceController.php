@@ -112,7 +112,7 @@ class AttendanceController extends Controller
         $attendances = Attendance::where('student_id', $student->id)
             ->with(['lesson' => ['subject', 'teacher']])
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->paginate(10);
         
         // Calculate statistics
         $totalSessions = $attendances->total();
@@ -145,7 +145,7 @@ class AttendanceController extends Controller
         $attendances = Attendance::whereHas('lesson', fn($q) => $q->where('teacher_id', $teacher->id))
             ->with(['lesson' => ['classRoom', 'subject'], 'student.user', 'student.classRoom'])
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->paginate(10);
         
         // Calculate statistics
         $totalSessions = $attendances->total();
@@ -289,7 +289,7 @@ class AttendanceController extends Controller
                     'lesson' => fn($q) => $q->with(['teacher' => fn($q2) => $q2->with('user')])
                 ])
                 ->orderBy('created_at', 'desc')
-                ->paginate(50);
+                ->paginate(10);
             
             // Calculate monthly statistics
             $stats = [

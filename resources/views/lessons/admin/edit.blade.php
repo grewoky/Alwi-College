@@ -52,7 +52,7 @@
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-bold text-gray-900 mb-3">Jam Mulai</label>
-            <select name="start_time" id="start_time" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
+            <select name="start_time" id="start_time" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 select2-input">
               <option value="">-- Pilih Jam Mulai --</option>
               @php
                 $times = [];
@@ -74,7 +74,7 @@
           </div>
           <div>
             <label class="block text-sm font-bold text-gray-900 mb-3">Jam Selesai</label>
-            <select name="end_time" id="end_time" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
+            <select name="end_time" id="end_time" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 select2-input">
               <option value="">-- Pilih Jam Selesai --</option>
               @foreach($times as $time)
                 <option value="{{ $time }}" @if($lesson->end_time == $time) selected @endif>
@@ -87,6 +87,11 @@
             @enderror
           </div>
         </div>
+
+        <!-- Reset Button untuk Jam -->
+        <button type="button" id="resetTimeBtn" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 rounded-lg transition flex items-center justify-center gap-2">
+          ↺ Reset Jam Saja
+        </button>
 
         <!-- Description (Deskripsi Pelajaran) -->
         <div>
@@ -103,6 +108,7 @@
           (function() {
             const startSelect = document.getElementById('start_time');
             const endSelect = document.getElementById('end_time');
+            const resetBtn = document.getElementById('resetTimeBtn');
             const form = startSelect?.closest('form');
 
             if (startSelect && endSelect && form) {
@@ -122,6 +128,8 @@
 
               // Visual feedback on change
               startSelect.addEventListener('change', function() {
+                const startVal = startSelect.value;
+                const endVal = endSelect.value;
                 if (startVal && endVal && startVal >= endVal) {
                   endSelect.style.borderColor = '#dc2626';
                   endSelect.style.backgroundColor = '#fee2e2';
@@ -129,6 +137,20 @@
                   endSelect.style.borderColor = '#d1d5db';
                   endSelect.style.backgroundColor = '';
                 }
+              });
+            }
+
+            // Reset button untuk jam saja
+            if (resetBtn) {
+              resetBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                startSelect.value = '';
+                endSelect.value = '';
+                startSelect.style.borderColor = '#d1d5db';
+                startSelect.style.backgroundColor = '';
+                endSelect.style.borderColor = '#d1d5db';
+                endSelect.style.backgroundColor = '';
+                startSelect.focus();
               });
             }
           })();
