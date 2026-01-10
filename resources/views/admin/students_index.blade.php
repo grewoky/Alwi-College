@@ -38,8 +38,8 @@
                   @forelse($students as $s)
                   <tr class="border-t">
                       <td class="px-4 py-3">{{ $students->firstItem() + $loop->index }}</td>
-                      <td class="px-4 py-3">{{ $s->user->name ?? 'N/A' }}</td>
-                      <td class="px-4 py-3">{{ $s->user->email ?? '-' }}</td>
+                      <td class="px-4 py-3">{{ $s->user?->name ?? 'N/A' }}</td>
+                      <td class="px-4 py-3">{{ $s->user?->email ?? '-' }}</td>
                                             <td class="px-4 py-3">
                                                 @if($s->classRoom)
                           {{ $s->classRoom->grade }} - {{ $s->classRoom->name }}
@@ -50,10 +50,10 @@
                                                     -
                                                 @endif
                                                                                         </td>
-                                            <td class="px-4 py-3">{{ $s->user->phone ?? '-' }}</td>
+                                            <td class="px-4 py-3">{{ $s->user?->phone ?? '-' }}</td>
                                             <td class="px-4 py-3">{{ $s->created_at?->format('d M Y') ?? '-' }}</td>
                                             <td class="px-4 py-3">
-                                                @php($approved = (bool)($s->user->is_approved ?? false))
+                                                @php($approved = (bool)($s->user?->is_approved ?? false))
                                                 @if($approved)
                                                     <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700 border border-green-200">Aktif</span>
                                                 @else
