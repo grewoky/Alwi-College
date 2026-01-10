@@ -47,7 +47,7 @@
         <div>
           <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Trip Bulan Ini</p>
           <p class="mt-3 text-3xl font-bold text-slate-900">{{ $thisMonthTrips }} <span class="text-base font-medium text-slate-400">/ 90</span></p>
-          <p class="mt-2 text-sm text-slate-500">Poin penggunaan transportasi</p>
+          <p class="mt-2 text-sm text-slate-500">Poin</p>
         </div>
         <div class="h-12 w-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

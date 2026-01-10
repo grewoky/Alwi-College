@@ -18,7 +18,8 @@ return [
     |
     */
 
-    'driver' => env('SESSION_DRIVER', 'database'),
+    // Serverless-friendly default: avoid database sessions in production unless explicitly configured.
+    'driver' => env('SESSION_DRIVER', env('APP_ENV') === 'production' ? 'cookie' : 'database'),
 
     /*
     |--------------------------------------------------------------------------

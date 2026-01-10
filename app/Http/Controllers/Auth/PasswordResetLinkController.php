@@ -44,7 +44,7 @@ class PasswordResetLinkController extends Controller
                         ? back()->with('status', __($status))
                         : back()->withInput($request->only('email'))
                             ->withErrors(['email' => __($status)]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $errorMessage = $e->getMessage();
             $errorCode = $e->getCode() ?? 'EXCEPTION_ERROR';
             $email = $request->email;
@@ -85,7 +85,7 @@ class PasswordResetLinkController extends Controller
                 'admin_email' => $adminEmail,
                 'user_email' => $email,
             ]);
-        } catch (\Exception $mailException) {
+        } catch (\Throwable $mailException) {
             // Log if mail sending fails
             Log::error('Failed to send error notification email', [
                 'error' => $mailException->getMessage(),
