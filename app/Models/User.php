@@ -29,7 +29,7 @@ class User extends Authenticatable
 
     /**
      * Override the default password reset notification.
-     * Send custom mailable via Resend instead of using default notification.
+     * Send custom mailable via proper Mailable pattern.
      *
      * @param string $token The password reset token
      * @return void
@@ -42,43 +42,25 @@ class User extends Authenticatable
         // Get password reset timeout in minutes (default: 60)
         $expiresInMinutes = config('auth.passwords.users.expire', 60);
 
-        // Send the custom mailable via ResendService if available, otherwise via Mail facade
         try {
-            // Try using ResendService if it's available and mail mailer is set to resend
-            if (config('mail.default') === 'resend') {
-                $htmlBody = view('emails.reset-password-notification', [
-                    'resetUrl' => $resetUrl,
-                    'userName' => $this->name,
-                    'expiresInMinutes' => $expiresInMinutes,
-                ])->render();
+            // Send via proper Mailable pattern (works with Resend driver)
+            Mail::to($this->email)->send(new ResetPasswordNotification(
+                resetUrl: $resetUrl,
+                userName: $this->name,
+                expiresInMinutes: $expiresInMinutes
+            ));
 
-                app(\App\Services\ResendService::class)->sendEmail(
-                    $this->email,
-                    'Reset Password - Alwi College',
-                    $htmlBody
-                );
-            } else {
-                // Fallback to standard Mail facade if not using Resend
-                Mail::send(new ResetPasswordNotification(
-                    $resetUrl,
-                    $this->name,
-                    $expiresInMinutes
-                ));
-            }
+            \Illuminate\Support\Facades\Log::info('Password reset email sent successfully', [
+                'user_id' => $this->id,
+                'email' => $this->email,
+            ]);
         } catch (\Throwable $e) {
-            // If anything goes wrong, log it and use Mail facade
-            \Illuminate\Support\Facades\Log::warning('Failed to send password reset via ResendService', [
+            // Log the error
+            \Illuminate\Support\Facades\Log::error('Failed to send password reset email', [
                 'user_id' => $this->id,
                 'email' => $this->email,
                 'error' => $e->getMessage(),
             ]);
-
-            // Fallback
-            Mail::send(new ResetPasswordNotification(
-                $resetUrl,
-                $this->name,
-                $expiresInMinutes
-            ));
         }
     }
 }
