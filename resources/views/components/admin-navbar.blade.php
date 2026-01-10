@@ -49,7 +49,7 @@
             <!-- Right Side: User Info & Logout -->
             <div class="hidden md:flex items-center gap-4">
                 <div class="text-right">
-                    <p class="text-sm font-medium text-white">{{ auth()->user()->name ?? 'Admin' }}</p>
+                    <p class="text-sm font-medium text-white">{{ auth()->user()?->name ?? 'Admin' }}</p>
                     <p class="text-xs text-white/80">Administrator</p>
                 </div>
                 <form method="POST" action="{{ route('logout') }}" class="inline">

@@ -6,6 +6,13 @@
       </div>
 
       <div class="bg-white shadow rounded-lg p-4">
+                    @if(session('success'))
+                        <div class="mb-4 text-green-700">{{ session('success') }}</div>
+                    @endif
+                    @if($errors->any())
+                        <div class="mb-4 text-red-700">{{ $errors->first() }}</div>
+                    @endif
+
                     <div class="overflow-x-auto -mx-4 sm:mx-0">
                         <table class="min-w-[900px] w-full text-left">
               <thead>
