@@ -134,10 +134,11 @@
   @endonce
 
   <script type="text/javascript">
-    (function initCarouselCloudinary(retryCount = 0) {
+    (function(){
       const configEl = document.getElementById('carouselCloudinaryConfig');
-      const cloudName = configEl?.dataset?.cloudName?.trim() || '';
-      const uploadPreset = configEl?.dataset?.uploadPreset?.trim() || '';
+      // Keep defaults consistent with the Info page to reduce env misconfig headaches.
+      const cloudName = configEl?.dataset?.cloudName?.trim() || 'dln4ok2h5';
+      const uploadPreset = configEl?.dataset?.uploadPreset?.trim() || 'JadwalMurid';
 
       const uploadButton = document.getElementById('carouselUploadButton');
       const clearButton = document.getElementById('carouselClearButton');
@@ -154,18 +155,13 @@
 
       if (!uploadButton) return;
 
-      if (!window.cloudinary) {
-        if (retryCount < 20) {
-          setTimeout(() => initCarouselCloudinary(retryCount + 1), 500);
-        }
-        return;
-      }
+      let widget = null;
 
       const resetSelection = function () {
-        publicIdInput.value = '';
-        secureUrlInput.value = '';
-        formatInput.value = '';
-        originalInput.value = '';
+        if (publicIdInput) publicIdInput.value = '';
+        if (secureUrlInput) secureUrlInput.value = '';
+        if (formatInput) formatInput.value = '';
+        if (originalInput) originalInput.value = '';
 
         if (previewImg) previewImg.src = '';
         if (previewName) previewName.textContent = '';
@@ -174,55 +170,82 @@
         clearButton?.classList.add('hidden');
       };
 
-      const widget = window.cloudinary.createUploadWidget({
-        cloudName: cloudName,
-        uploadPreset: uploadPreset,
-        multiple: false,
-        resourceType: 'image',
-        clientAllowedFormats: ['jpg','jpeg','png','webp'],
-        sources: ['local','camera','google_drive','dropbox','box','onedrive','url'],
-        maxFileSize: 10 * 1024 * 1024
-      }, function (error, result) {
-        if (error) {
-          alert('Upload gagal. Silakan coba lagi.');
+      function ensureWidget(retryCount = 0) {
+        if (widget) return true;
+
+        if (!window.cloudinary) {
+          if (retryCount < 20) {
+            setTimeout(() => ensureWidget(retryCount + 1), 500);
+          }
+          return false;
+        }
+
+        if (!cloudName || !uploadPreset) {
+          console.error('Cloudinary config missing', { cloudName, uploadPreset });
+          return false;
+        }
+
+        widget = window.cloudinary.createUploadWidget({
+          cloudName: cloudName,
+          uploadPreset: uploadPreset,
+          multiple: false,
+          resourceType: 'image',
+          clientAllowedFormats: ['jpg','jpeg','png','webp'],
+          sources: ['local','camera','google_drive','dropbox','box','onedrive','url'],
+          maxFileSize: 10 * 1024 * 1024
+        }, function (error, result) {
+          if (error) {
+            console.error('Cloudinary upload error', error);
+            alert('Upload gagal. Silakan coba lagi.');
+            return;
+          }
+
+          if (result && result.event === 'success') {
+            const info = result.info || {};
+            if (publicIdInput) publicIdInput.value = info.public_id || '';
+            if (secureUrlInput) secureUrlInput.value = info.secure_url || '';
+            if (formatInput) formatInput.value = info.format || '';
+            if (originalInput) originalInput.value = info.original_filename || '';
+
+            if (previewImg && info.secure_url) {
+              const transformed = String(info.secure_url).includes('/upload/')
+                ? String(info.secure_url).replace('/upload/', '/upload/f_auto,q_auto,c_fill,g_auto,w_800,h_450/')
+                : info.secure_url;
+              previewImg.src = transformed;
+            }
+
+            const extension = info.format ? '.' + info.format : '';
+            if (previewName) previewName.textContent = (info.original_filename || info.public_id || 'poster') + extension;
+            if (previewMeta) {
+              const sizeKb = info.bytes ? Math.round(info.bytes / 1024) : null;
+              previewMeta.textContent = sizeKb ? (sizeKb + ' KB') : '';
+            }
+
+            preview?.classList.remove('hidden');
+            clearButton?.classList.remove('hidden');
+          }
+        });
+
+        return true;
+      }
+
+      // Kick off background init (so the widget is ready by the time user clicks)
+      ensureWidget(0);
+
+      uploadButton.addEventListener('click', function () {
+        if (ensureWidget(0) && widget) {
+          widget.open();
           return;
         }
 
-        if (result && result.event === 'success') {
-          const info = result.info || {};
-          publicIdInput.value = info.public_id || '';
-          secureUrlInput.value = info.secure_url || '';
-          formatInput.value = info.format || '';
-          originalInput.value = info.original_filename || '';
-
-          if (previewImg && info.secure_url) {
-            // Show a lightweight transformed preview (16:9)
-            const transformed = String(info.secure_url).includes('/upload/')
-              ? String(info.secure_url).replace('/upload/', '/upload/f_auto,q_auto,c_fill,g_auto,w_800,h_450/')
-              : info.secure_url;
-            previewImg.src = transformed;
-          }
-
-          const extension = info.format ? '.' + info.format : '';
-          if (previewName) previewName.textContent = (info.original_filename || info.public_id || 'poster') + extension;
-          if (previewMeta) {
-            const sizeKb = info.bytes ? Math.round(info.bytes / 1024) : null;
-            previewMeta.textContent = sizeKb ? (sizeKb + ' KB') : '';
-          }
-
-          preview?.classList.remove('hidden');
-          clearButton?.classList.remove('hidden');
-        }
-      });
-
-      uploadButton.addEventListener('click', function () {
-        widget.open();
+        alert('Cloudinary belum siap / terblokir. Coba refresh, atau matikan AdBlock untuk domain ini.');
       });
 
       clearButton?.addEventListener('click', resetSelection);
 
       form?.addEventListener('submit', function (e) {
-        if (!publicIdInput.value || !secureUrlInput.value) {
+        const hasDirect = publicIdInput?.value && secureUrlInput?.value;
+        if (!hasDirect) {
           e.preventDefault();
           alert('Silakan upload poster melalui Cloudinary terlebih dahulu.');
         }
