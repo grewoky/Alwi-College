@@ -8,20 +8,23 @@
 ## ✅ PERBAIKAN YANG TELAH DILAKUKAN:
 
 ### 1. **ResendService.php** - Updated
-- Fixed `sendCustomEmail()` method untuk better email handling
-- Added proper HTML content-type header
-- Better error logging dengan error_class
+
+-   Fixed `sendCustomEmail()` method untuk better email handling
+-   Added proper HTML content-type header
+-   Better error logging dengan error_class
 
 ### 2. **AdminUserController.php** - Updated
-- Added email sending verification
-- Now shows actual send result (sukses/gagal)
-- Added debug logging ke Laravel logs
+
+-   Added email sending verification
+-   Now shows actual send result (sukses/gagal)
+-   Added debug logging ke Laravel logs
 
 ---
 
 ## 📋 CHECKLIST TROUBLESHOOTING:
 
 ### Step 1: Cek Gmail Spam Folder
+
 ```
 1. Buka Gmail
 2. Klik "Spam" atau "Junk" di sidebar
@@ -30,13 +33,15 @@
 ```
 
 **Kenapa masuk spam?**
-- Sender tidak terverifikasi di Resend
-- Email format tidak proper
-- SPF/DKIM/DMARC belum dikonfigurasi
+
+-   Sender tidak terverifikasi di Resend
+-   Email format tidak proper
+-   SPF/DKIM/DMARC belum dikonfigurasi
 
 ---
 
 ### Step 2: Verifikasi Sender di Resend (PENTING!)
+
 ```
 1. Buka https://resend.com
 2. Login dengan akun Resend Anda
@@ -46,14 +51,16 @@
 ```
 
 **Jika belum verified:**
-- Resend akan kirim verification email
-- Buka email verification dari Resend
-- Click link to verify
-- Tunggu ~5 menit untuk aktif
+
+-   Resend akan kirim verification email
+-   Buka email verification dari Resend
+-   Click link to verify
+-   Tunggu ~5 menit untuk aktif
 
 ---
 
 ### Step 3: Cek API Key Valid
+
 ```
 Di .env Anda:
 RESEND_API_KEY=re_VMiD5VBz_8gA569jinvW3aTajdLCEJYSw
@@ -69,11 +76,13 @@ Verifikasi:
 ### Step 4: Cek Logs untuk Error Details
 
 **Local (development):**
+
 ```bash
 tail -f storage/logs/laravel.log | grep -i "email\|custom"
 ```
 
 **Vercel (production):**
+
 ```
 1. Buka https://vercel.com
 2. Project: Alwi College
@@ -84,6 +93,7 @@ tail -f storage/logs/laravel.log | grep -i "email\|custom"
 ---
 
 ### Step 5: Resend Dashboard Email History
+
 ```
 1. Buka https://resend.com/emails
 2. Lihat list semua emails yang dikirim
@@ -99,28 +109,31 @@ tail -f storage/logs/laravel.log | grep -i "email\|custom"
 
 ## 🔍 POSSIBLE ISSUES & SOLUTIONS:
 
-| Masalah | Penyebab | Solusi |
-|---------|---------|--------|
-| Email tidak sampai | Spam folder | Check Gmail spam, mark as not spam |
-| Email tidak terkirim | Sender tidak verified | Verify email di Resend dashboard |
-| Error "Invalid API key" | API key salah/expired | Check Resend API key is valid & active |
-| Error "Invalid recipient" | Email invalid | Pastikan email siswa valid |
-| Masuk spam terus-menerus | SPF/DKIM belum setup | Setup custom domain di Resend |
-| Vercel error logs | Config tidak sync | Redeploy dari Vercel dashboard |
+| Masalah                   | Penyebab              | Solusi                                 |
+| ------------------------- | --------------------- | -------------------------------------- |
+| Email tidak sampai        | Spam folder           | Check Gmail spam, mark as not spam     |
+| Email tidak terkirim      | Sender tidak verified | Verify email di Resend dashboard       |
+| Error "Invalid API key"   | API key salah/expired | Check Resend API key is valid & active |
+| Error "Invalid recipient" | Email invalid         | Pastikan email siswa valid             |
+| Masuk spam terus-menerus  | SPF/DKIM belum setup  | Setup custom domain di Resend          |
+| Vercel error logs         | Config tidak sync     | Redeploy dari Vercel dashboard         |
 
 ---
 
 ## 🚀 NEXT STEPS:
 
 ### 1. Push ke GitHub (Untuk update Vercel)
+
 ```bash
 git add -A
 git commit -m "Fix email sending with better error handling"
 git push origin main
 ```
+
 (Jika permission issue, push via GitHub Web)
 
 ### 2. Test Ulang
+
 ```
 1. Akses https://alwi-college.vercel.app/admin/students/create
 2. Buat student baru dengan email test Anda
@@ -129,6 +142,7 @@ git push origin main
 ```
 
 ### 3. Monitor Logs
+
 ```
 1. Jika email gagal, check Vercel logs
 2. Lihat error message untuk detail
@@ -140,6 +154,7 @@ git push origin main
 ## 📧 TEST EMAIL ADDRESSES:
 
 Untuk testing, gunakan:
+
 ```
 ✅ Gmail: suatigmail@gmail.com (reliable)
 ✅ Outlook: nama@outlook.com (good)
@@ -151,10 +166,10 @@ Untuk testing, gunakan:
 
 ## 🔐 SECURITY NOTES:
 
-- ✅ API Key sudah di-hash di environment
-- ✅ Password tidak dikirim plaintext
-- ✅ Link reset password secure
-- ✅ Email template di-sanitize
+-   ✅ API Key sudah di-hash di environment
+-   ✅ Password tidak dikirim plaintext
+-   ✅ Link reset password secure
+-   ✅ Email template di-sanitize
 
 ---
 
@@ -163,6 +178,7 @@ Untuk testing, gunakan:
 Jika email terus masuk spam:
 
 **Di Gmail:**
+
 ```
 1. Buka email dari Alwi College
 2. Klik 3 dots → "Add to Contacts"
@@ -171,6 +187,7 @@ Jika email terus masuk spam:
 ```
 
 **Buat filter:**
+
 ```
 1. Gmail Settings
 2. Filters & Blocked Addresses
@@ -183,11 +200,12 @@ Jika email terus masuk spam:
 
 ## ✨ VERSI TERBARU SUDAH LIVE:
 
-- ✅ `ResendService.php` - Fixed email sending
-- ✅ `AdminUserController.php` - Better error reporting
-- ✅ Logging - Now captures actual send status
+-   ✅ `ResendService.php` - Fixed email sending
+-   ✅ `AdminUserController.php` - Better error reporting
+-   ✅ Logging - Now captures actual send status
 
 **Untuk apply ke production:**
+
 ```bash
 git push origin main  # Vercel auto-redeploy
 ```
