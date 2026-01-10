@@ -9,7 +9,7 @@
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-3xl sm:text-4xl font-bold mb-2"><span class="heading-inline">Carousel Poster</span></h1>
-        <p class="text-indigo-100 text-base sm:text-lg">Upload poster langsung ke Cloudinary agar carousel di halaman utama otomatis ter-update.</p>
+        <p class="text-indigo-100 text-base sm:text-lg">Upload poster, untuk carousel di halaman utama otomatis ter-update.</p>
       </div>
       <div class="text-6xl hidden md:block">🖼️</div>
     </div>
@@ -36,7 +36,7 @@
 
       <div class="flex flex-col sm:flex-row sm:items-center gap-3">
         <button type="button" id="carouselUploadButton" class="px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition">
-          Upload Poster via Cloudinary
+          Upload Poster 
         </button>
         <button type="button" id="carouselClearButton" class="hidden px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium transition">
           Hapus Pilihan
