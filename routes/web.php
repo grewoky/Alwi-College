@@ -230,3 +230,46 @@ Route::middleware('auth')->group(function () {
 
 // Auth routes (Breeze)
 require __DIR__.'/auth.php';
+
+// ============ TEST ROUTES (Development Only) ============
+
+// Test email sending
+Route::get('/test-email', function () {
+    $resendService = app(\App\Services\ResendService::class);
+    
+    $result = $resendService->sendCustomEmail(
+        'felixgunawan_2327@gmail.com',
+        'TEST EMAIL - Alwi College',
+        '<h1>Email Test Successful!</h1><p>This is a test email from Alwi College.</p>'
+    );
+
+    return response()->json([
+        'status' => $result ? 'success' : 'failed',
+        'message' => $result ? 'Email sent to Resend API' : 'Failed to send email',
+    ]);
+})->name('test.email');
+
+// Test password reset email
+Route::get('/test-password-reset', function () {
+    $user = \App\Models\User::first();
+    
+    if (!$user) {
+        return response()->json(['error' => 'No user found'], 404);
+    }
+    
+    // Generate a test token
+    $token = \Illuminate\Support\Str::random(60);
+    
+    try {
+        $user->sendPasswordResetNotification($token);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Password reset email sent to ' . $user->email,
+        ]);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+        ], 500);
+    }
+})->name('test.password-reset');

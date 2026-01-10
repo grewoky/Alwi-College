@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Resend\Resend;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use App\Mail\ScheduleCreatedNotification;
@@ -66,8 +67,8 @@ class ResendService
     }
 
     /**
-     * Send custom HTML email
-     * Uses the ResetPasswordNotification mailable to send HTML emails
+     * Send custom HTML email - Direct Resend API call
+     * Bypasses Laravel Mail facade to ensure email is actually sent
      * 
      * @param string $recipientEmail
      * @param string $subject
@@ -80,24 +81,24 @@ class ResendService
         string $htmlBody
     ): bool {
         try {
-            // Create a temporary mailable from raw HTML
-            // For now, using mail directly via Mail facade with proper config
-            Mail::raw($htmlBody, function ($message) use ($recipientEmail, $subject) {
-                $message->to($recipientEmail)
-                        ->subject($subject)
-                        ->getSwiftMessage()
-                        ->getHeaders()
-                        ->addTextHeader('Content-Type', 'text/html; charset=UTF-8');
-            });
+            $resend = Resend::client(env('RESEND_API_KEY'));
 
-            Log::info('Custom email sent', [
+            $response = $resend->emails->send([
+                'from' => env('MAIL_FROM_NAME') . ' <' . env('MAIL_FROM_ADDRESS') . '>',
+                'to' => [$recipientEmail],
+                'subject' => $subject,
+                'html' => $htmlBody,
+            ]);
+
+            Log::info('Custom email sent via Resend API', [
                 'recipient_email' => $recipientEmail,
                 'subject' => $subject,
+                'response_id' => $response->id ?? 'unknown',
             ]);
 
             return true;
         } catch (Throwable $e) {
-            Log::warning('Failed to send custom email', [
+            Log::error('Failed to send custom email via Resend API', [
                 'recipient_email' => $recipientEmail,
                 'subject' => $subject,
                 'error' => $e->getMessage(),
