@@ -18,19 +18,19 @@
 
                     <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700">Nama</label>
-                            <input type="text" name="name" required value="{{ old('name', $teacher->user->name ?? '') }}" class="mt-1 block w-full border rounded px-3 py-2">
+                            <input type="text" name="name" required value="{{ old('name', $teacher->user?->name ?? '') }}" class="mt-1 block w-full border rounded px-3 py-2">
                             @error('name') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700">Email</label>
-                            <input type="email" name="email" required value="{{ old('email', $teacher->user->email ?? '') }}" class="mt-1 block w-full border rounded px-3 py-2">
+                            <input type="email" name="email" required value="{{ old('email', $teacher->user?->email ?? '') }}" class="mt-1 block w-full border rounded px-3 py-2">
                             @error('email') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700">Nomor Telepon</label>
-                            <input type="text" name="phone" value="{{ old('phone', $teacher->user->phone ?? '') }}" class="mt-1 block w-full border rounded px-3 py-2">
+                            <input type="text" name="phone" value="{{ old('phone', $teacher->user?->phone ?? '') }}" class="mt-1 block w-full border rounded px-3 py-2">
                             @error('phone') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
                     </div>
 
@@ -42,15 +42,15 @@
           <div class="mb-4">
               <label class="block text-sm font-medium text-gray-700">Status Aktif</label>
               <select name="is_approved" class="mt-1 block w-full border rounded px-3 py-2">
-                  <option value="1" @selected(old('is_approved', $teacher->user->is_approved ?? 1) == 1)>Aktif</option>
-                  <option value="0" @selected(old('is_approved', $teacher->user->is_approved ?? 1) == 0)>Nonaktif</option>
+                  <option value="1" @selected(old('is_approved', $teacher->user?->is_approved ?? 1) == 1)>Aktif</option>
+                  <option value="0" @selected(old('is_approved', $teacher->user?->is_approved ?? 1) == 0)>Nonaktif</option>
               </select>
               <p class="text-xs text-gray-500 mt-1">Status verifikasi dari admin (belum memperhatikan akses login).</p>
           </div>
 
           <div class="mb-4">
               <label class="flex items-center gap-3">
-                  <input type="checkbox" name="is_active" value="1" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" {{ old('is_active', $teacher->user->is_active ?? true) ? 'checked' : '' }}>
+                  <input type="checkbox" name="is_active" value="1" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" {{ old('is_active', $teacher->user?->is_active ?? true) ? 'checked' : '' }}>
                   <span class="text-sm font-medium text-gray-700">Akun Dapat Login</span>
               </label>
               <p class="text-xs text-gray-500 mt-1">Jika dicentang, guru dapat melakukan login. Jika tidak, akun tidak bisa login meskipun password benar.</p>

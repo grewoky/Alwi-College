@@ -22,11 +22,11 @@
                   @foreach($teachers as $t)
                   <tr class="border-t">
                       <td class="py-2">{{ $t->id }}</td>
-                      <td class="py-2">{{ $t->user->name ?? 'N/A' }}</td>
-                      <td class="py-2">{{ $t->user->email ?? 'N/A' }}</td>
-                      <td class="py-2">{{ $t->user->phone ?? '-' }}</td>
+                                            <td class="py-2">{{ $t->user?->name ?? 'N/A' }}</td>
+                                            <td class="py-2">{{ $t->user?->email ?? 'N/A' }}</td>
+                                            <td class="py-2">{{ $t->user?->phone ?? '-' }}</td>
                       <td class="py-2">
-                          @php($approved = (bool)($t->user->is_approved ?? false))
+                                                    @php($approved = (bool)($t->user?->is_approved ?? false))
                           @if($approved)
                             <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700 border border-green-200">Aktif</span>
                           @else
