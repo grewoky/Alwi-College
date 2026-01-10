@@ -35,14 +35,7 @@
           <div class="carousel-inner-mobile flex w-full h-full will-change-transform" style="min-width: 100%;">
           @foreach($posters as $i => $src)
             <div class="carousel-slide-mobile flex-shrink-0 w-full h-full relative" data-index="{{ $i }}" aria-hidden="{{ $i === 0 ? 'false' : 'true' }}">
-              <img src="{{ $src }}" alt="Poster {{ $i + 1 }}" class="w-full h-full object-cover object-center" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" decoding="async">
-
-              <!-- Overlay masks -->
-              <div class="absolute inset-0 pointer-events-none">
-                <div class="absolute top-0 left-0 w-24 h-16 rounded-br-xl" style="background:linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.0) 60%);"></div>
-                <div class="absolute bottom-0 right-0 w-24 h-16 rounded-tl-xl" style="background:linear-gradient(-45deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.0) 60%);"></div>
-                <div class="absolute inset-0 bg-gradient-to-t from-black/5 via-transparent to-black/5"></div>
-              </div>
+              <img src="{{ $src }}" alt="Poster {{ $i + 1 }}" class="w-full h-full object-contain object-center bg-white" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" decoding="async">
             </div>
           @endforeach
           </div>
@@ -72,14 +65,7 @@
           <div class="carousel-inner-desktop flex w-full h-full will-change-transform rounded-2xl" style="min-width: 100%;">
           @foreach($posters as $i => $src)
             <div class="carousel-slide-desktop flex-shrink-0 w-full h-full relative" data-index="{{ $i }}" aria-hidden="{{ $i === 0 ? 'false' : 'true' }}">
-              <img src="{{ $src }}" alt="Poster {{ $i + 1 }}" class="w-full h-full min-w-full min-h-full object-cover object-center" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" decoding="async">
-
-              <!-- Overlay masks -->
-              <div class="absolute inset-0 pointer-events-none">
-                <div class="absolute top-0 left-0 w-36 h-28 rounded-br-xl" style="background:linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.0) 60%);"></div>
-                <div class="absolute bottom-0 right-0 w-36 h-28 rounded-tl-xl" style="background:linear-gradient(-45deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.0) 60%);"></div>
-                <div class="absolute inset-0 bg-gradient-to-t from-black/5 via-transparent to-black/5"></div>
-              </div>
+              <img src="{{ $src }}" alt="Poster {{ $i + 1 }}" class="w-full h-full min-w-full min-h-full object-contain object-center bg-white" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" decoding="async">
             </div>
           @endforeach
           </div>

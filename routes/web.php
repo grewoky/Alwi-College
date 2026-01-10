@@ -26,7 +26,7 @@ Route::get('/', function () {
             ->map(function (CarouselPoster $poster) {
                 // Request a reasonably-sized, cropped image for the carousel.
                 // The frontend still uses object-cover, this mainly optimizes payload size.
-                return $poster->transformedUrl('f_auto,q_auto,c_fill,g_auto,w_1600,h_500');
+                return $poster->transformedUrl('f_auto,q_auto,c_fit,w_1600,h_500');
             })
             ->filter()
             ->values()
