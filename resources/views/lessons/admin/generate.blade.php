@@ -25,6 +25,20 @@
       </div>
     @endif
 
+    <!-- Warning Message -->
+    @if(session('warning'))
+      <div class="mb-6 bg-yellow-100 text-yellow-800 p-4 rounded-lg border border-yellow-300">
+        ⚠️ {{ session('warning') }}
+      </div>
+    @endif
+
+    <!-- General Error Message -->
+    @if($errors->has('general'))
+      <div class="mb-6 bg-red-100 text-red-800 p-4 rounded-lg border border-red-300">
+        ✕ {{ $errors->first('general') }}
+      </div>
+    @endif
+
     <!-- Form -->
     <div class="bg-white rounded-lg shadow-lg p-8">
       <form method="POST" action="{{ route('lessons.generate') }}" class="space-y-6">
