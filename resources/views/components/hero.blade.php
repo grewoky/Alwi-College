@@ -31,7 +31,7 @@
 
       <!-- MOBILE CAROUSEL (hidden on md and up) -->
       <div id="poster-carousel-mobile" class="relative w-full overflow-hidden rounded-none md:rounded-2xl shadow-lg md:hidden mb-8" role="region" aria-label="Carousel Poster Mobile">
-        <div class="carousel-track-mobile relative w-full h-96">
+        <div class="carousel-track-mobile relative w-full aspect-[16/5]">
           <div class="carousel-inner-mobile flex w-full h-full will-change-transform" style="min-width: 100%;">
           @foreach($posters as $i => $src)
             <div class="carousel-slide-mobile flex-shrink-0 w-full h-full relative" data-index="{{ $i }}" aria-hidden="{{ $i === 0 ? 'false' : 'true' }}">
@@ -55,22 +55,20 @@
         <button type="button" class="carousel-next-mobile absolute right-3 top-1/2 -translate-y-1/2 z-10 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/70 hover:bg-white/90 border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2E529F]" aria-label="Berikutnya">
           <svg class="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
         </button>
+      </div>
 
-        <!-- Mobile Thumbnails (selector) -->
-        <div class="absolute left-0 right-0 flex justify-center pointer-events-none" style="bottom: 14px;">
-          <div class="carousel-thumbs-mobile mx-3 px-2 py-2 flex gap-2 overflow-x-auto pointer-events-auto bg-white/60 backdrop-blur rounded-xl border border-gray-200 shadow-sm" aria-hidden="false">
-            @foreach($posters as $i => $src)
-              <button type="button" class="carousel-thumb-mobile shrink-0 w-12 h-8 rounded-lg overflow-hidden border border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2E529F] transition" data-index="{{ $i }}" aria-label="Pilih poster {{ $i + 1 }}" aria-pressed="false">
-                <img src="{{ $src }}" alt="Thumbnail poster {{ $i + 1 }}" class="w-full h-full object-cover object-center" loading="lazy" decoding="async">
-              </button>
-            @endforeach
-          </div>
+      <!-- Mobile Dots (selector) -->
+      <div class="md:hidden -mt-4 mb-8 flex justify-center">
+        <div class="carousel-dots-mobile flex justify-center gap-2" aria-hidden="false">
+          @foreach($posters as $i => $src)
+            <button type="button" class="carousel-dot-mobile w-2.5 h-2.5 rounded-full bg-gray-300/80 hover:bg-gray-400 border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2E529F] transition-all duration-200" data-index="{{ $i }}" aria-label="Slide {{ $i + 1 }}" aria-pressed="false"></button>
+          @endforeach
         </div>
       </div>
 
       <!-- DESKTOP CAROUSEL (hidden on md and below) -->
       <div id="poster-carousel-desktop" class="relative w-full overflow-hidden rounded-2xl shadow-lg hidden md:block" role="region" aria-label="Carousel Poster Desktop">
-        <div class="carousel-track-desktop relative w-full h-96 lg:h-[500px]">
+        <div class="carousel-track-desktop relative w-full aspect-[16/5]">
           <div class="carousel-inner-desktop flex w-full h-full will-change-transform rounded-2xl" style="min-width: 100%;">
           @foreach($posters as $i => $src)
             <div class="carousel-slide-desktop flex-shrink-0 w-full h-full relative" data-index="{{ $i }}" aria-hidden="{{ $i === 0 ? 'false' : 'true' }}">
@@ -94,16 +92,14 @@
         <button type="button" class="carousel-next-desktop absolute right-4 top-1/2 -translate-y-1/2 z-10 inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/70 hover:bg-white/90 border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2E529F]" aria-label="Berikutnya">
           <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
         </button>
+      </div>
 
-        <!-- Desktop Thumbnails (selector) -->
-        <div class="absolute left-0 right-0 flex justify-center pointer-events-none" style="bottom: 14px;">
-          <div class="carousel-thumbs-desktop mx-4 px-3 py-2 flex gap-3 overflow-x-auto pointer-events-auto bg-white/60 backdrop-blur rounded-xl border border-gray-200 shadow-sm" aria-hidden="false">
-            @foreach($posters as $i => $src)
-              <button type="button" class="carousel-thumb-desktop shrink-0 w-16 h-10 rounded-lg overflow-hidden border border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2E529F] transition" data-index="{{ $i }}" aria-label="Pilih poster {{ $i + 1 }}" aria-pressed="false">
-                <img src="{{ $src }}" alt="Thumbnail poster {{ $i + 1 }}" class="w-full h-full object-cover object-center" loading="lazy" decoding="async">
-              </button>
-            @endforeach
-          </div>
+      <!-- Desktop Dots (selector) -->
+      <div class="hidden md:flex -mt-4 mb-8 justify-center">
+        <div class="carousel-dots-desktop flex justify-center gap-3" aria-hidden="false">
+          @foreach($posters as $i => $src)
+            <button type="button" class="carousel-dot-desktop w-3 h-3 md:w-3.5 md:h-3.5 rounded-full bg-gray-300/80 hover:bg-gray-400 border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2E529F] transition-all duration-200" data-index="{{ $i }}" aria-label="Slide {{ $i + 1 }}" aria-pressed="false"></button>
+          @endforeach
         </div>
       </div>
     </div>
@@ -114,7 +110,7 @@
     (function(){
       const inner = document.querySelector('#poster-carousel-mobile .carousel-inner-mobile');
       const slides = Array.from(document.querySelectorAll('#poster-carousel-mobile .carousel-slide-mobile'));
-      const thumbs = Array.from(document.querySelectorAll('#poster-carousel-mobile .carousel-thumbs-mobile .carousel-thumb-mobile'));
+      const dots = Array.from(document.querySelectorAll('.carousel-dots-mobile .carousel-dot-mobile'));
       const prevBtn = document.querySelector('#poster-carousel-mobile .carousel-prev-mobile');
       const nextBtn = document.querySelector('#poster-carousel-mobile .carousel-next-mobile');
       let current = 0;
@@ -193,13 +189,15 @@
         const offset = -(index * 100) / total;
         inner.style.transform = `translateX(${offset}%)`;
         slides.forEach((el,i)=> el.setAttribute('aria-hidden', i===index ? 'false' : 'true'));
-        thumbs.forEach((t,i)=>{
+        dots.forEach((d,i)=>{
           if(i===index){
-            t.classList.add('ring-2','ring-[#2E529F]');
-            t.setAttribute('aria-pressed','true');
+            d.classList.remove('bg-gray-300/80','hover:bg-gray-400');
+            d.classList.add('bg-[#2E529F]');
+            d.setAttribute('aria-pressed','true');
           } else {
-            t.classList.remove('ring-2','ring-[#2E529F]');
-            t.setAttribute('aria-pressed','false');
+            d.classList.add('bg-gray-300/80','hover:bg-gray-400');
+            d.classList.remove('bg-[#2E529F]');
+            d.setAttribute('aria-pressed','false');
           }
         });
         current = index;
@@ -213,7 +211,7 @@
         show(current - 1);
       }
 
-      thumbs.forEach(t=> t.addEventListener('click', e => show(Number(e.currentTarget.dataset.index))));
+      dots.forEach(d=> d.addEventListener('click', e => show(Number(e.currentTarget.dataset.index))));
       if (prevBtn) prevBtn.addEventListener('click', () => { stopAuto(); prevSlide(); startAuto(); });
       if (nextBtn) nextBtn.addEventListener('click', () => { stopAuto(); nextSlide(); startAuto(); });
 
@@ -229,7 +227,7 @@
     (function(){
       const inner = document.querySelector('#poster-carousel-desktop .carousel-inner-desktop');
       const slides = Array.from(document.querySelectorAll('#poster-carousel-desktop .carousel-slide-desktop'));
-      const thumbs = Array.from(document.querySelectorAll('#poster-carousel-desktop .carousel-thumbs-desktop .carousel-thumb-desktop'));
+      const dots = Array.from(document.querySelectorAll('.carousel-dots-desktop .carousel-dot-desktop'));
       const prevBtn = document.querySelector('#poster-carousel-desktop .carousel-prev-desktop');
       const nextBtn = document.querySelector('#poster-carousel-desktop .carousel-next-desktop');
       let current = 0;
@@ -308,13 +306,15 @@
         const offset = -(index * 100) / total;
         inner.style.transform = `translateX(${offset}%)`;
         slides.forEach((el,i)=> el.setAttribute('aria-hidden', i===index ? 'false' : 'true'));
-        thumbs.forEach((t,i)=>{
+        dots.forEach((d,i)=>{
           if(i===index){
-            t.classList.add('ring-2','ring-[#2E529F]');
-            t.setAttribute('aria-pressed','true');
+            d.classList.remove('bg-gray-300/80','hover:bg-gray-400');
+            d.classList.add('bg-[#2E529F]');
+            d.setAttribute('aria-pressed','true');
           } else {
-            t.classList.remove('ring-2','ring-[#2E529F]');
-            t.setAttribute('aria-pressed','false');
+            d.classList.add('bg-gray-300/80','hover:bg-gray-400');
+            d.classList.remove('bg-[#2E529F]');
+            d.setAttribute('aria-pressed','false');
           }
         });
         current = index;
@@ -328,7 +328,7 @@
         show(current - 1);
       }
 
-      thumbs.forEach(t=> t.addEventListener('click', e => show(Number(e.currentTarget.dataset.index))));
+      dots.forEach(d=> d.addEventListener('click', e => show(Number(e.currentTarget.dataset.index))));
       if (prevBtn) prevBtn.addEventListener('click', () => { stopAuto(); prevSlide(); startAuto(); });
       if (nextBtn) nextBtn.addEventListener('click', () => { stopAuto(); nextSlide(); startAuto(); });
 
