@@ -225,12 +225,12 @@
             <!-- Alumni Section -->
             <section id="alumni" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 sm:pb-10 scroll-mt-24 sm:scroll-mt-28">
               <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-md border border-gray-100 card-hover">
-                <div class="fade-up">
+                <div class="fade-up text-center">
                   <h2 class="text-2xl sm:text-3xl font-bold text-[#3B63B5] mb-2 sm:mb-3 heading-accent-left text-center"><span class="heading-inline">Alumni Berprestasi</span></h2>
-                  <p class="text-sm sm:text-base text-gray-600 leading-relaxed max-w-3xl">
+                  <p class="text-sm sm:text-base text-gray-600 leading-relaxed max-w-3xl mx-auto">
                     Alwi College berkomitmen membangun kebiasaan belajar yang disiplin, terarah, dan konsisten—didukung mentor berpengalaman dan materi yang terstruktur.
                   </p>
-                  <p class="text-sm sm:text-base text-gray-600 leading-relaxed max-w-3xl mt-2">
+                  <p class="text-sm sm:text-base text-gray-600 leading-relaxed max-w-3xl mx-auto mt-2">
                     Berikut beberapa cerita singkat alumni yang terus berkembang dan berkontribusi di bidangnya.
                   </p>
                 </div>
