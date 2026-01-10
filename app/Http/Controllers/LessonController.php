@@ -20,9 +20,17 @@ use App\Models\Student;
 use App\Models\DeletedLessonLog;
 use App\Mail\ScheduleCreatedNotification;
 use App\Http\Requests\GenerateLessonRequest;
+use App\Services\ResendService;
 
 class LessonController extends Controller
 {
+    protected ResendService $resendService;
+
+    public function __construct(ResendService $resendService)
+    {
+        $this->resendService = $resendService;
+    }
+
     public function showGenerate()
     {
         $teachersList = Teacher::with('user')->orderBy('id', 'desc')->get();
@@ -730,8 +738,47 @@ class LessonController extends Controller
         }
 
         // Send email to teacher
-        try {
-            $firstLesson = $lessons->first();
+        $firstLesson = $lessons->first();
+        $scheduleInfo = [
+            'date' => $firstLesson->date,
+            'subject_name' => $firstLesson->subject?->name ?? '-',
+            'teacher_name' => $teacher->user->name,
+            'class_name' => $firstLesson->classRoom?->name ?? '-',
+            'school_name' => $school->name,
+            'start_time' => $firstLesson->start_time,
+            'end_time' => $firstLesson->end_time,
+        ];
+
+        $this->resendService->sendScheduleNotification(
+            $teacher->user->email,
+            $teacher->user->name,
+            $scheduleInfo,
+            'guru'
+        );
+
+        // Get unique class rooms and send emails to students
+        $classRoomIds = $lessons->pluck('class_room_id')->unique();
+
+        foreach ($classRoomIds as $classRoomId) {
+            // Get all students in this class
+            $students = Student::where('class_room_id', $classRoomId)
+                ->with('user')
+                ->get();
+
+            if ($students->isEmpty()) {
+                continue;
+            }
+
+            // Get first lesson for this class room for schedule info
+            $classLessons = $lessons->filter(function($lesson) use ($classRoomId) {
+                return $lesson->class_room_id == $classRoomId;
+            });
+
+            $firstLesson = $classLessons->first();
+            if (!$firstLesson) {
+                continue;
+            }
+
             $scheduleInfo = [
                 'date' => $firstLesson->date,
                 'subject_name' => $firstLesson->subject?->name ?? '-',
@@ -742,92 +789,25 @@ class LessonController extends Controller
                 'end_time' => $firstLesson->end_time,
             ];
 
-            Mail::to($teacher->user->email)->send(new ScheduleCreatedNotification(
-                $teacher->user->name,
-                $teacher->user->email,
-                $scheduleInfo,
-                'guru'
-            ));
-
-            Log::info('Schedule notification sent to teacher', [
-                'teacher_id' => $teacherId,
-                'teacher_email' => $teacher->user->email,
-                'lessons_count' => $lessons->count(),
-            ]);
-        } catch (\Throwable $e) {
-            Log::warning('Failed to send schedule notification to teacher', [
-                'teacher_id' => $teacherId,
-                'error' => $e->getMessage(),
-            ]);
-        }
-
-        // Get unique class rooms and send emails to students
-        $classRoomIds = $lessons->pluck('class_room_id')->unique();
-
-        foreach ($classRoomIds as $classRoomId) {
-            try {
-                // Get all students in this class
-                $students = Student::where('class_room_id', $classRoomId)
-                    ->with('user')
-                    ->get();
-
-                if ($students->isEmpty()) {
+            // Send email to each student
+            foreach ($students as $student) {
+                if (!$student->user || !$student->user->email) {
                     continue;
                 }
 
-                // Get first lesson for this class room for schedule info
-                $classLessons = $lessons->filter(function($lesson) use ($classRoomId) {
-                    return $lesson->class_room_id == $classRoomId;
-                });
-
-                $firstLesson = $classLessons->first();
-                if (!$firstLesson) {
-                    continue;
-                }
-
-                $scheduleInfo = [
-                    'date' => $firstLesson->date,
-                    'subject_name' => $firstLesson->subject?->name ?? '-',
-                    'teacher_name' => $teacher->user->name,
-                    'class_name' => $firstLesson->classRoom?->name ?? '-',
-                    'school_name' => $school->name,
-                    'start_time' => $firstLesson->start_time,
-                    'end_time' => $firstLesson->end_time,
-                ];
-
-                // Send email to each student
-                foreach ($students as $student) {
-                    if (!$student->user || !$student->user->email) {
-                        continue;
-                    }
-
-                    try {
-                        Mail::to($student->user->email)->send(new ScheduleCreatedNotification(
-                            $student->user->name,
-                            $student->user->email,
-                            $scheduleInfo,
-                            'siswa'
-                        ));
-                    } catch (\Throwable $e) {
-                        Log::warning('Failed to send schedule notification to student', [
-                            'student_id' => $student->id,
-                            'student_email' => $student->user->email,
-                            'error' => $e->getMessage(),
-                        ]);
-                    }
-                }
-
-                Log::info('Schedule notifications sent to students', [
-                    'class_room_id' => $classRoomId,
-                    'students_count' => $students->count(),
-                    'lessons_count' => $classLessons->count(),
-                ]);
-            } catch (\Throwable $e) {
-                Log::warning('Failed to send schedule notifications to class', [
-                    'class_room_id' => $classRoomId,
-                    'error' => $e->getMessage(),
-                ]);
+                $this->resendService->sendScheduleNotification(
+                    $student->user->email,
+                    $student->user->name,
+                    $scheduleInfo,
+                    'siswa'
+                );
             }
+
+            Log::info('Schedule notifications sent to students', [
+                'class_room_id' => $classRoomId,
+                'students_count' => $students->count(),
+                'lessons_count' => $classLessons->count(),
+            ]);
         }
     }
 }

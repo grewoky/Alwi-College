@@ -14,9 +14,16 @@ use App\Models\ClassRoom;
 use App\Models\Teacher;
 use Illuminate\Support\Facades\DB;
 use Throwable;
+use App\Services\ResendService;
 
 class AdminUserController extends Controller
 {
+	protected ResendService $resendService;
+
+	public function __construct(ResendService $resendService)
+	{
+		$this->resendService = $resendService;
+	}
 	public function pending()
 	{
 		$users = User::where('is_approved', false)->orderBy('created_at','desc')->get();
@@ -83,17 +90,21 @@ class AdminUserController extends Controller
 			return redirect()->back()->withErrors('Gagal menambahkan pengajar.');
 		}
 
-		// Send account creation email notification
-		try {
-			Mail::to($user->email)->send(new AccountCreatedNotification(
-				$user->name,
-				$user->email,
-				$request->password,
-				'guru'
-			));
-		} catch (Throwable $e) {
-			Log::warning('Failed to send account creation email to teacher', ['email' => $user->email, 'error' => $e->getMessage()]);
-		}
+		// Send account creation email notification via ResendService
+		$emailHtml = '<p>Halo ' . htmlspecialchars($user->name) . ',</p>'
+			. '<p>Akun guru Anda telah dibuat oleh admin dengan detail berikut:</p>'
+			. '<ul>'
+			. '<li><strong>Email:</strong> ' . htmlspecialchars($user->email) . '</li>'
+			. '<li><strong>Password:</strong> ' . htmlspecialchars($request->password) . '</li>'
+			. '</ul>'
+			. '<p>Silakan login ke dashboard dengan kredensial di atas. Anda dapat mengubah password Anda setelah login.</p>'
+			. '<p>Terima kasih,<br/>Tim Alwi College</p>';
+
+		$this->resendService->sendEmail(
+			$user->email,
+			'Akun Guru Dibuat',
+			$emailHtml
+		);
 
 		return redirect()->route('admin.teachers.index')->with('success','Guru berhasil ditambahkan dan email notifikasi telah dikirim.');
 	}
@@ -375,17 +386,21 @@ class AdminUserController extends Controller
 			return redirect()->back()->withErrors('Gagal menambahkan siswa.');
 		}
 
-		// Send account creation email notification
-		try {
-			Mail::to($user->email)->send(new AccountCreatedNotification(
-				$user->name,
-				$user->email,
-				$request->password,
-				'siswa'
-			));
-		} catch (Throwable $e) {
-			Log::warning('Failed to send account creation email to student', ['email' => $user->email, 'error' => $e->getMessage()]);
-		}
+		// Send account creation email notification via ResendService
+		$emailHtml = '<p>Halo ' . htmlspecialchars($user->name) . ',</p>'
+			. '<p>Akun siswa Anda telah dibuat oleh admin dengan detail berikut:</p>'
+			. '<ul>'
+			. '<li><strong>Email:</strong> ' . htmlspecialchars($user->email) . '</li>'
+			. '<li><strong>Password:</strong> ' . htmlspecialchars($request->password) . '</li>'
+			. '</ul>'
+			. '<p>Silakan login ke dashboard dengan kredensial di atas. Anda dapat mengubah password Anda setelah login.</p>'
+			. '<p>Terima kasih,<br/>Tim Alwi College</p>';
+
+		$this->resendService->sendEmail(
+			$user->email,
+			'Akun Siswa Dibuat',
+			$emailHtml
+		);
 
 		return redirect()->route('admin.students.index')->with('success', 'Siswa berhasil ditambahkan dan email notifikasi telah dikirim.');
 	}
