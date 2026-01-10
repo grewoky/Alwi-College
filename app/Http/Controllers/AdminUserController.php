@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\AccountCreatedNotification;
 use App\Models\ClassRoom;
 use App\Models\Teacher;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class AdminUserController extends Controller
 {
@@ -46,28 +48,39 @@ class AdminUserController extends Controller
 			'is_active' => 'nullable|in:0,1',
 		]);
 
-		$user = User::create([
-			'name' => $request->name,
-			'email' => $request->email,
-			'password' => bcrypt($request->password),
-			'is_approved' => true,
-			'is_active' => (bool) $request->input('is_active', true),
-			'phone' => $request->phone ?? null,
-		]);
-
 		try {
-			if (method_exists($user, 'assignRole')) {
-				$user->assignRole('teacher');
+			DB::beginTransaction();
+
+			$user = User::create([
+				'name' => $request->name,
+				'email' => $request->email,
+				'password' => bcrypt($request->password),
+				'is_approved' => true,
+				'is_active' => (bool) $request->input('is_active', true),
+				'phone' => $request->phone ?? null,
+			]);
+
+			try {
+				if (method_exists($user, 'assignRole')) {
+					$user->assignRole('teacher');
+				}
+			} catch (Throwable $e) {
+				Log::warning('Failed to assign teacher role', ['user_id' => $user->id, 'error' => $e->getMessage()]);
 			}
-		} catch (\Exception $e) {
-			// ignore
-		}
 
-		// Ensure a Teacher record exists for this user so teacher routes work
-		try {
+			// Ensure a Teacher record exists for this user so teacher routes work
 			\App\Models\Teacher::firstOrCreate(['user_id' => $user->id]);
-		} catch (\Exception $e) {
-			Log::warning('Failed to create Teacher record for new user', ['error' => $e->getMessage()]);
+
+			DB::commit();
+		} catch (Throwable $e) {
+			try {
+				DB::rollBack();
+			} catch (Throwable $rollbackError) {
+				// ignore
+			}
+
+			Log::error('Failed to store teacher', ['error' => $e->getMessage()]);
+			return redirect()->back()->withErrors('Gagal menambahkan pengajar.');
 		}
 
 		// Send account creation email notification
@@ -78,7 +91,7 @@ class AdminUserController extends Controller
 				$request->password,
 				'guru'
 			));
-		} catch (\Exception $e) {
+		} catch (Throwable $e) {
 			Log::warning('Failed to send account creation email to teacher', ['email' => $user->email, 'error' => $e->getMessage()]);
 		}
 
@@ -323,32 +336,43 @@ class AdminUserController extends Controller
 			'is_active' => 'nullable|in:0,1',
 		]);
 
-		$user = User::create([
-			'name' => $request->name,
-			'email' => $request->email,
-			'password' => bcrypt($request->password),
-			'is_approved' => true, // admin-created accounts are approved
-			'is_active' => (bool) $request->input('is_active', true),
-			'phone' => $request->phone ?? null,
-		]);
-
 		try {
-			if (method_exists($user, 'assignRole')) {
-				$user->assignRole('student');
+			DB::beginTransaction();
+
+			$user = User::create([
+				'name' => $request->name,
+				'email' => $request->email,
+				'password' => bcrypt($request->password),
+				'is_approved' => true, // admin-created accounts are approved
+				'is_active' => (bool) $request->input('is_active', true),
+				'phone' => $request->phone ?? null,
+			]);
+
+			try {
+				if (method_exists($user, 'assignRole')) {
+					$user->assignRole('student');
+				}
+			} catch (Throwable $e) {
+				Log::warning('Failed to assign student role', ['user_id' => $user->id, 'error' => $e->getMessage()]);
 			}
-		} catch (\Exception $e) {
-			// ignore
-		}
 
-		try {
 			Student::firstOrCreate([
 				'user_id' => $user->id,
 			], [
 				'class_room_id' => $request->class_room_id,
 				'nis' => $request->nis,
 			]);
-		} catch (\Exception $e) {
-			Log::warning('Failed to create Student record for new user', ['error' => $e->getMessage()]);
+
+			DB::commit();
+		} catch (Throwable $e) {
+			try {
+				DB::rollBack();
+			} catch (Throwable $rollbackError) {
+				// ignore
+			}
+
+			Log::error('Failed to store student', ['error' => $e->getMessage()]);
+			return redirect()->back()->withErrors('Gagal menambahkan siswa.');
 		}
 
 		// Send account creation email notification
@@ -359,7 +383,7 @@ class AdminUserController extends Controller
 				$request->password,
 				'siswa'
 			));
-		} catch (\Exception $e) {
+		} catch (Throwable $e) {
 			Log::warning('Failed to send account creation email to student', ['email' => $user->email, 'error' => $e->getMessage()]);
 		}
 
