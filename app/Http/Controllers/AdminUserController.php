@@ -100,13 +100,19 @@ class AdminUserController extends Controller
 			. '<p>Silakan login ke dashboard dengan kredensial di atas. Anda dapat mengubah password Anda setelah login.</p>'
 			. '<p>Terima kasih,<br/>Tim Alwi College</p>';
 
-		$this->resendService->sendEmail(
+		$emailSent = $this->resendService->sendEmail(
 			$user->email,
 			'Akun Guru Dibuat',
 			$emailHtml
 		);
 
-		return redirect()->route('admin.teachers.index')->with('success','Guru berhasil ditambahkan dan email notifikasi telah dikirim.');
+		\Illuminate\Support\Facades\Log::info('Teacher account created - email send result', [
+			'teacher_id' => $user->id,
+			'email' => $user->email,
+			'email_sent' => $emailSent,
+		]);
+
+		return redirect()->route('admin.teachers.index')->with('success','Guru berhasil ditambahkan' . ($emailSent ? ' dan email notifikasi telah dikirim.' : ' (email gagal dikirim, silakan cek log).'));
 	}
 
 	/**
@@ -396,13 +402,19 @@ class AdminUserController extends Controller
 			. '<p>Silakan login ke dashboard dengan kredensial di atas. Anda dapat mengubah password Anda setelah login.</p>'
 			. '<p>Terima kasih,<br/>Tim Alwi College</p>';
 
-		$this->resendService->sendEmail(
+		$emailSent = $this->resendService->sendEmail(
 			$user->email,
 			'Akun Siswa Dibuat',
 			$emailHtml
 		);
 
-		return redirect()->route('admin.students.index')->with('success', 'Siswa berhasil ditambahkan dan email notifikasi telah dikirim.');
+		\Illuminate\Support\Facades\Log::info('Student account created - email send result', [
+			'student_id' => $user->id,
+			'email' => $user->email,
+			'email_sent' => $emailSent,
+		]);
+
+		return redirect()->route('admin.students.index')->with('success', 'Siswa berhasil ditambahkan' . ($emailSent ? ' dan email notifikasi telah dikirim.' : ' (email gagal dikirim, silakan cek log).'));
 	}
 
 	/**

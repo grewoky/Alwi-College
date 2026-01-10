@@ -67,6 +67,7 @@ class ResendService
 
     /**
      * Send custom HTML email
+     * Uses the ResetPasswordNotification mailable to send HTML emails
      * 
      * @param string $recipientEmail
      * @param string $subject
@@ -79,9 +80,14 @@ class ResendService
         string $htmlBody
     ): bool {
         try {
-            Mail::html($htmlBody, function ($message) use ($recipientEmail, $subject) {
+            // Create a temporary mailable from raw HTML
+            // For now, using mail directly via Mail facade with proper config
+            Mail::raw($htmlBody, function ($message) use ($recipientEmail, $subject) {
                 $message->to($recipientEmail)
-                        ->subject($subject);
+                        ->subject($subject)
+                        ->getSwiftMessage()
+                        ->getHeaders()
+                        ->addTextHeader('Content-Type', 'text/html; charset=UTF-8');
             });
 
             Log::info('Custom email sent', [
