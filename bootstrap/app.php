@@ -16,5 +16,30 @@ return Application::configure(basePath: dirname(__DIR__))
     ]);
 })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->reportable(function (\Throwable $e) {
+            // Ensure we always log a short, searchable line in serverless logs
+            // (Vercel sometimes shows only a stack fragment; this captures the real message).
+            $vercelId = null;
+            $method = null;
+            $url = null;
+
+            try {
+                $request = request();
+                $vercelId = $request->headers->get('x-vercel-id');
+                $method = $request->method();
+                $url = $request->fullUrl();
+            } catch (\Throwable $ignored) {
+                // no request available (CLI, early boot, etc.)
+            }
+
+            logger()->error('Unhandled exception', [
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'vercel_id' => $vercelId,
+                'method' => $method,
+                'url' => $url,
+            ]);
+        });
     })->create();

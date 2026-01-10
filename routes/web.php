@@ -107,18 +107,23 @@ Route::middleware(['auth','role:admin'])->prefix('admin')->group(function () {
     // ADMIN USER MANAGEMENT (verifikasi pendaftar, tambah guru)
     Route::get('/users/pending', [\App\Http\Controllers\AdminUserController::class,'pending'])->name('admin.users.pending');
     Route::post('/users/{user}/approve', [\App\Http\Controllers\AdminUserController::class,'approve'])->name('admin.users.approve');
+
+    // Create routes MUST come before parameterized {id} routes
+    // Otherwise /students/create gets matched as GET /students/{student} where student="create"
+    Route::get('/students/create', [\App\Http\Controllers\AdminUserController::class,'createStudent'])->name('admin.students.create');
+    Route::post('/students', [\App\Http\Controllers\AdminUserController::class,'storeStudent'])->name('admin.students.store');
+    Route::get('/teachers/create', [\App\Http\Controllers\AdminUserController::class,'createTeacher'])->name('admin.teachers.create');
+    Route::post('/teachers', [\App\Http\Controllers\AdminUserController::class,'storeTeacher'])->name('admin.teachers.store');
+
     // Student management
     Route::get('/students', [\App\Http\Controllers\AdminUserController::class,'studentsIndex'])->name('admin.students.index');
     Route::get('/students/{student}/edit', [\App\Http\Controllers\AdminUserController::class,'editStudent'])->name('admin.students.edit');
     Route::put('/students/{student}', [\App\Http\Controllers\AdminUserController::class,'updateStudent'])->name('admin.students.update');
     Route::delete('/students/{student}', [\App\Http\Controllers\AdminUserController::class,'destroyStudent'])->name('admin.students.destroy');
+
     // Clear student email (replace with unique placeholder)
     Route::post('/students/{student}/clear-email', [\App\Http\Controllers\AdminUserController::class,'clearStudentEmail'])->name('admin.students.clear_email');
-    // Create student (admin only)
-    Route::get('/students/create', [\App\Http\Controllers\AdminUserController::class,'createStudent'])->name('admin.students.create');
-    Route::post('/students', [\App\Http\Controllers\AdminUserController::class,'storeStudent'])->name('admin.students.store');
-    Route::get('/teachers/create', [\App\Http\Controllers\AdminUserController::class,'createTeacher'])->name('admin.teachers.create');
-    Route::post('/teachers', [\App\Http\Controllers\AdminUserController::class,'storeTeacher'])->name('admin.teachers.store');
+
     // Kelola Pengajar
     Route::get('/teachers', [\App\Http\Controllers\AdminUserController::class,'teachersIndex'])->name('admin.teachers.index');
     Route::delete('/teachers/{teacher}', [\App\Http\Controllers\AdminUserController::class,'destroyTeacher'])->name('admin.teachers.destroy');
