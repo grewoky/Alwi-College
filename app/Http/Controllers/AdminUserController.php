@@ -10,20 +10,14 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\AccountCreatedNotification;
+use App\Mail\AccountCreationEmail;
 use App\Models\ClassRoom;
 use App\Models\Teacher;
 use Illuminate\Support\Facades\DB;
 use Throwable;
-use App\Services\ResendService;
 
 class AdminUserController extends Controller
 {
-	protected ResendService $resendService;
-
-	public function __construct(ResendService $resendService)
-	{
-		$this->resendService = $resendService;
-	}
 	public function pending()
 	{
 		$users = User::where('is_approved', false)->orderBy('created_at','desc')->get();
@@ -90,23 +84,25 @@ class AdminUserController extends Controller
 			return redirect()->back()->withErrors('Gagal menambahkan pengajar.');
 		}
 
-		// Send account creation email notification via ResendService
-		$emailHtml = '<p>Halo ' . htmlspecialchars($user->name) . ',</p>'
-			. '<p>Akun guru Anda telah dibuat oleh admin dengan detail berikut:</p>'
-			. '<ul>'
-			. '<li><strong>Email:</strong> ' . htmlspecialchars($user->email) . '</li>'
-			. '<li><strong>Password:</strong> ' . htmlspecialchars($request->password) . '</li>'
-			. '</ul>'
-			. '<p>Silakan login ke dashboard dengan kredensial di atas. Anda dapat mengubah password Anda setelah login.</p>'
-			. '<p>Terima kasih,<br/>Tim Alwi College</p>';
+		// Send account creation email notification using proper Mailable pattern
+		try {
+			Mail::to($user->email)->send(new AccountCreationEmail(
+				userName: $user->name,
+				userEmail: $user->email,
+				password: $request->password,
+				userType: 'guru'
+			));
+			$emailSent = true;
+		} catch (\Exception $e) {
+			$emailSent = false;
+			Log::error('Failed to send teacher account creation email', [
+				'teacher_id' => $user->id,
+				'email' => $user->email,
+				'error' => $e->getMessage(),
+			]);
+		}
 
-		$emailSent = $this->resendService->sendEmail(
-			$user->email,
-			'Akun Guru Dibuat',
-			$emailHtml
-		);
-
-		\Illuminate\Support\Facades\Log::info('Teacher account created - email send result', [
+		Log::info('Teacher account created - email send result', [
 			'teacher_id' => $user->id,
 			'email' => $user->email,
 			'email_sent' => $emailSent,
@@ -392,23 +388,25 @@ class AdminUserController extends Controller
 			return redirect()->back()->withErrors('Gagal menambahkan siswa.');
 		}
 
-		// Send account creation email notification via ResendService
-		$emailHtml = '<p>Halo ' . htmlspecialchars($user->name) . ',</p>'
-			. '<p>Akun siswa Anda telah dibuat oleh admin dengan detail berikut:</p>'
-			. '<ul>'
-			. '<li><strong>Email:</strong> ' . htmlspecialchars($user->email) . '</li>'
-			. '<li><strong>Password:</strong> ' . htmlspecialchars($request->password) . '</li>'
-			. '</ul>'
-			. '<p>Silakan login ke dashboard dengan kredensial di atas. Anda dapat mengubah password Anda setelah login.</p>'
-			. '<p>Terima kasih,<br/>Tim Alwi College</p>';
+		// Send account creation email notification using proper Mailable pattern
+		try {
+			Mail::to($user->email)->send(new AccountCreationEmail(
+				userName: $user->name,
+				userEmail: $user->email,
+				password: $request->password,
+				userType: 'siswa'
+			));
+			$emailSent = true;
+		} catch (\Exception $e) {
+			$emailSent = false;
+			Log::error('Failed to send student account creation email', [
+				'student_id' => $user->id,
+				'email' => $user->email,
+				'error' => $e->getMessage(),
+			]);
+		}
 
-		$emailSent = $this->resendService->sendEmail(
-			$user->email,
-			'Akun Siswa Dibuat',
-			$emailHtml
-		);
-
-		\Illuminate\Support\Facades\Log::info('Student account created - email send result', [
+		Log::info('Student account created - email send result', [
 			'student_id' => $user->id,
 			'email' => $user->email,
 			'email_sent' => $emailSent,
