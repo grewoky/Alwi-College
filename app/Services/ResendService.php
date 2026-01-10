@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use Resend\Resend;
+use Resend\Client;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use App\Mail\ScheduleCreatedNotification;
@@ -81,7 +81,7 @@ class ResendService
         string $htmlBody
     ): bool {
         try {
-            $resend = Resend::client(env('RESEND_API_KEY'));
+            $resend = new Client(env('RESEND_API_KEY'));
 
             $response = $resend->emails->send([
                 'from' => env('MAIL_FROM_NAME') . ' <' . env('MAIL_FROM_ADDRESS') . '>',
