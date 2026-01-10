@@ -48,11 +48,21 @@
           </div>
         </div>
 
-        <!-- Mobile Indicators -->
+        <!-- Mobile Prev/Next Controls -->
+        <button type="button" class="carousel-prev-mobile absolute left-3 top-1/2 -translate-y-1/2 z-10 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/70 hover:bg-white/90 border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2E529F]" aria-label="Sebelumnya">
+          <svg class="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <button type="button" class="carousel-next-mobile absolute right-3 top-1/2 -translate-y-1/2 z-10 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/70 hover:bg-white/90 border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2E529F]" aria-label="Berikutnya">
+          <svg class="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        </button>
+
+        <!-- Mobile Thumbnails (selector) -->
         <div class="absolute left-0 right-0 flex justify-center pointer-events-none" style="bottom: 14px;">
-          <div class="carousel-dots-mobile mt-0 mb-2 flex justify-center gap-2 pointer-events-auto" aria-hidden="false">
+          <div class="carousel-thumbs-mobile mx-3 px-2 py-2 flex gap-2 overflow-x-auto pointer-events-auto bg-white/60 backdrop-blur rounded-xl border border-gray-200 shadow-sm" aria-hidden="false">
             @foreach($posters as $i => $src)
-              <button class="carousel-dot-mobile w-2.5 h-2.5 rounded-full bg-white/60 border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2E529F] transition-all duration-200" data-index="{{ $i }}" aria-label="Slide {{ $i + 1 }}" aria-pressed="false"></button>
+              <button type="button" class="carousel-thumb-mobile shrink-0 w-12 h-8 rounded-lg overflow-hidden border border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2E529F] transition" data-index="{{ $i }}" aria-label="Pilih poster {{ $i + 1 }}" aria-pressed="false">
+                <img src="{{ $src }}" alt="Thumbnail poster {{ $i + 1 }}" class="w-full h-full object-cover object-center" loading="lazy" decoding="async">
+              </button>
             @endforeach
           </div>
         </div>
@@ -77,11 +87,21 @@
           </div>
         </div>
 
-        <!-- Desktop Indicators -->
+        <!-- Desktop Prev/Next Controls -->
+        <button type="button" class="carousel-prev-desktop absolute left-4 top-1/2 -translate-y-1/2 z-10 inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/70 hover:bg-white/90 border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2E529F]" aria-label="Sebelumnya">
+          <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <button type="button" class="carousel-next-desktop absolute right-4 top-1/2 -translate-y-1/2 z-10 inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/70 hover:bg-white/90 border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2E529F]" aria-label="Berikutnya">
+          <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        </button>
+
+        <!-- Desktop Thumbnails (selector) -->
         <div class="absolute left-0 right-0 flex justify-center pointer-events-none" style="bottom: 14px;">
-          <div class="carousel-dots-desktop mt-0 mb-2 flex justify-center gap-3 pointer-events-auto" aria-hidden="false">
+          <div class="carousel-thumbs-desktop mx-4 px-3 py-2 flex gap-3 overflow-x-auto pointer-events-auto bg-white/60 backdrop-blur rounded-xl border border-gray-200 shadow-sm" aria-hidden="false">
             @foreach($posters as $i => $src)
-              <button class="carousel-dot-desktop w-3 h-3 md:w-3.5 md:h-3.5 rounded-full bg-white/60 border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2E529F] transition-all duration-200" data-index="{{ $i }}" aria-label="Slide {{ $i + 1 }}" aria-pressed="false"></button>
+              <button type="button" class="carousel-thumb-desktop shrink-0 w-16 h-10 rounded-lg overflow-hidden border border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2E529F] transition" data-index="{{ $i }}" aria-label="Pilih poster {{ $i + 1 }}" aria-pressed="false">
+                <img src="{{ $src }}" alt="Thumbnail poster {{ $i + 1 }}" class="w-full h-full object-cover object-center" loading="lazy" decoding="async">
+              </button>
             @endforeach
           </div>
         </div>
@@ -94,7 +114,9 @@
     (function(){
       const inner = document.querySelector('#poster-carousel-mobile .carousel-inner-mobile');
       const slides = Array.from(document.querySelectorAll('#poster-carousel-mobile .carousel-slide-mobile'));
-      const dots = Array.from(document.querySelectorAll('#poster-carousel-mobile .carousel-dots-mobile .carousel-dot-mobile'));
+      const thumbs = Array.from(document.querySelectorAll('#poster-carousel-mobile .carousel-thumbs-mobile .carousel-thumb-mobile'));
+      const prevBtn = document.querySelector('#poster-carousel-mobile .carousel-prev-mobile');
+      const nextBtn = document.querySelector('#poster-carousel-mobile .carousel-next-mobile');
       let current = 0;
       let interval = null;
 
@@ -134,7 +156,7 @@
       function startAuto(){
         if(prefersReduced || total <= 1){ return; }
         stopAuto();
-        interval = setInterval(nextSlide, 4000);
+        interval = setInterval(nextSlide, 2000);
       }
 
       function onTouchStart(e){
@@ -171,15 +193,13 @@
         const offset = -(index * 100) / total;
         inner.style.transform = `translateX(${offset}%)`;
         slides.forEach((el,i)=> el.setAttribute('aria-hidden', i===index ? 'false' : 'true'));
-        dots.forEach((d,i)=>{
+        thumbs.forEach((t,i)=>{
           if(i===index){
-            d.classList.remove('bg-white/60','border-gray-200');
-            d.classList.add('bg-[#2E529F]');
-            d.setAttribute('aria-pressed','true');
+            t.classList.add('ring-2','ring-[#2E529F]');
+            t.setAttribute('aria-pressed','true');
           } else {
-            d.classList.add('bg-white/60','border-gray-200');
-            d.classList.remove('bg-[#2E529F]');
-            d.setAttribute('aria-pressed','false');
+            t.classList.remove('ring-2','ring-[#2E529F]');
+            t.setAttribute('aria-pressed','false');
           }
         });
         current = index;
@@ -189,7 +209,13 @@
         show(current + 1);
       }
 
-      dots.forEach(d=> d.addEventListener('click', e => show(Number(e.currentTarget.dataset.index))));
+      function prevSlide(){
+        show(current - 1);
+      }
+
+      thumbs.forEach(t=> t.addEventListener('click', e => show(Number(e.currentTarget.dataset.index))));
+      if (prevBtn) prevBtn.addEventListener('click', () => { stopAuto(); prevSlide(); startAuto(); });
+      if (nextBtn) nextBtn.addEventListener('click', () => { stopAuto(); nextSlide(); startAuto(); });
 
       const carouselEl = document.getElementById('poster-carousel-mobile');
       carouselEl.addEventListener('mouseenter', stopAuto);
@@ -203,7 +229,9 @@
     (function(){
       const inner = document.querySelector('#poster-carousel-desktop .carousel-inner-desktop');
       const slides = Array.from(document.querySelectorAll('#poster-carousel-desktop .carousel-slide-desktop'));
-      const dots = Array.from(document.querySelectorAll('#poster-carousel-desktop .carousel-dots-desktop .carousel-dot-desktop'));
+      const thumbs = Array.from(document.querySelectorAll('#poster-carousel-desktop .carousel-thumbs-desktop .carousel-thumb-desktop'));
+      const prevBtn = document.querySelector('#poster-carousel-desktop .carousel-prev-desktop');
+      const nextBtn = document.querySelector('#poster-carousel-desktop .carousel-next-desktop');
       let current = 0;
       let interval = null;
 
@@ -243,7 +271,7 @@
       function startAuto(){
         if(prefersReduced || total <= 1){ return; }
         stopAuto();
-        interval = setInterval(nextSlide, 4000);
+        interval = setInterval(nextSlide, 2000);
       }
 
       function onTouchStart(e){
@@ -280,15 +308,13 @@
         const offset = -(index * 100) / total;
         inner.style.transform = `translateX(${offset}%)`;
         slides.forEach((el,i)=> el.setAttribute('aria-hidden', i===index ? 'false' : 'true'));
-        dots.forEach((d,i)=>{
+        thumbs.forEach((t,i)=>{
           if(i===index){
-            d.classList.remove('bg-white/60','border-gray-200');
-            d.classList.add('bg-[#2E529F]');
-            d.setAttribute('aria-pressed','true');
+            t.classList.add('ring-2','ring-[#2E529F]');
+            t.setAttribute('aria-pressed','true');
           } else {
-            d.classList.add('bg-white/60','border-gray-200');
-            d.classList.remove('bg-[#2E529F]');
-            d.setAttribute('aria-pressed','false');
+            t.classList.remove('ring-2','ring-[#2E529F]');
+            t.setAttribute('aria-pressed','false');
           }
         });
         current = index;
@@ -298,7 +324,13 @@
         show(current + 1);
       }
 
-      dots.forEach(d=> d.addEventListener('click', e => show(Number(e.currentTarget.dataset.index))));
+      function prevSlide(){
+        show(current - 1);
+      }
+
+      thumbs.forEach(t=> t.addEventListener('click', e => show(Number(e.currentTarget.dataset.index))));
+      if (prevBtn) prevBtn.addEventListener('click', () => { stopAuto(); prevSlide(); startAuto(); });
+      if (nextBtn) nextBtn.addEventListener('click', () => { stopAuto(); nextSlide(); startAuto(); });
 
       const carouselEl = document.getElementById('poster-carousel-desktop');
       carouselEl.addEventListener('mouseenter', stopAuto);

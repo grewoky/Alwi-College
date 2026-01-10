@@ -226,7 +226,7 @@
             <section id="alumni" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 sm:pb-10 scroll-mt-24 sm:scroll-mt-28">
               <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-md border border-gray-100 card-hover">
                 <div class="fade-up">
-                  <h2 class="text-2xl sm:text-3xl font-bold text-[#3B63B5] mb-2 sm:mb-3 heading-accent-left"><span class="heading-inline">Alumni Berprestasi</span></h2>
+                  <h2 class="text-2xl sm:text-3xl font-bold text-[#3B63B5] mb-2 sm:mb-3 heading-accent-left text-center"><span class="heading-inline">Alumni Berprestasi</span></h2>
                   <p class="text-sm sm:text-base text-gray-600 leading-relaxed max-w-3xl">
                     Alwi College berkomitmen membangun kebiasaan belajar yang disiplin, terarah, dan konsisten—didukung mentor berpengalaman dan materi yang terstruktur.
                   </p>
@@ -367,7 +367,7 @@
                       <ul class="space-y-1.5 sm:space-y-2 text-white/90 text-xs sm:text-sm">
                         <li class="flex items-center gap-2">
                           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2 8l10-6 10 6-10 6L2 8zm0 8l10 6 10-6"/></svg>
-                          <span>Jl. Kebun Mnaggis Gg Salam 619CD</span>
+                          <span>Jl. Kebun Manggis Gg Salam 619CD</span>
                         </li>
                         <li class="flex items-center gap-2">
                           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5h18M3 19h18M3 12h18"/></svg>
