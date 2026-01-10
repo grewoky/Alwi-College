@@ -120,6 +120,11 @@
           'description' => 'Laporan kehadiran siswa',
           'route' => route('attendance.admin')
         ],
+        [
+          'label' => 'Carousel Poster',
+          'description' => 'Kelola poster landing page',
+          'route' => route('admin.carousel-posters.index')
+        ],
       ];
     @endphp
 

@@ -10,12 +10,32 @@ use App\Http\Controllers\LessonController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\TripController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CarouselPosterController;
+use App\Models\CarouselPoster;
 
 // ============ HOME & DASHBOARD ============
 
 // Halaman home
 Route::get('/', function () {
-    return view('welcome');
+    $posters = [];
+    try {
+        $posters = CarouselPoster::query()
+            ->active()
+            ->ordered()
+            ->get()
+            ->map(function (CarouselPoster $poster) {
+                // Request a reasonably-sized, cropped image for the carousel.
+                // The frontend still uses object-cover, this mainly optimizes payload size.
+                return $poster->transformedUrl('f_auto,q_auto,c_fill,g_auto,w_1600,h_500');
+            })
+            ->filter()
+            ->values()
+            ->all();
+    } catch (\Throwable $e) {
+        $posters = [];
+    }
+
+    return view('welcome', compact('posters'));
 });
 
 // Dashboard redirect sesuai role
@@ -104,6 +124,13 @@ Route::middleware(['auth','role:admin'])->prefix('admin')->group(function () {
     Route::delete('/teachers/{teacher}', [\App\Http\Controllers\AdminUserController::class,'destroyTeacher'])->name('admin.teachers.destroy');
     Route::get('/teachers/{teacher}/edit', [\App\Http\Controllers\AdminUserController::class,'editTeacher'])->name('admin.teachers.edit');
     Route::put('/teachers/{teacher}', [\App\Http\Controllers\AdminUserController::class,'updateTeacher'])->name('admin.teachers.update');
+
+    // ADMIN CAROUSEL POSTERS (Manage landing page posters)
+    Route::get('/carousel-posters', [CarouselPosterController::class, 'index'])->name('admin.carousel-posters.index');
+    Route::post('/carousel-posters', [CarouselPosterController::class, 'store'])->name('admin.carousel-posters.store');
+    Route::post('/carousel-posters/{poster}/move-up', [CarouselPosterController::class, 'moveUp'])->name('admin.carousel-posters.move-up');
+    Route::post('/carousel-posters/{poster}/move-down', [CarouselPosterController::class, 'moveDown'])->name('admin.carousel-posters.move-down');
+    Route::delete('/carousel-posters/{poster}', [CarouselPosterController::class, 'destroy'])->name('admin.carousel-posters.destroy');
 });
 
 // ============ TEACHER AREA ============
