@@ -66,13 +66,6 @@
             <div class="carousel-slide-desktop flex-shrink-0 w-full h-full relative" data-index="{{ $i }}" aria-hidden="{{ $i === 0 ? 'false' : 'true' }}">
               <img src="{{ $src }}" alt="Poster {{ $i + 1 }}" class="w-full h-full min-w-full min-h-full object-cover object-center" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" decoding="async">
 
-              <!-- CTA overlay on poster (center-left alignment) -->
-              <div class="absolute inset-0 flex items-center justify-start pl-8 lg:pl-12 pointer-events-none">
-                <a href="{{ route('login') }}" class="pointer-events-auto px-5 py-2.5 rounded-lg bg-white/95 text-[#2E529F] font-medium shadow hover:shadow-lg hover:bg-white focus:ring-4 focus:ring-[#2E529F]/30 transition-all duration-150 ease-in-out">
-                  Daftar Sekarang
-                </a>
-              </div>
-
               <!-- Overlay masks -->
               <div class="absolute inset-0 pointer-events-none">
                 <div class="absolute top-0 left-0 w-36 h-28 rounded-br-xl" style="background:linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.0) 60%);"></div>
