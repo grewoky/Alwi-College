@@ -224,41 +224,59 @@
                 <div class="fade-up">
                   <h2 class="text-2xl sm:text-3xl font-bold text-[#3B63B5] mb-2 sm:mb-3 heading-accent-left"><span class="heading-inline">Alumni Berprestasi</span></h2>
                   <p class="text-sm sm:text-base text-gray-600 leading-relaxed max-w-3xl">
-                    Cerita singkat dari alumni Alwi College yang terus berkembang dan berkontribusi di bidangnya.
+                    Alwi College berkomitmen membangun kebiasaan belajar yang disiplin, terarah, dan konsisten—didukung mentor berpengalaman dan materi yang terstruktur.
+                  </p>
+                  <p class="text-sm sm:text-base text-gray-600 leading-relaxed max-w-3xl mt-2">
+                    Berikut beberapa cerita singkat alumni yang terus berkembang dan berkontribusi di bidangnya.
                   </p>
                 </div>
 
                 <div class="mt-5 sm:mt-6 grid gap-3 sm:gap-6 md:grid-cols-3">
                   <article class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 card-hover reveal show">
-                    <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-4">
-                      “Belajar di Alwi College membuat saya lebih disiplin dan percaya diri. Pola latihan yang terarah membantu saya membangun fondasi yang kuat.”
-                    </p>
-                    <div class="pt-4 border-t border-gray-100">
-                      <p class="font-semibold text-gray-900">Nadia Putri</p>
-                      <p class="text-xs sm:text-sm text-gray-600">Tahun lulus: 2020</p>
-                      <p class="text-xs sm:text-sm text-gray-600">Profesi sekarang: Analis Data</p>
+                    <div class="flex flex-col sm:flex-row items-start gap-4">
+                      <img src="{{ asset('images/posters/poster1-1600x1296.jpg.jpeg') }}" alt="Foto alumni Nadia Putri" class="w-20 h-20 sm:w-16 sm:h-16 rounded-2xl object-cover shrink-0 border border-gray-100">
+                      <div class="min-w-0">
+                        <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-4">
+                          “Belajar di Alwi College membuat saya lebih disiplin dan percaya diri. Pola latihan yang terarah membantu saya membangun fondasi yang kuat.”
+                        </p>
+                        <div class="pt-4 border-t border-gray-100">
+                          <p class="font-semibold text-gray-900">Nadia Putri</p>
+                          <p class="text-xs sm:text-sm text-gray-600">Tahun lulus: 2020</p>
+                          <p class="text-xs sm:text-sm text-gray-600">Profesi sekarang: Analis Data</p>
+                        </div>
+                      </div>
                     </div>
                   </article>
 
                   <article class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 card-hover reveal show">
-                    <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-4">
-                      “Pendampingan mentor dan pembahasan materi yang rapi membuat saya lebih mudah memahami konsep. Hasilnya terasa saat menghadapi ujian.”
-                    </p>
-                    <div class="pt-4 border-t border-gray-100">
-                      <p class="font-semibold text-gray-900">Rizky Pratama</p>
-                      <p class="text-xs sm:text-sm text-gray-600">Tahun lulus: 2019</p>
-                      <p class="text-xs sm:text-sm text-gray-600">Profesi sekarang: Guru Matematika</p>
+                    <div class="flex flex-col sm:flex-row items-start gap-4">
+                      <img src="{{ asset('images/posters/poster2-1600x1296.jpg.jpeg') }}" alt="Foto alumni Rizky Pratama" class="w-20 h-20 sm:w-16 sm:h-16 rounded-2xl object-cover shrink-0 border border-gray-100">
+                      <div class="min-w-0">
+                        <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-4">
+                          “Pendampingan mentor dan pembahasan materi yang rapi membuat saya lebih mudah memahami konsep. Hasilnya terasa saat menghadapi ujian.”
+                        </p>
+                        <div class="pt-4 border-t border-gray-100">
+                          <p class="font-semibold text-gray-900">Rizky Pratama</p>
+                          <p class="text-xs sm:text-sm text-gray-600">Tahun lulus: 2019</p>
+                          <p class="text-xs sm:text-sm text-gray-600">Profesi sekarang: Guru Matematika</p>
+                        </div>
+                      </div>
                     </div>
                   </article>
 
                   <article class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 card-hover reveal show">
-                    <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-4">
-                      “Lingkungan belajarnya suportif dan latihan soalnya bertahap. Saya jadi terbiasa menyusun strategi belajar dan mengelola waktu.”
-                    </p>
-                    <div class="pt-4 border-t border-gray-100">
-                      <p class="font-semibold text-gray-900">Siti Aisyah</p>
-                      <p class="text-xs sm:text-sm text-gray-600">Tahun lulus: 2021</p>
-                      <p class="text-xs sm:text-sm text-gray-600">Profesi sekarang: Mahasiswa Kedokteran</p>
+                    <div class="flex flex-col sm:flex-row items-start gap-4">
+                      <img src="{{ asset('images/posters/poster3-1600x1296.jpg.jpeg') }}" alt="Foto alumni Siti Aisyah" class="w-20 h-20 sm:w-16 sm:h-16 rounded-2xl object-cover shrink-0 border border-gray-100">
+                      <div class="min-w-0">
+                        <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-4">
+                          “Lingkungan belajarnya suportif dan latihan soalnya bertahap. Saya jadi terbiasa menyusun strategi belajar dan mengelola waktu.”
+                        </p>
+                        <div class="pt-4 border-t border-gray-100">
+                          <p class="font-semibold text-gray-900">Siti Aisyah</p>
+                          <p class="text-xs sm:text-sm text-gray-600">Tahun lulus: 2021</p>
+                          <p class="text-xs sm:text-sm text-gray-600">Profesi sekarang: Mahasiswa Kedokteran</p>
+                        </div>
+                      </div>
                     </div>
                   </article>
                 </div>
