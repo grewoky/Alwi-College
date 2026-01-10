@@ -114,7 +114,8 @@ class LessonController extends Controller
                                     ->first();
                                 
                                 if ($conflict) {
-                                    $errors[] = "Konflik jadwal pada {$date->format('d-m-Y')}: Guru sudah dijadwalkan jam {$conflict->start_time}-{$conflict->end_time} untuk kelas {$conflict->classRoom->name}";
+                                    $conflictClassName = $conflict->classRoom?->name ?? ('ID ' . (string) $conflict->class_room_id);
+                                    $errors[] = "Konflik jadwal pada {$date->format('d-m-Y')}: Guru sudah dijadwalkan jam {$conflict->start_time}-{$conflict->end_time} untuk kelas {$conflictClassName}";
                                     continue; // Skip this classroom, move to next
                                 }
                             }
@@ -158,8 +159,8 @@ class LessonController extends Controller
 
             // Send emails to teacher and students
             try {
-                $this->sendScheduleNotificationEmails($newLessons, $r->teacher_id, $school);
-            } catch (\Exception $e) {
+                $this->sendScheduleNotificationEmails(collect($newLessons), $r->teacher_id, $school);
+            } catch (\Throwable $e) {
                 Log::warning('Failed to send schedule notification emails', ['error' => $e->getMessage()]);
                 // Don't fail the operation if email sending fails
             }
@@ -178,8 +179,9 @@ class LessonController extends Controller
             ]);
 
             return back()->with('ok', $msg);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Lesson generation failed', [
+                'exception' => get_class($e),
                 'error' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
@@ -670,6 +672,8 @@ class LessonController extends Controller
      */
     private function sendScheduleNotificationEmails($lessons, $teacherId, $school)
     {
+        $lessons = collect($lessons);
+
         if ($lessons->isEmpty()) {
             return;
         }
@@ -705,7 +709,7 @@ class LessonController extends Controller
                 'teacher_email' => $teacher->user->email,
                 'lessons_count' => $lessons->count(),
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::warning('Failed to send schedule notification to teacher', [
                 'teacher_id' => $teacherId,
                 'error' => $e->getMessage(),
@@ -759,7 +763,7 @@ class LessonController extends Controller
                             $scheduleInfo,
                             'siswa'
                         ));
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         Log::warning('Failed to send schedule notification to student', [
                             'student_id' => $student->id,
                             'student_email' => $student->user->email,
@@ -773,7 +777,7 @@ class LessonController extends Controller
                     'students_count' => $students->count(),
                     'lessons_count' => $classLessons->count(),
                 ]);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 Log::warning('Failed to send schedule notifications to class', [
                     'class_room_id' => $classRoomId,
                     'error' => $e->getMessage(),
