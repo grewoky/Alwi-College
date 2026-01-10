@@ -160,6 +160,7 @@ Route::middleware(['auth','role:student'])->prefix('student')->group(function ()
     
     // STUDENT JADWAL (Lihat jadwal pelajaran)
     Route::get('/jadwal', [LessonController::class,'studentView'])->name('lessons.student');
+    Route::get('/jadwal-saya', [LessonController::class,'studentMySchedule'])->name('lessons.student.mine');
     
     // STUDENT INFO (Upload file pribadi)
     Route::get('/info', [InfoFileController::class,'index'])->name('info.index');

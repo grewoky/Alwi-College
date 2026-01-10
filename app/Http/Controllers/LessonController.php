@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Carbon\Carbon;
 use App\Models\Lesson;
 use App\Models\ClassRoom;
@@ -281,6 +282,50 @@ class LessonController extends Controller
         $lessons = $q->paginate(15)->withQueryString();
         
         return view('lessons.student.index', compact('student', 'lessons'));
+    }
+
+    // Jadwal saya: khusus sesuai kelas + sekolah siswa yang login
+    public function studentMySchedule(Request $r)
+    {
+        $user = Auth::user();
+        abort_unless($user !== null, 403, 'Unauthorized.');
+
+        $student = Student::with('classRoom.school')->where('user_id', $user->id)->firstOrFail();
+
+        // ✅ Respect retention window: students only see lessons NOT expired
+        $retentionDays = (int) env('SCHEDULE_RETENTION_DAYS', 2);
+        $cutoffDate = Carbon::now()->startOfDay()->subDays($retentionDays)->toDateString();
+
+        if (empty($student->class_room_id)) {
+            $lessons = new LengthAwarePaginator([], 0, 15, (int) $r->input('page', 1), [
+                'path' => $r->url(),
+                'query' => $r->query(),
+            ]);
+
+            return view('lessons.student.index', [
+                'student' => $student,
+                'lessons' => $lessons,
+                'mode' => 'mine',
+            ]);
+        }
+
+        $q = Lesson::with(['teacher.user', 'subject', 'classRoom.school'])
+            ->where('date', '>', $cutoffDate)
+            ->where('class_room_id', $student->class_room_id)
+            ->orderBy('date', 'asc')
+            ->select('lessons.*');
+
+        if ($r->filled('date')) {
+            $q->whereDate('date', $r->date);
+        }
+
+        $lessons = $q->paginate(15)->withQueryString();
+
+        return view('lessons.student.index', [
+            'student' => $student,
+            'lessons' => $lessons,
+            'mode' => 'mine',
+        ]);
     }
 
     // View jadwal untuk admin/guru

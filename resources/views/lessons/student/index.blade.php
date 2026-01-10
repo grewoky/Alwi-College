@@ -24,34 +24,49 @@
 
             <!-- Filters Section -->
             <div class="bg-white rounded-md shadow-sm p-6 mb-6">
+                @php($mode = $mode ?? 'all')
+
+                <div class="flex flex-wrap items-center gap-2 mb-5">
+                    <a href="{{ route('lessons.student.mine') }}"
+                       class="inline-flex items-center px-4 py-2 rounded-lg font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300 {{ $mode === 'mine' ? 'bg-indigo-600 text-white shadow-sm border border-indigo-600' : 'bg-white border border-slate-200 text-slate-700 hover:border-indigo-300 hover:text-indigo-600' }}">
+                        Jadwal Saya
+                    </a>
+                    <a href="{{ route('lessons.student') }}"
+                       class="inline-flex items-center px-4 py-2 rounded-lg font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300 {{ $mode !== 'mine' ? 'bg-indigo-600 text-white shadow-sm border border-indigo-600' : 'bg-white border border-slate-200 text-slate-700 hover:border-indigo-300 hover:text-indigo-600' }}">
+                        Semua Jadwal
+                    </a>
+                </div>
+
                 <h3 class="font-semibold text-lg mb-4 text-gray-900">Filter</h3>
 
                 <!-- Grade Filter Buttons -->
-                <div class="mb-6">
-                    <p class="text-sm font-medium text-gray-700 mb-3">Pilih Kelas:</p>
-                    <div class="flex gap-2 flex-wrap">
-                        <a href="{{ route('lessons.student') }}" 
-                           class="inline-flex items-center px-4 py-2 rounded-lg font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300 {{ !request('grade') ? 'bg-indigo-600 text-white shadow-sm border border-indigo-600' : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600' }}">
-                            Semua
-                        </a>
-                        <a href="{{ route('lessons.student', ['grade' => '10']) }}" 
-                           class="inline-flex items-center px-4 py-2 rounded-lg font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300 {{ request('grade') == '10' ? 'bg-indigo-600 text-white shadow-sm border border-indigo-600' : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600' }}">
-                            Kelas 10
-                        </a>
-                        <a href="{{ route('lessons.student', ['grade' => '11']) }}" 
-                           class="inline-flex items-center px-4 py-2 rounded-lg font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300 {{ request('grade') == '11' ? 'bg-indigo-600 text-white shadow-sm border border-indigo-600' : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600' }}">
-                            Kelas 11
-                        </a>
-                        <a href="{{ route('lessons.student', ['grade' => '12']) }}" 
-                           class="inline-flex items-center px-4 py-2 rounded-lg font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300 {{ request('grade') == '12' ? 'bg-indigo-600 text-white shadow-sm border border-indigo-600' : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600' }}">
-                            Kelas 12
-                        </a>
+                @if($mode !== 'mine')
+                    <div class="mb-6">
+                        <p class="text-sm font-medium text-gray-700 mb-3">Pilih Kelas:</p>
+                        <div class="flex gap-2 flex-wrap">
+                            <a href="{{ route('lessons.student') }}" 
+                               class="inline-flex items-center px-4 py-2 rounded-lg font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300 {{ !request('grade') ? 'bg-indigo-600 text-white shadow-sm border border-indigo-600' : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600' }}">
+                                Semua
+                            </a>
+                            <a href="{{ route('lessons.student', ['grade' => '10']) }}" 
+                               class="inline-flex items-center px-4 py-2 rounded-lg font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300 {{ request('grade') == '10' ? 'bg-indigo-600 text-white shadow-sm border border-indigo-600' : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600' }}">
+                                Kelas 10
+                            </a>
+                            <a href="{{ route('lessons.student', ['grade' => '11']) }}" 
+                               class="inline-flex items-center px-4 py-2 rounded-lg font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300 {{ request('grade') == '11' ? 'bg-indigo-600 text-white shadow-sm border border-indigo-600' : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600' }}">
+                                Kelas 11
+                            </a>
+                            <a href="{{ route('lessons.student', ['grade' => '12']) }}" 
+                               class="inline-flex items-center px-4 py-2 rounded-lg font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300 {{ request('grade') == '12' ? 'bg-indigo-600 text-white shadow-sm border border-indigo-600' : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600' }}">
+                                Kelas 12
+                            </a>
+                        </div>
                     </div>
-                </div>
+                @endif
 
                 <!-- Tanggal Filter -->
-                <form method="GET" action="{{ route('lessons.student') }}" class="flex gap-2 flex-wrap items-end">
-                    @if(request('grade'))
+                <form method="GET" action="{{ $mode === 'mine' ? route('lessons.student.mine') : route('lessons.student') }}" class="flex gap-2 flex-wrap items-end">
+                    @if($mode !== 'mine' && request('grade'))
                         <input type="hidden" name="grade" value="{{ request('grade') }}">
                     @endif
 
@@ -64,7 +79,7 @@
                     <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300">
                         Cari
                     </button>
-                    <a href="{{ request('grade') ? route('lessons.student', ['grade' => request('grade')]) : route('lessons.student') }}" 
+                    <a href="{{ $mode === 'mine' ? route('lessons.student.mine') : (request('grade') ? route('lessons.student', ['grade' => request('grade')]) : route('lessons.student')) }}" 
                        class="px-4 py-2 rounded-lg font-medium transition bg-white border border-slate-200 text-slate-700 hover:border-indigo-300 hover:text-indigo-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300">
                         Reset
                     </a>
@@ -91,7 +106,7 @@
 
                                 <div>
                                     <p class="text-gray-500 text-xs font-medium uppercase">Pengajar</p>
-                                    <p class="text-gray-900 font-medium">{{ $lesson->teacher->user->name ?? 'N/A' }}</p>
+                                    <p class="text-gray-900 font-medium">{{ $lesson->teacher?->user?->name ?? 'N/A' }}</p>
                                 </div>
 
                                 <div>

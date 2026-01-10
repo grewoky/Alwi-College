@@ -18,8 +18,12 @@
   <x-admin-navbar />
 
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-    @if (session('ok'))
-      <x-toast type="success" :message="session('ok')" />
+    @if (session('ok') || session('success'))
+      <x-toast type="success" :message="session('ok') ?? session('success')" />
+    @endif
+
+    @if (session('error'))
+      <x-toast type="error" :message="session('error')" />
     @endif
 
     {{ $slot }}
