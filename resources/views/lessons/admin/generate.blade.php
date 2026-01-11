@@ -49,7 +49,7 @@
           <label class="block text-sm font-bold text-gray-900 mb-3">🏛️ Pilih Sekolah</label>
           <select name="school" id="schoolSelect" required class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 select2-input">
             <option value="">-- Pilih Sekolah --</option>
-            @foreach(['Negeri','IGS','Xavega','Bangau','Kumbang'] as $schoolOption)
+            @foreach(($schoolsList ?? ['Bangau','IGS','Kumbang','Negeri','Xavega']) as $schoolOption)
               <option value="{{ $schoolOption }}" {{ old('school') === $schoolOption ? 'selected' : '' }}>
                 {{ $schoolOption }}
               </option>

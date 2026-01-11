@@ -33,12 +33,25 @@ class LessonController extends Controller
 
     public function showGenerate()
     {
-        $teachersList = Teacher::with('user')->orderBy('id', 'desc')->get();
-        $subjectsList = Subject::orderBy('name', 'desc')->get();
+        // Sort dropdowns A–Z for better UX
+        $teachersList = Teacher::query()
+            ->join('users', 'teachers.user_id', '=', 'users.id')
+            ->select('teachers.*')
+            ->with('user')
+            ->orderBy('users.name', 'asc')
+            ->get();
+
+        $subjectsList = Subject::orderBy('name', 'asc')->get();
+
+        $schoolsList = School::orderBy('name', 'asc')->pluck('name')->all();
+        if (empty($schoolsList)) {
+            $schoolsList = ['Bangau', 'IGS', 'Kumbang', 'Negeri', 'Xavega'];
+        }
         
         return view('lessons.admin.generate', [
             'teachersList' => $teachersList,
             'subjectsList' => $subjectsList,
+            'schoolsList' => $schoolsList,
         ]);
     }
 
