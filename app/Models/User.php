@@ -6,8 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Support\Facades\Log;
 // WAJIB
 use Spatie\Permission\Traits\HasRoles;
+
+use Throwable;
 
 class User extends Authenticatable
 {
@@ -35,6 +38,25 @@ class User extends Authenticatable
      */
     public function sendPasswordResetNotification($token): void
     {
-        $this->notify(new ResetPassword($token));
+        try {
+            $this->notify(new ResetPassword($token));
+
+            Log::info('Password reset email dispatched', [
+                'user_id' => $this->id,
+                'mail_default' => config('mail.default'),
+                'mail_from' => config('mail.from.address'),
+            ]);
+        } catch (Throwable $e) {
+            Log::error('Password reset email failed to send', [
+                'user_id' => $this->id,
+                'mail_default' => config('mail.default'),
+                'mail_from' => config('mail.from.address'),
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
+            ]);
+
+            // Bubble up so the controller can show an error (avoid false success).
+            throw $e;
+        }
     }
 }
