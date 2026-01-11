@@ -756,10 +756,29 @@ class LessonController extends Controller
             'guru'
         );
 
-        // Get unique class rooms and send emails to students
-        $classRoomIds = $lessons->pluck('class_room_id')->unique();
+        // Send emails to students.
+        // IMPORTANT: Schedule generation may intentionally create lessons only for one
+        // representative class per grade (see generate()). In that case, we still want
+        // all students in the same school+grade (all class variants) to receive the
+        // notification.
+        $firstClassRoom = $firstLesson->classRoom;
+        $grade = $firstClassRoom?->grade;
 
-        foreach ($classRoomIds as $classRoomId) {
+        $targetClassRoomIds = null;
+        if ($grade !== null) {
+            $targetClassRoomIds = ClassRoom::where('school_id', $school->id)
+                ->where('grade', $grade)
+                ->pluck('id');
+        }
+
+        if ($targetClassRoomIds === null || $targetClassRoomIds->isEmpty()) {
+            // Fallback: only notify students in the class rooms that actually have lessons.
+            $targetClassRoomIds = $lessons->pluck('class_room_id')->unique();
+        }
+
+        $classRoomsById = ClassRoom::whereIn('id', $targetClassRoomIds)->get()->keyBy('id');
+
+        foreach ($targetClassRoomIds as $classRoomId) {
             // Get all students in this class
             $students = Student::where('class_room_id', $classRoomId)
                 ->with('user')
@@ -769,21 +788,13 @@ class LessonController extends Controller
                 continue;
             }
 
-            // Get first lesson for this class room for schedule info
-            $classLessons = $lessons->filter(function($lesson) use ($classRoomId) {
-                return $lesson->class_room_id == $classRoomId;
-            });
-
-            $firstLesson = $classLessons->first();
-            if (!$firstLesson) {
-                continue;
-            }
+            $classRoom = $classRoomsById->get($classRoomId);
 
             $scheduleInfo = [
                 'date' => $firstLesson->date,
                 'subject_name' => $firstLesson->subject?->name ?? '-',
                 'teacher_name' => $teacher->user->name,
-                'class_name' => $firstLesson->classRoom?->name ?? '-',
+                'class_name' => $classRoom?->name ?? ($firstLesson->classRoom?->name ?? '-'),
                 'school_name' => $school->name,
                 'start_time' => $firstLesson->start_time,
                 'end_time' => $firstLesson->end_time,
@@ -806,7 +817,8 @@ class LessonController extends Controller
             Log::info('Schedule notifications sent to students', [
                 'class_room_id' => $classRoomId,
                 'students_count' => $students->count(),
-                'lessons_count' => $classLessons->count(),
+                'grade' => $grade,
+                'school_id' => $school->id,
             ]);
         }
     }
