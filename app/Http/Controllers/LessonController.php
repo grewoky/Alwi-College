@@ -749,7 +749,7 @@ class LessonController extends Controller
             'end_time' => $firstLesson->end_time,
         ];
 
-        $this->resendService->sendScheduleNotification(
+        $teacherSent = $this->resendService->sendScheduleNotification(
             $teacher->user->email,
             $teacher->user->name,
             $scheduleInfo,
@@ -776,50 +776,72 @@ class LessonController extends Controller
             $targetClassRoomIds = $lessons->pluck('class_room_id')->unique();
         }
 
-        $classRoomsById = ClassRoom::whereIn('id', $targetClassRoomIds)->get()->keyBy('id');
+        // Collect all target student emails across the selected school+grade.
+        // Send in BCC batches to avoid serverless timeouts and SMTP rate limits.
+        $students = Student::whereIn('class_room_id', $targetClassRoomIds)
+            ->with('user:id,name,email')
+            ->get();
 
-        foreach ($targetClassRoomIds as $classRoomId) {
-            // Get all students in this class
-            $students = Student::where('class_room_id', $classRoomId)
-                ->with('user')
-                ->get();
+        $studentEmails = $students
+            ->map(fn($s) => $s->user?->email)
+            ->filter()
+            ->unique()
+            ->values();
 
-            if ($students->isEmpty()) {
-                continue;
-            }
-
-            $classRoom = $classRoomsById->get($classRoomId);
-
-            $scheduleInfo = [
-                'date' => $firstLesson->date,
-                'subject_name' => $firstLesson->subject?->name ?? '-',
-                'teacher_name' => $teacher->user->name,
-                'class_name' => $classRoom?->name ?? ($firstLesson->classRoom?->name ?? '-'),
-                'school_name' => $school->name,
-                'start_time' => $firstLesson->start_time,
-                'end_time' => $firstLesson->end_time,
-            ];
-
-            // Send email to each student
-            foreach ($students as $student) {
-                if (!$student->user || !$student->user->email) {
-                    continue;
-                }
-
-                $this->resendService->sendScheduleNotification(
-                    $student->user->email,
-                    $student->user->name,
-                    $scheduleInfo,
-                    'siswa'
-                );
-            }
-
-            Log::info('Schedule notifications sent to students', [
-                'class_room_id' => $classRoomId,
-                'students_count' => $students->count(),
-                'grade' => $grade,
+        if ($studentEmails->isEmpty()) {
+            Log::info('No student emails to notify for schedule generation', [
                 'school_id' => $school->id,
+                'grade' => $grade,
+                'teacher_sent' => $teacherSent,
             ]);
+            return;
         }
+
+        $studentScheduleInfo = $scheduleInfo;
+        if ($grade !== null) {
+            $studentScheduleInfo['class_name'] = 'Kelas ' . $grade;
+        }
+
+        $bccChunkSize = (int) env('SCHEDULE_EMAIL_BCC_CHUNK', 50);
+        $bccChunkSize = $bccChunkSize > 0 ? $bccChunkSize : 50;
+
+        $toAddress = (string) (env('ADMIN_EMAIL') ?: config('mail.from.address'));
+        $sentBatches = 0;
+        $failedBatches = 0;
+
+        foreach ($studentEmails->chunk($bccChunkSize) as $chunk) {
+            try {
+                // Generic student email (not personalized) to keep delivery fast & reliable.
+                Mail::to($toAddress)
+                    ->bcc($chunk->all())
+                    ->send(new ScheduleCreatedNotification(
+                        'Siswa',
+                        '',
+                        $studentScheduleInfo,
+                        'siswa'
+                    ));
+
+                $sentBatches++;
+            } catch (\Throwable $e) {
+                $failedBatches++;
+                Log::warning('Failed to send schedule notification BCC batch', [
+                    'school_id' => $school->id,
+                    'grade' => $grade,
+                    'batch_size' => $chunk->count(),
+                    'exception' => get_class($e),
+                    'message' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        Log::info('Schedule notifications summary', [
+            'school_id' => $school->id,
+            'grade' => $grade,
+            'teacher_sent' => $teacherSent,
+            'students_total' => $studentEmails->count(),
+            'bcc_chunk_size' => $bccChunkSize,
+            'batches_sent' => $sentBatches,
+            'batches_failed' => $failedBatches,
+        ]);
     }
 }
