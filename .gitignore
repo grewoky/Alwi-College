@@ -29,8 +29,7 @@ Thumbs.db
 # Vercel CLI local env file (often contains secrets)
 .env.vercel
 
-.vercel
-.env*.local
-
-# Vercel CLI local env file (often contains secrets)
-.env.vercel
+# Local-only documentation (keep README.md tracked)
+*.txt
+*.md
+!README.md
