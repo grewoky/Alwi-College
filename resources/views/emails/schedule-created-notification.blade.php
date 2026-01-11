@@ -1,6 +1,8 @@
 @php
     $isTeacher = strtolower($userType) === 'guru';
-    $dateFormatted = \Carbon\Carbon::parse($scheduleInfo['date'])->format('dddd, d MMMM Y', ['locale' => 'id']);
+    $dateFormatted = \Carbon\Carbon::parse($scheduleInfo['date'])
+        ->locale('id')
+        ->translatedFormat('l, d F Y');
 @endphp
 
 <x-mail::message>
