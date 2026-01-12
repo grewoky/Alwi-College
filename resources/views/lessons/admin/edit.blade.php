@@ -63,6 +63,15 @@
                   }
                 }
                 $times[] = "18:30";
+                
+                // End times dapat sampai 20:00 WIB
+                $endTimes = [];
+                for ($hour = 9; $hour <= 20; $hour++) {
+                  $endTimes[] = sprintf("%02d:00", $hour);
+                  if ($hour < 20) {
+                    $endTimes[] = sprintf("%02d:30", $hour);
+                  }
+                }
               @endphp
               @foreach($times as $time)
                 <option value="{{ $time }}" @if($lesson->start_time == $time) selected @endif>
@@ -78,7 +87,7 @@
             <label class="block text-sm font-bold text-gray-900 mb-3">Jam Selesai</label>
             <select name="end_time" id="end_time" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 select2-input">
               <option value="">-- Pilih Jam Selesai --</option>
-              @foreach($times as $time)
+              @foreach($endTimes as $time)
                 <option value="{{ $time }}" @if($lesson->end_time == $time) selected @endif>
                   {{ $time }} WIB
                 </option>
