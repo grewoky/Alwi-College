@@ -62,11 +62,6 @@
               @endif
             </div>
             <div class="flex items-center rounded-xl border border-gray-300 bg-white hover:border-blue-400 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all duration-200">
-              <div class="flex items-center justify-center px-3 sm:px-4 py-3 text-blue-600">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 1a5 5 0 00-5 5v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V6a5 5 0 00-5-5zm-3 8V6a3 3 0 116 0v3H9z"/>
-                </svg>
-              </div>
               <input id="password" name="password" type="password" required
                      placeholder="••••••••"
                      class="flex-1 h-12 px-3 sm:px-4 outline-none bg-transparent text-gray-900 placeholder-gray-400 text-sm sm:text-base"/>

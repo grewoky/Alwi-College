@@ -1,7 +1,7 @@
 <!-- User Profile Dropdown Component -->
 <div class="relative" id="userProfileDropdown">
     <!-- Profile Button with Avatar -->
-    <button id="userProfileBtn" class="flex items-center gap-3 px-2 py-1 rounded-lg hover:bg-white/10 transition-colors focus:outline-none">
+    <button id="userProfileBtn" class="flex items-center gap-2 md:gap-3 px-2 md:px-2 py-1 rounded-lg hover:bg-white/10 transition-colors focus:outline-none">
         <!-- Avatar -->
         <div class="w-9 h-9 bg-gradient-to-br from-blue-300 to-indigo-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md">
             {{ substr(auth()->user()->name, 0, 1) }}
@@ -16,8 +16,8 @@
         </svg>
     </button>
 
-    <!-- Dropdown Menu -->
-    <div id="userProfileMenu" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
+    <!-- Dropdown Menu - Responsive positioning for mobile -->
+    <div id="userProfileMenu" class="hidden absolute -right-2 sm:right-0 mt-3 w-72 sm:w-80 md:w-96 max-w-[calc(100vw-1rem)] bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
         
         <!-- Profile Header -->
         <div class="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 px-6 py-5">
@@ -286,20 +286,24 @@
         changePasswordModal.classList.remove('hidden');
         userProfileMenu.classList.add('hidden');
         dropdownChevron.style.transform = 'rotate(0deg)';
+        document.body.style.overflow = 'hidden'; // Prevent body scroll on mobile
         resetPasswordForm();
     });
 
     closePasswordModal.addEventListener('click', () => {
         changePasswordModal.classList.add('hidden');
+        document.body.style.overflow = ''; // Restore body scroll
     });
 
     cancelPasswordBtn.addEventListener('click', () => {
         changePasswordModal.classList.add('hidden');
+        document.body.style.overflow = ''; // Restore body scroll
     });
 
     changePasswordModal.addEventListener('click', (e) => {
         if (e.target === changePasswordModal) {
             changePasswordModal.classList.add('hidden');
+            document.body.style.overflow = ''; // Restore body scroll
         }
     });
 
