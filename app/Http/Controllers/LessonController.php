@@ -372,12 +372,12 @@ class LessonController extends Controller
             $q->whereDate('date', $r->date);
         }
 
-        $sort = $r->input('sort', 'date_desc');
+        $sort = $r->input('sort', 'date_asc');
 
         if ($sort === 'teacher_asc') {
             $q->orderBy('date', 'asc')->orderBy('id', 'asc');
         } else {
-            $q->orderBy('date', 'desc')->orderBy('id', 'desc');
+            $q->orderBy('date', 'asc')->orderBy('id', 'asc');
         }
         
         $lessons = $q->paginate(10)->withQueryString();
