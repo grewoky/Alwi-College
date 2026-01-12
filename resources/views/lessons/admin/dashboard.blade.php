@@ -132,6 +132,7 @@
                 <thead class="bg-gray-100 border-b">
                   <tr>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Tanggal</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Sekolah</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Kelas</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Guru</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Jam</th>
@@ -142,6 +143,9 @@
                     <tr class="border-b hover:bg-gray-50 transition">
                       <td class="px-6 py-4 text-sm text-gray-900 font-medium">
                         {{ \Carbon\Carbon::parse($lesson->date)->format('d M Y') }}
+                      </td>
+                      <td class="px-6 py-4 text-sm text-gray-700">
+                        {{ $lesson->classRoom->school->name ?? '-' }}
                       </td>
                       <td class="px-6 py-4 text-sm text-gray-700">
                         {{ $lesson->classRoom->name }}

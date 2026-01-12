@@ -554,10 +554,10 @@ class LessonController extends Controller
             })->count();
         
         // ✅ Jadwal terbaru - EXCLUDE expired lessons from dashboard
-        $recentLessons = Lesson::with(['teacher.user', 'subject', 'classRoom'])
+        $recentLessons = Lesson::with(['teacher.user', 'subject', 'classRoom.school'])
             ->whereHas('classRoom', fn($q) => $q->whereIn('grade', [10, 11, 12]))
             ->where('date', '>', $cutoff)  // ✅ Filter: exclude expired
-            ->orderBy('created_at', 'desc')
+            ->orderBy('date', 'asc')
             ->limit(10)
             ->get();
         
