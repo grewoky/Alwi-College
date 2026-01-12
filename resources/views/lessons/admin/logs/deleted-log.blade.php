@@ -116,7 +116,28 @@
                       <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
                       </svg>
-                      <span class="text-gray-900 font-medium">{{ $log->classroom_id }}</span>
+                      <span class="text-gray-900 font-medium">
+                        @php
+                          $className = null;
+                          if (!empty($log->classroom_id)) {
+                            try {
+                              $classroom = \App\Models\ClassRoom::find($log->classroom_id);
+                              if ($classroom) {
+                                $className = $classroom->name;
+                              }
+                            } catch (\Exception $e) {
+                              $className = null;
+                            }
+                          }
+                        @endphp
+                        @if($className)
+                          {{ $className }}
+                        @elseif(!empty($log->classroom_id))
+                          ID: {{ $log->classroom_id }}
+                        @else
+                          -
+                        @endif
+                      </span>
                     </span>
                   </td>
                   <td class="px-6 py-4 text-sm text-gray-700">

@@ -178,16 +178,26 @@
             <select id="start_time" name="start_time" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
               <option value="">-- Pilih Jam Mulai --</option>
               @php
-                $times = [];
+                // Jam Mulai: 09:00 - 18:30 (interval 30 menit)
+                $startTimes = [];
                 for ($hour = 9; $hour <= 18; $hour++) {
-                  $times[] = sprintf("%02d:00", $hour);
+                  $startTimes[] = sprintf("%02d:00", $hour);
                   if ($hour < 18) {
-                    $times[] = sprintf("%02d:30", $hour);
+                    $startTimes[] = sprintf("%02d:30", $hour);
                   }
                 }
-                $times[] = "18:30";
+                $startTimes[] = "18:30";
+                
+                // Jam Selesai: 09:00 - 20:00 (interval 30 menit)
+                $endTimes = [];
+                for ($hour = 9; $hour <= 20; $hour++) {
+                  $endTimes[] = sprintf("%02d:00", $hour);
+                  if ($hour < 20) {
+                    $endTimes[] = sprintf("%02d:30", $hour);
+                  }
+                }
               @endphp
-              @foreach($times as $time)
+              @foreach($startTimes as $time)
                 <option value="{{ $time }}">
                   {{ $time }} WIB
                 </option>
@@ -201,7 +211,7 @@
             <label class="block text-sm font-bold text-gray-900 mb-3">🕐 Jam Selesai</label>
             <select id="end_time" name="end_time" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
               <option value="">-- Pilih Jam Selesai --</option>
-              @foreach($times as $time)
+              @foreach($endTimes as $time)
                 <option value="{{ $time }}">
                   {{ $time }} WIB
                 </option>
