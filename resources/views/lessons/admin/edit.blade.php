@@ -56,11 +56,13 @@
               <option value="">-- Pilih Jam Mulai --</option>
               @php
                 $times = [];
-                for ($hour = 9; $hour < 20; $hour++) {
+                for ($hour = 9; $hour <= 18; $hour++) {
                   $times[] = sprintf("%02d:00", $hour);
-                  $times[] = sprintf("%02d:30", $hour);
+                  if ($hour < 18) {
+                    $times[] = sprintf("%02d:30", $hour);
+                  }
                 }
-                $times[] = "20:00";
+                $times[] = "18:30";
               @endphp
               @foreach($times as $time)
                 <option value="{{ $time }}" @if($lesson->start_time == $time) selected @endif>
@@ -145,6 +147,15 @@
       maximumSelectionLength: 1,
       dropdownParent: $(document.body),
       closeOnSelect: true,
+      noResults: function(params) {
+        return $('<span class="text-gray-500 text-center block py-4">' +
+          '<svg class="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+          '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />' +
+          '</svg>' +
+          '<p class="font-semibold text-gray-700">Tidak ada hasil</p>' +
+          '<p class="text-sm text-gray-500 mt-1">Coba cari dengan kata kunci lain</p>' +
+          '</span>');
+      }
     });
 
     // Advanced search matcher - lebih fleksibel

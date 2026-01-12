@@ -47,7 +47,7 @@
         <!-- School Selection -->
         <div>
           <label class="block text-sm font-bold text-gray-900 mb-3">🏛️ Pilih Sekolah</label>
-          <select name="school" id="schoolSelect" required class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 select2-input">
+          <select name="school" id="schoolSelect" required class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 select2-input" data-placeholder="Cari sekolah (Bangau, IGS, Kumbang, Negeri, SMA Alwi College, Xavega, Xaverius 3)...">
             <option value="">-- Pilih Sekolah --</option>
             @foreach(($schoolsList ?? ['Bangau','IGS','Kumbang','Negeri','Xavega']) as $schoolOption)
               <option value="{{ $schoolOption }}" {{ old('school') === $schoolOption ? 'selected' : '' }}>
@@ -63,7 +63,7 @@
         <!-- Grade (Kelas 10, 11, 12) -->
         <div>
           <label class="block text-sm font-bold text-gray-900 mb-3">📚 Pilih Kelas</label>
-          <select name="grade" id="gradeSelect" required class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 select2-input">
+          <select name="grade" id="gradeSelect" required class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 select2-input" data-placeholder="Cari kelas (10, 11, 12)...">
             <option value="">-- Pilih Kelas --</option>
             <option value="10" {{ old('grade') === '10' ? 'selected' : '' }}>Kelas 10</option>
             <option value="11" {{ old('grade') === '11' ? 'selected' : '' }}>Kelas 11</option>
@@ -77,7 +77,7 @@
         <!-- Guru -->
         <div>
           <label class="block text-sm font-bold text-gray-900 mb-3">👨‍🏫 Pilih Guru</label>
-          <select name="teacher_id" id="teacherSelect" required class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 select2-input">
+          <select name="teacher_id" id="teacherSelect" required class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 select2-input" data-placeholder="Cari nama guru...">
             <option value="">-- Pilih Guru --</option>
             @forelse($teachersList as $tch)
               <option value="{{ $tch->id }}" {{ old('teacher_id') == $tch->id ? 'selected' : '' }}>{{ $tch->user->name }}</option>
@@ -93,7 +93,7 @@
         <!-- Materi (Optional) -->
         <div>
           <label class="block text-sm font-bold text-gray-900 mb-3">📖 Pilih Materi (Opsional)</label>
-          <select name="subject_id" id="subjectSelect" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 select2-input">
+          <select name="subject_id" id="subjectSelect" class="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 select2-input" data-placeholder="Cari nama materi/pelajaran...">
             <option value="">-- Tanpa Materi --</option>
             @forelse($subjectsList as $sbj)
               <option value="{{ $sbj->id }}" {{ old('subject_id') == $sbj->id ? 'selected' : '' }}>{{ $sbj->name }}</option>
@@ -179,11 +179,13 @@
               <option value="">-- Pilih Jam Mulai --</option>
               @php
                 $times = [];
-                for ($hour = 9; $hour < 20; $hour++) {
+                for ($hour = 9; $hour <= 18; $hour++) {
                   $times[] = sprintf("%02d:00", $hour);
-                  $times[] = sprintf("%02d:30", $hour);
+                  if ($hour < 18) {
+                    $times[] = sprintf("%02d:30", $hour);
+                  }
                 }
-                $times[] = "20:00";
+                $times[] = "18:30";
               @endphp
               @foreach($times as $time)
                 <option value="{{ $time }}">
@@ -232,25 +234,58 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Select2 for all select fields with class select2-input
+    // Configuration untuk setiap field Select2
+    const select2Config = {
+      schoolSelect: {
+        id: 'schoolSelect',
+        placeholder: 'Cari sekolah (Bangau, IGS, Kumbang, Negeri, SMA Alwi College, Xavega, Xaverius 3)...'
+      },
+      gradeSelect: {
+        id: 'gradeSelect',
+        placeholder: 'Cari kelas (10, 11, 12)...'
+      },
+      teacherSelect: {
+        id: 'teacherSelect',
+        placeholder: 'Cari nama guru...'
+      },
+      subjectSelect: {
+        id: 'subjectSelect',
+        placeholder: 'Cari nama materi/pelajaran...'
+      }
+    };
+
+    // Initialize Select2 untuk semua field dengan class select2-input
     const select2Elements = document.querySelectorAll('.select2-input');
     
     select2Elements.forEach(function(element) {
+      const fieldId = element.id;
+      const config = select2Config[fieldId];
+      
       $(element).select2({
         theme: 'bootstrap-5',
         width: '100%',
         allowClear: true,
-        placeholder: element.getAttribute('data-placeholder') || 'Ketik untuk mencari...',
+        placeholder: config?.placeholder || 'Ketik untuk mencari...',
         language: 'id',
         matcher: advancedMatcher,
         templateSelection: formatSelection,
         templateResult: formatResult,
         minimumInputLength: 0,
         dropdownParent: $(element).parent(),
+        closeOnSelect: true,
+        noResults: function(params) {
+          return $('<div class="text-center py-6 px-4">' +
+            '<svg class="w-10 h-10 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />' +
+            '</svg>' +
+            '<p class="font-semibold text-gray-700 text-base">Tidak ada hasil pencarian</p>' +
+            '<p class="text-sm text-gray-500 mt-1">Coba gunakan kata kunci yang berbeda</p>' +
+            '</div>');
+        }
       });
     });
 
-    // Advanced matcher untuk pencarian lebih fleksibel
+    // Advanced matcher untuk pencarian yang lebih fleksibel
     function advancedMatcher(params, data) {
       var term = $.trim(params.term).toLowerCase();
       
@@ -259,10 +294,9 @@
         return data;
       }
 
-      // Pencarian pada text option
       var text = data.text.toLowerCase();
       
-      // 1. Pencarian partial match (cocok dengan bagian kata)
+      // 1. Partial match - cek apakah text mengandung term
       if (text.indexOf(term) > -1) {
         return $.extend({}, data, { 
           highlighted: true,
@@ -270,22 +304,22 @@
         });
       }
 
-      // 2. Pencarian per kata (split by space)
-      var words = term.split(/\s+/);
+      // 2. Word-by-word match - cek setiap kata yang dicari
+      var searchWords = term.split(/\s+/);
       var textWords = text.split(/\s+/);
       
-      var allWordsMatch = words.every(searchWord => 
+      var allMatch = searchWords.every(searchWord => 
         textWords.some(textWord => textWord.indexOf(searchWord) === 0)
       );
 
-      if (allWordsMatch) {
+      if (allMatch) {
         return $.extend({}, data, { 
           highlighted: true,
           matched: true 
         });
       }
 
-      // 3. Case-insensitive exact word match
+      // 3. Exact word match
       if (textWords.some(textWord => textWord === term)) {
         return $.extend({}, data, { 
           highlighted: true,
@@ -296,18 +330,18 @@
       return null;
     }
 
-    // Format selection
+    // Format tampilan selection (saat item dipilih)
     function formatSelection(data) {
       if (!data.id) return data.text;
       return $('<span>').text(data.text);
     }
 
-    // Format result in dropdown dengan styling
+    // Format tampilan hasil di dropdown
     function formatResult(data) {
       if (!data.id) return data.text;
       
-      var $result = $('<div class="py-2.5 px-3 d-flex align-items-center">');
-      var $text = $('<span class="flex-grow-1 font-medium">').text(data.text);
+      var $result = $('<div class="py-2.5 px-3">');
+      var $text = $('<span class="block">').text(data.text);
       
       if (data.matched) {
         $text.css({
@@ -320,44 +354,41 @@
       return $result;
     }
 
-    // Enhance search input appearance
-    $(document).on('select2:opening', function(e) {
-      var $search = $(this).data('select2').$dropdown.find('.select2-search__field');
+    // Event handler: saat dropdown dibuka
+    $('.select2-input').on('select2:opening', function(e) {
+      const $select2 = $(this).data('select2');
+      if (!$select2 || !$select2.$dropdown) return;
+      
+      const $search = $select2.$dropdown.find('.select2-search__field');
       if ($search.length) {
-        $search.css({
-          'padding': '12px 14px',
-          'font-size': '14px',
-          'border': '2px solid #e5e7eb',
-          'border-radius': '6px',
-          'width': '100%',
-          'margin': '8px',
-          'box-sizing': 'border-box'
-        });
+        const fieldId = $(this).attr('id');
+        const config = select2Config[fieldId];
         
-        // Set placeholder berdasarkan field
-        var fieldId = $(this).attr('id');
-        var placeholders = {
-          'schoolSelect': 'Cari sekolah (Bangau, IGS, Kumbang, Negeri, SMA Alwi College, Xavega, Xaverius 3)...',
-          'gradeSelect': 'Cari kelas (10, 11, 12)...',
-          'teacherSelect': 'Cari nama guru...',
-          'subjectSelect': 'Cari nama materi/pelajaran...'
-        };
+        // Set placeholder dinamis
+        $search.attr('placeholder', config?.placeholder || 'Ketik untuk mencari...');
         
-        $search.attr('placeholder', placeholders[fieldId] || 'Ketik untuk mencari...');
+        // Auto focus
+        setTimeout(() => $search.focus(), 100);
       }
     });
 
-    // Focus event
-    $(document).on('select2:open', function(e) {
-      var $search = $(this).data('select2').$dropdown.find('.select2-search__field');
-      if ($search.length) {
-        $search.focus();
-      }
+    // Event handler: saat item dipilih
+    $('.select2-input').on('select2:select', function(e) {
+      console.log('Selected:', e.params.data);
     });
 
-    // Preserve selected values on form validation errors
+    // Restore nilai lama saat ada error validasi
+    restoreOldValues();
+  });
+
+  // Fungsi untuk restore nilai yang sudah dipilih sebelumnya (saat ada error)
+  function restoreOldValues() {
     @if(old('school'))
       $('#schoolSelect').val('{{ old("school") }}').trigger('change');
+    @endif
+
+    @if(old('grade'))
+      $('#gradeSelect').val('{{ old("grade") }}').trigger('change');
     @endif
 
     @if(old('teacher_id'))
@@ -367,7 +398,7 @@
     @if(old('subject_id'))
       $('#subjectSelect').val('{{ old("subject_id") }}').trigger('change');
     @endif
-  });
+  }
 </script>
 
 <style>
