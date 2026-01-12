@@ -65,27 +65,9 @@
                         @endif
                     </div>
 
-            <!-- Right Side: User Info & Logout -->
-            <div class="hidden md:flex items-center gap-4">
-                <div class="text-right">
-                    <p class="text-sm font-medium text-white">{{ auth()->user()->name ?? 'User' }}</p>
-                    @php
-                        $roleLabel = 'User';
-                        if (!empty($roles)) {
-                            if (in_array('admin', $roles)) $roleLabel = 'Administrator';
-                            elseif (in_array('teacher', $roles)) $roleLabel = 'Guru';
-                            elseif (in_array('student', $roles)) $roleLabel = 'Siswa';
-                        }
-                    @endphp
-                    <p class="text-xs text-white/80">{{ $roleLabel }}</p>
-                </div>
-                <form method="POST" action="{{ route('logout') }}" class="inline">
-                    @csrf
-                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white shadow-sm text-sm font-medium transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                        Logout
-                    </button>
-                </form>
+            <!-- Right Side: User Profile Dropdown -->
+            <div class="hidden md:flex items-center">
+                <x-user-profile-dropdown />
             </div>
 
             <!-- Mobile Menu Button -->
