@@ -1,109 +1,120 @@
 <x-guest-layout>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-blue-50 px-4 py-8">
-  <div class="w-full max-w-md">
-    {{-- Card --}}
-    <div class="bg-white/90 backdrop-blur border border-gray-200 rounded-2xl shadow-sm p-6 md:p-8">
-      {{-- Logo + Title --}}
-      <div class="text-center mb-6">
-        <div class="mx-auto mb-2 h-16 w-16 flex items-center justify-center">
-          <img src="{{ asset('images/logo.png') }}" alt="Alwi College Logo" class="w-full h-full object-contain">
+  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-blue-50 px-4 py-6 sm:py-8 lg:py-12">
+    <div class="w-full max-w-md">
+      {{-- Card --}}
+      <div class="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 sm:p-8">
+        {{-- Logo + Title --}}
+        <div class="text-center mb-8">
+          <div class="mx-auto mb-3 h-16 w-16 sm:h-20 sm:w-20 flex items-center justify-center">
+            <img src="{{ asset('images/logo.png') }}" alt="Alwi College Logo" class="w-full h-full object-contain">
+          </div>
+          <h2 class="text-lg sm:text-xl font-semibold text-gray-800">Alwi College</h2>
+          <h1 class="text-2xl sm:text-3xl font-bold mt-2 text-[#2E529F]">Login</h1>
+          <div class="mt-3 h-1 w-20 sm:w-24 mx-auto rounded-full bg-gradient-to-r from-[#3B63B5] via-[#6FA2FF] to-[#3B63B5] opacity-40"></div>
         </div>
-        <div class="font-semibold">Alwi College</div>
-        <h1 class="text-xl md:text-2xl font-semibold mt-1 text-[#2E529F]">Login</h1>
-        <div class="mt-2 h-1 w-24 mx-auto rounded-full bg-gradient-to-r from-[#3B63B5] via-[#6FA2FF] to-[#3B63B5] opacity-30"></div>
+
+        {{-- Status / Errors --}}
+        @if (session('status'))
+          <div class="mb-4 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-3 animate-in fade-in duration-300">
+            {{ session('status') }}
+          </div>
+        @endif
+        @if ($errors->any())
+          <div class="mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-3 animate-in fade-in duration-300">
+            <ul class="list-disc list-inside space-y-1">
+              @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+              @endforeach
+            </ul>
+          </div>
+        @endif
+
+        {{-- Form --}}
+        <form method="POST" action="{{ route('login') }}" class="space-y-5">
+          @csrf
+
+          {{-- Email --}}
+          <div class="space-y-2">
+            <label for="email" class="block text-sm font-semibold text-gray-800">Email Address</label>
+            <div class="flex items-center rounded-xl border border-gray-300 bg-white hover:border-blue-400 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all duration-200">
+              <div class="flex items-center justify-center px-3 sm:px-4 py-3 text-blue-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20 4H4a2 2 0 00-2 2v.01l10 6.25L22 6.01V6a2 2 0 00-2-2z"/>
+                  <path d="M22 8.24l-10 6.25L2 8.24V18a2 2 0 002 2h16a2 2 0 002-2V8.24z"/>
+                </svg>
+              </div>
+              <input id="email" name="email" type="email" required autofocus
+                     placeholder="your.email@example.com"
+                     value="{{ old('email') }}"
+                     class="flex-1 h-12 px-3 sm:px-4 outline-none bg-transparent text-gray-900 placeholder-gray-400 text-sm sm:text-base"/>
+            </div>
+            @error('email') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
+          </div>
+
+          {{-- Password --}}
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label for="password" class="block text-sm font-semibold text-gray-800">Password</label>
+              @if (Route::has('password.request'))
+                <a class="text-xs sm:text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors" href="{{ route('password.request') }}">
+                  Lupa password?
+                </a>
+              @endif
+            </div>
+            <div class="flex items-center rounded-xl border border-gray-300 bg-white hover:border-blue-400 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all duration-200">
+              <div class="flex items-center justify-center px-3 sm:px-4 py-3 text-blue-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 1a5 5 0 00-5 5v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V6a5 5 0 00-5-5zm-3 8V6a3 3 0 116 0v3H9z"/>
+                </svg>
+              </div>
+              <input id="password" name="password" type="password" required
+                     placeholder="••••••••"
+                     class="flex-1 h-12 px-3 sm:px-4 outline-none bg-transparent text-gray-900 placeholder-gray-400 text-sm sm:text-base"/>
+              <button type="button" id="togglePassword" class="flex items-center justify-center px-3 sm:px-4 py-3 text-gray-600 hover:text-gray-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+                aria-label="Toggle password visibility">
+                <!-- Eye Open Icon -->
+                <svg id="eyeOpenIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <!-- Eye Closed Icon -->
+                <svg id="eyeClosedIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+              </button>
+            </div>
+            @error('password') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
+          </div>
+
+          {{-- Remember --}}
+          <label class="flex items-center gap-3 text-sm text-gray-700 select-none cursor-pointer hover:text-gray-900">
+            <input type="checkbox" name="remember" class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer transition-all duration-200">
+            <span class="font-medium">Ingat saya</span>
+          </label>
+
+          {{-- Button --}}
+          <button type="submit"
+            class="w-full h-12 sm:h-13 rounded-xl bg-[#2E529F] text-white font-semibold shadow-md hover:shadow-lg hover:bg-[#23478d] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99] text-sm sm:text-base">
+            Login ke Akun
+          </button>
+        
+          {{-- Info pendaftaran ditutup publik --}}
+          <div class="text-center pt-2">
+            <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+              Untuk membuat akun baru, silakan hubungi administrator.
+            </p>
+          </div>
+        </form>
       </div>
 
-      {{-- Status / Errors --}}
-      @if (session('status'))
-        <div class="mb-3 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-          {{ session('status') }}
-        </div>
-      @endif
-      @if ($errors->any())
-        <div class="mb-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-          <ul class="list-disc list-inside">
-            @foreach ($errors->all() as $error)
-              <li>{{ $error }}</li>
-            @endforeach
-          </ul>
-        </div>
-      @endif
-
-      {{-- Form --}}
-      <form method="POST" action="{{ route('login') }}" class="space-y-3">
-        @csrf
-
-        {{-- Email --}}
-        <div class="space-y-1">
-          <label for="email" class="text-sm font-medium text-gray-700">Email</label>
-          <div class="flex items-center rounded-lg border bg-white shadow-inner focus-within:ring-2 focus-within:ring-blue-200">
-            <div class="flex items-center justify-center w-10 h-10 rounded-l-lg bg-blue-600">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20 4H4a2 2 0 00-2 2v.01l10 6.25L22 6.01V6a2 2 0 00-2-2z"/>
-                <path d="M22 8.24l-10 6.25L2 8.24V18a2 2 0 002 2h16a2 2 0 002-2V8.24z"/>
-              </svg>
-            </div>
-            <input id="email" name="email" type="email" required autofocus
-                   placeholder="Masukkan email anda"
-                   value="{{ old('email') }}"
-                   class="w-full h-10 px-3 outline-none bg-transparent rounded-r-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"/>
-          </div>
-        </div>
-
-        {{-- Password --}}
-        <div class="space-y-1">
-          <div class="flex items-center justify-between">
-            <label for="password" class="text-sm font-medium text-gray-700">Password</label>
-            @if (Route::has('password.request'))
-              <a class="text-xs text-gray-500 hover:text-gray-700" href="{{ route('password.request') }}">
-                Lupa password?
-              </a>
-            @endif
-          </div>
-          <div class="flex items-center rounded-lg border bg-white shadow-inner focus-within:ring-2 focus-within:ring-blue-200">
-            <div class="flex items-center justify-center w-10 h-10 rounded-l-lg bg-blue-600">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 1a5 5 0 00-5 5v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V6a5 5 0 00-5-5zm-3 8V6a3 3 0 116 0v3H9z"/>
-              </svg>
-            </div>
-            <input id="password" name="password" type="password" required
-                   placeholder="Masukkan password anda"
-                   class="flex-1 h-10 px-3 outline-none bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"/>
-            <button type="button" id="togglePassword" class="flex items-center justify-center w-10 h-10 rounded-r-lg text-gray-500 hover:text-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300"
-              aria-label="Toggle password visibility">
-              <!-- Eye Open Icon -->
-              <svg id="eyeOpenIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-              <!-- Eye Closed Icon -->
-              <svg id="eyeClosedIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                <line x1="1" y1="1" x2="23" y2="23"></line>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {{-- Remember --}}
-        <label class="flex items-center gap-2 text-sm text-gray-700 select-none">
-          <input type="checkbox" name="remember" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-          Ingat saya
-        </label>
-
-        {{-- Button --}}
-        <button type="submit"
-          class="w-full h-10 rounded-lg bg-[#2E529F] text-white font-medium shadow-sm hover:shadow md:hover:shadow-md hover:bg-[#23478d] transition-transform duration-150 transform-gpu hover:-translate-y-[1px] hover:scale-[1.02]">
-          Masuk
-        </button>
-      
-        {{-- Info pendaftaran ditutup publik --}}
-        <div class="text-center mt-4">
-          <p class="text-sm text-gray-600">Untuk membuat akun baru, silakan hubungi administrator.</p>
-        </div>
-      </form>
+      {{-- Footer Info --}}
+      <div class="text-center mt-6 sm:mt-8">
+        <p class="text-xs sm:text-sm text-gray-500">
+          Sistem Informasi Akademik Alwi College
+        </p>
+      </div>
     </div>
-  </div>
   </div>
 </x-guest-layout>
 
@@ -128,8 +139,51 @@
         eyeClosedIcon.classList.toggle('hidden');
       });
     }
+
+    // Add smooth animation to error messages
+    const errorMessages = document.querySelectorAll('[class*="bg-red-50"]');
+    errorMessages.forEach(msg => {
+      msg.style.animation = 'slideIn 0.3s ease-out';
+    });
   });
 </script>
+
+<style>
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Smooth transitions for focus states */
+  input[type="email"],
+  input[type="password"] {
+    transition: all 0.2s ease;
+  }
+
+  input[type="email"]:focus,
+  input[type="password"]:focus {
+    background-color: rgba(59, 130, 246, 0.02);
+  }
+
+  /* Mobile optimized button tapping */
+  @media (hover: none) and (pointer: coarse) {
+    button[type="submit"] {
+      active: scale(0.98);
+    }
+  }
+
+  /* Improved accessibility for focus-visible */
+  input:focus-visible,
+  button:focus-visible {
+    outline: none;
+  }
+</style>
 
 <!-- Improved WhatsApp FAB for Login: same behavior as welcome page -->
 <div id="whatsapp-fab-login" class="fixed bottom-6 right-6 z-[9999]">
