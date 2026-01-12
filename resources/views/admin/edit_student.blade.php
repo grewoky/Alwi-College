@@ -36,7 +36,7 @@
 
       <div class="mb-3">
         <label class="block text-sm font-medium">Kelas</label>
-        <select name="class_room_id" class="border p-2 w-full rounded">
+        <select name="class_room_id" id="classRoomSelect" class="border p-2 w-full rounded select2-classroom">
           <option value="">-- Tidak Ada --</option>
           @foreach($classRooms as $c)
             <option value="{{ $c->id }}" @selected(old('class_room_id', $student->class_room_id) == $c->id)>{{ $c->grade }} - {{ $c->name }} ({{ $c->school->name ?? '-' }})</option>
@@ -44,6 +44,23 @@
         </select>
         @error('class_room_id') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
       </div>
+
+      <!-- Select2 CSS & JS -->
+      <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+      <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+      <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          $('#classRoomSelect').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            placeholder: 'Cari kelas (grade - nama)...',
+            allowClear: true
+          });
+        });
+      </script>
 
       <div class="mb-3">
         <label class="block text-sm font medium">NIS</label>

@@ -28,7 +28,7 @@
               <tbody>
                   @foreach($teachers as $t)
                   <tr class="border-t">
-                      <td class="py-2">{{ $t->id }}</td>
+                      <td class="py-2">{{ $teachers->firstItem() + $loop->index }}</td>
                                             <td class="py-2">{{ $t->user?->name ?? 'N/A' }}</td>
                                             <td class="py-2">{{ $t->user?->email ?? 'N/A' }}</td>
                                             <td class="py-2">{{ $t->user?->phone ?? '-' }}</td>

@@ -37,7 +37,7 @@
               <tbody>
                   @forelse($students as $s)
                   <tr class="border-t">
-                      <td class="px-4 py-3">{{ $students->firstItem() + $loop->index }}</td>
+                      <td class="px-4 py-3">{{ $loop->iteration }}</td>
                       <td class="px-4 py-3">{{ $s->user?->name ?? 'N/A' }}</td>
                       <td class="px-4 py-3">{{ $s->user?->email ?? '-' }}</td>
                                             <td class="px-4 py-3">
