@@ -14,7 +14,7 @@
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-4xl font-bold mb-2">Upload Kisi-kisi & Materi</h1>
-          <p class="text-blue-100 text-lg">Bagikan materi pembelajaran dengan guru dan admin sekolah</p>
+          <p class="text-blue-100 text-lg">Bagikan materi pembelajaran dengan guru dan admin</p>
         </div>
         <div class="text-6xl hidden md:block">📚</div>
       </div>

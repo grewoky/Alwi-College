@@ -166,7 +166,7 @@
                     <li>Simpan password ini dengan aman</li>
                     <li>Anda dapat mengubah password setelah login</li>
                     <li>Jangan bagikan password kepada siapa pun</li>
-                    <li>Jika ada pertanyaan, hubungi admin sekolah</li>
+                    <li>Jika ada pertanyaan, hubungi admin</li>
                 </ul>
             </div>
         </div>
