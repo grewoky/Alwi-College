@@ -240,44 +240,120 @@
         theme: 'bootstrap-5',
         width: '100%',
         allowClear: true,
-        placeholder: element.getAttribute('data-placeholder') || element.querySelector('option:first')?.textContent,
+        placeholder: element.getAttribute('data-placeholder') || 'Ketik untuk mencari...',
         language: 'id',
-        matcher: customMatcher,
+        matcher: advancedMatcher,
         templateSelection: formatSelection,
         templateResult: formatResult,
+        minimumInputLength: 0,
+        dropdownParent: $(element).parent(),
       });
     });
 
-    // Custom matcher for better search
-    function customMatcher(params, data) {
-      if ($.trim(params.term) === '') {
+    // Advanced matcher untuk pencarian lebih fleksibel
+    function advancedMatcher(params, data) {
+      var term = $.trim(params.term).toLowerCase();
+      
+      // Jika tidak ada pencarian, tampilkan semua
+      if (!term) {
         return data;
       }
 
-      var term = params.term.toLowerCase();
+      // Pencarian pada text option
       var text = data.text.toLowerCase();
-
-      // Check if text contains the search term
+      
+      // 1. Pencarian partial match (cocok dengan bagian kata)
       if (text.indexOf(term) > -1) {
-        return $.extend({}, data, {
-          highlighted: true
+        return $.extend({}, data, { 
+          highlighted: true,
+          matched: true 
+        });
+      }
+
+      // 2. Pencarian per kata (split by space)
+      var words = term.split(/\s+/);
+      var textWords = text.split(/\s+/);
+      
+      var allWordsMatch = words.every(searchWord => 
+        textWords.some(textWord => textWord.indexOf(searchWord) === 0)
+      );
+
+      if (allWordsMatch) {
+        return $.extend({}, data, { 
+          highlighted: true,
+          matched: true 
+        });
+      }
+
+      // 3. Case-insensitive exact word match
+      if (textWords.some(textWord => textWord === term)) {
+        return $.extend({}, data, { 
+          highlighted: true,
+          matched: true 
         });
       }
 
       return null;
     }
 
-    // Format selection to show text clearly
+    // Format selection
     function formatSelection(data) {
       if (!data.id) return data.text;
-      return data.text;
+      return $('<span>').text(data.text);
     }
 
-    // Format result in dropdown
+    // Format result in dropdown dengan styling
     function formatResult(data) {
       if (!data.id) return data.text;
-      return $('<div class="py-2">' + data.text + '</div>');
+      
+      var $result = $('<div class="py-2.5 px-3 d-flex align-items-center">');
+      var $text = $('<span class="flex-grow-1 font-medium">').text(data.text);
+      
+      if (data.matched) {
+        $text.css({
+          'color': '#1e40af',
+          'font-weight': '600'
+        });
+      }
+      
+      $result.append($text);
+      return $result;
     }
+
+    // Enhance search input appearance
+    $(document).on('select2:opening', function(e) {
+      var $search = $(this).data('select2').$dropdown.find('.select2-search__field');
+      if ($search.length) {
+        $search.css({
+          'padding': '12px 14px',
+          'font-size': '14px',
+          'border': '2px solid #e5e7eb',
+          'border-radius': '6px',
+          'width': '100%',
+          'margin': '8px',
+          'box-sizing': 'border-box'
+        });
+        
+        // Set placeholder berdasarkan field
+        var fieldId = $(this).attr('id');
+        var placeholders = {
+          'schoolSelect': 'Cari sekolah (Bangau, IGS, Kumbang, Negeri, SMA Alwi College, Xavega, Xaverius 3)...',
+          'gradeSelect': 'Cari kelas (10, 11, 12)...',
+          'teacherSelect': 'Cari nama guru...',
+          'subjectSelect': 'Cari nama materi/pelajaran...'
+        };
+        
+        $search.attr('placeholder', placeholders[fieldId] || 'Ketik untuk mencari...');
+      }
+    });
+
+    // Focus event
+    $(document).on('select2:open', function(e) {
+      var $search = $(this).data('select2').$dropdown.find('.select2-search__field');
+      if ($search.length) {
+        $search.focus();
+      }
+    });
 
     // Preserve selected values on form validation errors
     @if(old('school'))
@@ -295,61 +371,162 @@
 </script>
 
 <style>
-  /* Custom Select2 Styling */
+  /* Custom Select2 Styling untuk Better Search Experience */
+  
+  /* Main Selection Box */
   .select2-container--bootstrap-5 .select2-selection--single {
-    height: 42px;
+    height: 44px;
     border: 2px solid #d1d5db;
     border-radius: 0.5rem;
-    padding-top: 0.5rem;
+    padding-top: 0.6rem;
     transition: all 0.3s ease;
+    background-color: #ffffff;
+    position: relative;
   }
 
+  .select2-container--bootstrap-5 .select2-selection--single:hover {
+    border-color: #9ca3af;
+  }
+
+  /* Open State */
   .select2-container--bootstrap-5.select2-container--open .select2-selection--single {
     border-color: #2563eb;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
   }
 
-  .select2-container--bootstrap-5 .select2-selection--single:focus,
-  .select2-container--bootstrap-5 .select2-selection--single:focus-visible {
+  .select2-container--bootstrap-5 .select2-selection--single:focus {
     border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
     outline: none;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  /* Dropdown Container */
+  .select2-container--bootstrap-5 .select2-dropdown {
+    border: 2px solid #2563eb;
+    border-top: none;
+    border-radius: 0 0 0.5rem 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+    margin-top: -2px;
+  }
+
+  /* Search Input Field */
+  .select2-container--bootstrap-5 .select2-search {
+    padding: 8px;
   }
 
   .select2-container--bootstrap-5 .select2-search__field {
-    padding: 6px 8px;
+    padding: 12px 14px !important;
+    font-size: 14px !important;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 6px !important;
+    transition: all 0.2s ease !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
-  .select2-container--bootstrap-5 .select2-dropdown {
-    border: 2px solid #d1d5db;
-    border-radius: 0.5rem;
-    margin-top: 4px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  .select2-container--bootstrap-5 .select2-search__field:focus {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+    outline: none !important;
+    background-color: #f0f9ff !important;
   }
 
+  .select2-container--bootstrap-5 .select2-search__field::placeholder {
+    color: #9ca3af;
+  }
+
+  /* Results Container */
+  .select2-container--bootstrap-5 .select2-results {
+    max-height: 350px;
+    padding: 8px 0;
+  }
+
+  /* Result Options */
   .select2-results__option {
-    padding: 10px 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border-left: 3px solid transparent;
+    margin: 4px 0;
   }
 
-  .select2-results__option--highlighted[aria-selected],
   .select2-results__option:hover {
-    background-color: #3b82f6;
-    color: white;
+    background-color: #eff6ff;
+    border-left-color: #2563eb;
   }
 
-  .select2-container--bootstrap-5 .select2-results__option[aria-selected=true] {
+  /* Highlighted (Selected) Option */
+  .select2-results__option--highlighted[aria-selected] {
+    background-color: #2563eb;
+    color: white;
+    border-left-color: #1d4ed8;
+  }
+
+  .select2-results__option--highlighted[aria-selected]:hover {
+    background-color: #1d4ed8;
+  }
+
+  /* Already Selected Item in List */
+  .select2-results__option[aria-selected=true] {
     background-color: #dbeafe;
     color: #1e40af;
+    font-weight: 500;
+    border-left-color: #0284c7;
   }
 
-  /* Clear button styling */
-  .select2-container--bootstrap-5 .select2-selection__clear {
+  /* No Results Message */
+  .select2-results__message {
+    padding: 16px;
     color: #6b7280;
     font-size: 14px;
+    text-align: center;
+    background-color: #f9fafb;
+    border-radius: 6px;
+    margin: 8px;
+  }
+
+  /* Clear Button */
+  .select2-container--bootstrap-5 .select2-selection__clear {
+    cursor: pointer;
+    float: right;
+    font-weight: bold;
+    margin-right: 12px;
+    color: #9ca3af;
+    transition: color 0.2s ease;
   }
 
   .select2-container--bootstrap-5 .select2-selection__clear:hover {
-    color: #1f2937;
+    color: #ef4444;
+  }
+
+  /* Selection Text */
+  .select2-selection__rendered {
+    padding-left: 8px !important;
+  }
+
+  /* Loading State */
+  .select2-container--bootstrap-5.select2-container--loading .select2-selection--single {
+    opacity: 0.7;
+  }
+
+  /* Dropdown Arrow */
+  .select2-container--bootstrap-5 .select2-selection__arrow {
+    height: 44px;
+    right: 12px;
+    top: 0;
+  }
+
+  .select2-container--bootstrap-5 .select2-selection__arrow b {
+    border-color: #2563eb transparent transparent transparent;
+    border-width: 6px 4px 0 4px;
+  }
+
+  .select2-container--bootstrap-5.select2-container--open .select2-selection__arrow b {
+    border-color: transparent transparent #2563eb transparent;
+    border-width: 0 4px 6px 4px;
   }
 </style>
 
