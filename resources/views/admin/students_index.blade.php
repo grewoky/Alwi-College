@@ -42,7 +42,7 @@
                       <td class="px-4 py-3">{{ $s->user?->email ?? '-' }}</td>
                                             <td class="px-4 py-3">
                                                 @if($s->classRoom)
-                          {{ $s->classRoom->grade }} - {{ $s->classRoom->name }}
+                          {{ $s->classRoom->name }}
                                                     @if($s->classRoom->school)
                                                         <span class="text-xs text-gray-500">({{ $s->classRoom->school->name }})</span>
                                                     @endif
