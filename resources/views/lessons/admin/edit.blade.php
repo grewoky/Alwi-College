@@ -130,69 +130,209 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Select2 for subject select
+    // Initialize Select2 for subject select with advanced search
     $('.select2-input').select2({
       theme: 'bootstrap-5',
       width: '100%',
       allowClear: true,
-      placeholder: 'Cari materi...',
+      clearButtonLabel: 'Hapus',
+      placeholder: 'Ketik untuk mencari materi...',
       language: 'id',
-      matcher: customMatcher,
+      matcher: advancedMatcher,
       templateSelection: formatSelection,
       templateResult: formatResult,
+      minimumInputLength: 0,
+      maximumSelectionLength: 1,
+      dropdownParent: $(document.body),
+      closeOnSelect: true,
     });
 
-    function customMatcher(params, data) {
-      if ($.trim(params.term) === '') {
+    // Advanced search matcher - lebih fleksibel
+    function advancedMatcher(params, data) {
+      var term = $.trim(params.term).toLowerCase();
+      
+      // Jika tidak ada pencarian, tampilkan semua
+      if (!term) {
         return data;
       }
-      var term = params.term.toLowerCase();
+
+      // Pencarian pada text option
       var text = data.text.toLowerCase();
+      
+      // Pencarian partial match (cocok dengan bagian kata)
       if (text.indexOf(term) > -1) {
-        return $.extend({}, data, { highlighted: true });
+        return $.extend({}, data, { 
+          highlighted: true,
+          matched: true 
+        });
       }
+
+      // Pencarian per kata (split by space)
+      var words = term.split(/\s+/);
+      var textWords = text.split(/\s+/);
+      var allWordsMatch = words.every(searchWord => 
+        textWords.some(textWord => textWord.indexOf(searchWord) === 0)
+      );
+
+      if (allWordsMatch) {
+        return $.extend({}, data, { 
+          highlighted: true,
+          matched: true 
+        });
+      }
+
       return null;
     }
 
     function formatSelection(data) {
       if (!data.id) return data.text;
-      return data.text;
+      
+      // Tampilkan dengan indikator visual
+      var $span = $('<span>');
+      $span.text(data.text);
+      $span.css({
+        'display': 'inline-block',
+        'padding': '4px 8px',
+        'border-radius': '4px',
+        'background-color': '#e0e7ff',
+        'color': '#3730a3'
+      });
+      
+      return $span;
     }
 
     function formatResult(data) {
       if (!data.id) return data.text;
-      return $('<div class="py-2">' + data.text + '</div>');
+      
+      var $result = $('<div class="py-2 px-3 d-flex align-items-center">');
+      var $text = $('<span class="flex-grow-1">').text(data.text);
+      
+      if (data.matched) {
+        $text.css({
+          'font-weight': '500',
+          'color': '#1e40af'
+        });
+      }
+      
+      $result.append($text);
+      return $result;
     }
+
+    // Tambahkan event listener untuk menampilkan indikator pencarian
+    $('.select2-input').on('select2:opening', function(e) {
+      var $search = $(this).data('select2').$dropdown.find('.select2-search__field');
+      if ($search.length) {
+        $search.css({
+          'padding': '10px 12px',
+          'font-size': '14px',
+          'border': '2px solid #e5e7eb',
+          'border-radius': '6px',
+          'width': '100%'
+        });
+        $search.attr('placeholder', 'Cari materi (ketik minimal 1 huruf)...');
+      }
+    });
+
+    // Focus styling
+    $('.select2-input').on('select2:open', function(e) {
+      $(this).data('select2').$dropdown.find('.select2-search__field').focus();
+    });
   });
 </script>
 
 <style>
+  /* Select2 Container */
   .select2-container--bootstrap-5 .select2-selection--single {
     height: 44px;
     border: 2px solid #d1d5db;
     border-radius: 0.5rem;
     padding-top: 0.5rem;
     transition: all 0.3s ease;
+    background-color: #ffffff;
   }
 
   .select2-container--bootstrap-5.select2-container--open .select2-selection--single {
     border-color: #2563eb;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
   }
 
+  .select2-container--bootstrap-5.select2-container--focus .select2-selection--single {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+  }
+
+  /* Dropdown */
   .select2-container--bootstrap-5 .select2-dropdown {
     border: 2px solid #d1d5db;
     border-radius: 0.5rem;
     margin-top: 4px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   }
 
+  /* Search Input */
+  .select2-container--bootstrap-5 .select2-search__field {
+    padding: 10px 12px !important;
+    font-size: 14px !important;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 6px !important;
+    margin: 8px !important;
+    width: calc(100% - 16px) !important;
+    transition: all 0.2s ease !important;
+  }
+
+  .select2-container--bootstrap-5 .select2-search__field:focus {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+    outline: none !important;
+  }
+
+  /* Results Container */
+  .select2-container--bootstrap-5 .select2-results {
+    max-height: 300px;
+  }
+
+  /* Result Options */
   .select2-results__option {
     padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .select2-results__option:hover {
+    background-color: #f3f4f6;
   }
 
   .select2-results__option--highlighted[aria-selected] {
     background-color: #3b82f6;
     color: white;
+  }
+
+  .select2-results__option--highlighted[aria-selected]:hover {
+    background-color: #2563eb;
+  }
+
+  /* Clear Button */
+  .select2-container--bootstrap-5 .select2-selection__clear {
+    cursor: pointer;
+    float: right;
+    font-weight: bold;
+    margin-right: 8px;
+  }
+
+  /* Loading State */
+  .select2-container--bootstrap-5.select2-container--loading .select2-selection--single {
+    opacity: 0.6;
+  }
+
+  /* No Results Message */
+  .select2-results__message {
+    padding: 10px 12px;
+    color: #6b7280;
+    font-size: 14px;
+  }
+
+  /* Selected Item Badge */
+  .select2-selection__rendered {
+    padding-left: 8px !important;
   }
 </style>
