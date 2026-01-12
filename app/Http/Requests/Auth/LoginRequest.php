@@ -43,14 +43,14 @@ class LoginRequest extends FormRequest
 
         // Check if the account exists and is approved before attempting authentication
         $userModel = \App\Models\User::where('email', $this->input('email'))->first();
-        if ($userModel && property_exists($userModel, 'is_approved') && $userModel->is_approved === false) {
+        if ($userModel && !$userModel->is_approved) {
             throw ValidationException::withMessages([
                 'email' => 'Akun Anda belum diverifikasi oleh admin. Silakan tunggu konfirmasi.',
             ]);
         }
 
         // Check if account is active
-        if ($userModel && property_exists($userModel, 'is_active') && $userModel->is_active === false) {
+        if ($userModel && !$userModel->is_active) {
             throw ValidationException::withMessages([
                 'email' => 'Akun Anda telah dinonaktifkan. Hubungi administrator untuk mengaktifkan akun Anda.',
             ]);
@@ -61,23 +61,6 @@ class LoginRequest extends FormRequest
 
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
-            ]);
-        }
-
-        // prevent login if account is not approved by admin (double-check)
-        $user = Auth::user();
-        if ($user && property_exists($user, 'is_approved') && $user->is_approved === false) {
-            Auth::logout();
-            throw ValidationException::withMessages([
-                'email' => 'Akun Anda belum diverifikasi oleh admin. Silakan tunggu konfirmasi.',
-            ]);
-        }
-
-        // prevent login if account is not active (double-check)
-        if ($user && property_exists($user, 'is_active') && $user->is_active === false) {
-            Auth::logout();
-            throw ValidationException::withMessages([
-                'email' => 'Akun Anda telah dinonaktifkan. Hubungi administrator untuk mengaktifkan akun Anda.',
             ]);
         }
 

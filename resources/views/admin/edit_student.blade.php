@@ -52,20 +52,21 @@
       </div>
 
       <div class="mb-3">
-        <label class="block text-sm font-medium">Status Aktif</label>
-        <select name="is_approved" class="border p-2 rounded">
-          <option value="1" @selected(old('is_approved', $student->user?->is_approved ?? 1) == 1)>Aktif</option>
-          <option value="0" @selected(old('is_approved', $student->user?->is_approved ?? 1) == 0)>Nonaktif</option>
+        <label class="block text-sm font-medium">Status Verifikasi</label>
+        <select name="is_approved" class="border p-2 w-full rounded">
+          <option value="1" @selected(old('is_approved', $student->user?->is_approved ?? 1) == 1)>Terverifikasi</option>
+          <option value="0" @selected(old('is_approved', $student->user?->is_approved ?? 1) == 0)>Belum Terverifikasi</option>
         </select>
-        <p class="text-xs text-gray-500 mt-1">Status verifikasi dari admin (belum memperhatikan akses login).</p>
+        <p class="text-xs text-gray-500 mt-1">Status verifikasi akun oleh admin. User tidak bisa login jika belum terverifikasi.</p>
       </div>
 
       <div class="mb-3">
-        <label class="flex items-center gap-3">
-          <input type="checkbox" name="is_active" value="1" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" {{ old('is_active', $student->user?->is_active ?? true) ? 'checked' : '' }}>
-          <span class="text-sm font-medium">Akun Dapat Login</span>
-        </label>
-        <p class="text-xs text-gray-500 mt-1">Jika dicentang, siswa dapat melakukan login. Jika tidak, akun tidak bisa login meskipun password benar.</p>
+        <label class="block text-sm font-medium">Status Akun</label>
+        <select name="is_active" class="border p-2 w-full rounded">
+          <option value="1" @selected(old('is_active', $student->user?->is_active ?? true) == 1)>Aktif (Bisa Login)</option>
+          <option value="0" @selected(old('is_active', $student->user?->is_active ?? true) == 0)>Nonaktif (Tidak Bisa Login)</option>
+        </select>
+        <p class="text-xs text-gray-500 mt-1">Jika nonaktif, siswa tidak dapat login meskipun password benar.</p>
       </div>
 
       <div class="flex gap-2">

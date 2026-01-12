@@ -30,6 +30,30 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if user is approved by admin
+     */
+    public function isApproved(): bool
+    {
+        return $this->is_approved === true;
+    }
+
+    /**
+     * Check if user account is active
+     */
+    public function isActive(): bool
+    {
+        return $this->is_active === true;
+    }
+
+    /**
+     * Check if user can login (both approved and active)
+     */
+    public function canLogin(): bool
+    {
+        return $this->isApproved() && $this->isActive();
+    }
+
+    /**
      * Override the default password reset notification.
      * Use Laravel's mail notification so the configured mailer (SMTP/Resend/etc.) is respected.
      *
