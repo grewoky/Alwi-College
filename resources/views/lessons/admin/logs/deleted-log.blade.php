@@ -98,6 +98,7 @@
             <thead class="bg-gradient-to-r from-blue-50 via-cyan-50 to-blue-50 border-b-2 border-blue-200">
               <tr>
                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Tanggal</th>
+                <th class="px-6 py-4 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Sekolah</th>
                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Kelas</th>
                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Pengajar</th>
                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Waktu</th>
@@ -110,6 +111,24 @@
                 <tr class="hover:bg-blue-50 transition-colors duration-150">
                   <td class="px-6 py-4 text-sm font-medium text-gray-900">
                     {{ \Carbon\Carbon::parse($log->lesson_date)->format('d M Y') }}
+                  </td>
+                  <td class="px-6 py-4 text-sm">
+                    <span class="inline-flex items-center px-3 py-1 rounded-lg bg-blue-100 text-blue-900 font-medium text-xs">
+                      @php
+                        $schoolName = null;
+                        if (!empty($log->classroom_id)) {
+                          try {
+                            $classroom = \App\Models\ClassRoom::find($log->classroom_id);
+                            if ($classroom && $classroom->school) {
+                              $schoolName = $classroom->school->name;
+                            }
+                          } catch (\Exception $e) {
+                            $schoolName = null;
+                          }
+                        }
+                      @endphp
+                      {{ $schoolName ?? '-' }}
+                    </span>
                   </td>
                   <td class="px-6 py-4 text-sm">
                     <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-blue-100 to-blue-50 border border-blue-200">

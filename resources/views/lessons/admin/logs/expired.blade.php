@@ -62,6 +62,7 @@
             <thead class="bg-gradient-to-r from-orange-50 via-red-50 to-orange-50 border-b-2 border-orange-200">
               <tr>
                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Tanggal</th>
+                <th class="px-6 py-4 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Sekolah</th>
                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Kelas</th>
                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Guru</th>
                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Materi</th>
@@ -74,6 +75,11 @@
                 <tr class="hover:bg-orange-50 transition-colors duration-150">
                   <td class="px-6 py-4 text-sm font-medium text-gray-900">
                     {{ \Carbon\Carbon::parse($lesson->date)->format('d M Y') }}
+                  </td>
+                  <td class="px-6 py-4 text-sm">
+                    <span class="inline-flex items-center px-3 py-1 rounded-lg bg-blue-100 text-blue-900 font-medium text-xs">
+                      {{ $lesson->classRoom->school->name ?? '-' }}
+                    </span>
                   </td>
                   <td class="px-6 py-4 text-sm">
                     <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-orange-100 to-orange-50 border border-orange-200">
