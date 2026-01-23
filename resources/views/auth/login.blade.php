@@ -62,21 +62,23 @@
               @endif
             </div>
             <div class="flex items-center rounded-xl border border-gray-300 bg-white hover:border-blue-400 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all duration-200">
+              <div class="flex items-center justify-center px-3 sm:px-4 py-3 text-blue-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 1C8.676 1 6 3.676 6 7v2H4a1 1 0 00-1 1v12a1 1 0 001 1h16a1 1 0 001-1V10a1 1 0 00-1-1h-2V7c0-3.324-2.676-6-6-6zm0 2c2.276 0 4 1.724 4 4v2H8V7c0-2.276 1.724-4 4-4zm0 10a2 2 0 011 3.732V18a1 1 0 11-2 0v-1.268A2 2 0 0112 13z"/>
+                </svg>
+              </div>
               <input id="password" name="password" type="password" required
                      placeholder="••••••••"
-                     class="flex-1 h-12 px-3 sm:px-4 outline-none bg-transparent text-gray-900 placeholder-gray-400 text-sm sm:text-base"/>
-              <button type="button" id="togglePassword" class="flex items-center justify-center px-3 sm:px-4 py-3 text-gray-600 hover:text-gray-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+                     class="flex-1 h-12 px-1 outline-none bg-transparent text-gray-900 placeholder-gray-400 text-sm sm:text-base"/>
+              <button type="button" id="togglePassword" class="relative flex items-center justify-center w-10 h-10 flex-shrink-0 text-gray-500 hover:text-gray-700 transition-colors duration-200 focus:outline-none mr-1"
                 aria-label="Toggle password visibility">
-                <!-- Eye Icon for Password Toggle -->
-                <svg id="passwordToggleIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <!-- Eye Closed (default) -->
-                  <g id="eyeClosedState">
-                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                    <line x1="1" y1="1" x2="23" y2="23"></line>
-                  </g>
+                <!-- Eye Closed (default) -->
+                <svg id="eyeClosedState" xmlns="http://www.w3.org/2000/svg" class="absolute h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
                 </svg>
                 <!-- Eye Open (hidden by default) -->
-                <svg id="passwordToggleIconOpen" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg id="passwordToggleIconOpen" xmlns="http://www.w3.org/2000/svg" class="absolute h-4 w-4 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
