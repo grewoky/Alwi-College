@@ -185,7 +185,7 @@
             </svg>
           </span>
           <div>
-            <h2 class="text-base font-semibold text-slate-900">Guru Terbanyak</h2>
+            <h2 class="text-base font-semibold text-slate-900">Jadwal Terbanyak</h2>
             <p class="text-sm text-slate-500">Jumlah jadwal terbanyak per guru</p>
           </div>
         </div>
