@@ -36,12 +36,12 @@ if (fabEl) {
   console.log('Found whatsapp-fab mount point');
   try {
     const rootFab = createRoot(fabEl);
-    rootFab.render(<WhatsAppFab phone="6282179970473" />);
+    rootFab.render(<WhatsAppFab phone="628994432225" />);
     console.log('WhatsAppFab mounted');
   } catch (e) {
     console.error('WhatsAppFab mount failed', e);
     // Fallback simple link
-    fabEl.innerHTML = `<div class="fixed bottom-6 right-6 z-50"><a href="https://wa.me/6282179970473" target="_blank" rel="noopener noreferrer" class="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center">WA</a></div>`;
+    fabEl.innerHTML = `<div class="fixed bottom-6 right-6 z-50"><a href="https://wa.me/628994432225" target="_blank" rel="noopener noreferrer" class="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center">WA</a></div>`;
   }
 } else {
   console.warn('whatsapp-fab mount point not found');
