@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
@@ -237,14 +237,14 @@
 
                 <div class="mt-5 sm:mt-6 grid gap-3 sm:gap-6 md:grid-cols-3">
                   <article class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 card-hover reveal show">
-                    <div class="flex flex-col sm:flex-row sm:items-stretch items-start gap-4">
-                      <div class="w-28 shrink-0">
-                        <div class="aspect-[3/4] w-full overflow-hidden rounded-2xl border border-gray-100 bg-gray-50">
-                          <img src="{{ asset('images/alumni/testimoni1.png') }}" alt="Foto alumni Rizky Pratama" class="w-full h-full object-cover">
+                    <div class="flex flex-col sm:flex-row items-start gap-4 h-full">
+                      <div class="w-24 sm:w-28 shrink-0 self-stretch">
+                        <div class="h-full w-full overflow-hidden rounded-2xl border border-gray-100 bg-gray-50">
+                          <img src="{{ asset('images/alumni/testimoni1.png') }}" alt="Foto alumni Rizky Pratama" class="w-full h-full object-cover object-top">
                         </div>
                       </div>
-                      <div class="min-w-0">
-                        <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-4">
+                      <div class="min-w-0 flex flex-col flex-1">
+                        <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-4 flex-1">
                           “Belajar di Alwi College membuat saya lebih disiplin dan percaya diri. Pola latihan yang terarah membantu saya membangun fondasi yang kuat.”
                         </p>
                         <div class="pt-4 border-t border-gray-100">
@@ -257,14 +257,14 @@
                   </article>
 
                   <article class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 card-hover reveal show">
-                    <div class="flex flex-col sm:flex-row sm:items-stretch items-start gap-4">
-                      <div class="w-28 shrink-0">
-                        <div class="aspect-[3/4] w-full overflow-hidden rounded-2xl border border-gray-100 bg-gray-50">
-                          <img src="{{ asset('images/alumni/testimoni2.png') }}" alt="Foto alumni Nadia Putri" class="w-full h-full object-cover">
+                    <div class="flex flex-col sm:flex-row items-start gap-4 h-full">
+                      <div class="w-24 sm:w-28 shrink-0 self-stretch">
+                        <div class="h-full w-full overflow-hidden rounded-2xl border border-gray-100 bg-gray-50">
+                          <img src="{{ asset('images/alumni/testimoni2.png') }}" alt="Foto alumni Nadia Putri" class="w-full h-full object-cover object-top">
                         </div>
                       </div>
-                      <div class="min-w-0">
-                        <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-4">
+                      <div class="min-w-0 flex flex-col flex-1">
+                        <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-4 flex-1">
                           “Pendampingan mentor dan pembahasan materi yang rapi membuat saya lebih mudah memahami konsep. Hasilnya terasa saat menghadapi ujian.”
                         </p>
                         <div class="pt-4 border-t border-gray-100">
@@ -277,14 +277,14 @@
                   </article>
 
                   <article class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 card-hover reveal show">
-                    <div class="flex flex-col sm:flex-row sm:items-stretch items-start gap-4">
-                      <div class="w-28 shrink-0">
-                        <div class="aspect-[3/4] w-full overflow-hidden rounded-2xl border border-gray-100 bg-gray-50">
-                          <img src="{{ asset('images/alumni/testimoni3.png') }}" alt="Foto alumni Jonathan William" class="w-full h-full object-cover">
+                    <div class="flex flex-col sm:flex-row items-start gap-4 h-full">
+                      <div class="w-24 sm:w-28 shrink-0 self-stretch">
+                        <div class="h-full w-full overflow-hidden rounded-2xl border border-gray-100 bg-gray-50">
+                          <img src="{{ asset('images/alumni/testimoni3.png') }}" alt="Foto alumni Jonathan William" class="w-full h-full object-cover object-top">
                         </div>
                       </div>
-                      <div class="min-w-0">
-                        <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-4">
+                      <div class="min-w-0 flex flex-col flex-1">
+                        <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-4 flex-1">
                           “Lingkungan belajarnya suportif dan latihan soalnya bertahap. Saya jadi terbiasa menyusun strategi belajar dan mengelola waktu.”
                         </p>
                         <div class="pt-4 border-t border-gray-100">
