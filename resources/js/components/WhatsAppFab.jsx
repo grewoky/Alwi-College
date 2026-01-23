@@ -29,7 +29,7 @@ export default function WhatsAppFab({ phone = "68994432225" }) {
                 role="tooltip"
                 className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 -translate-y-2 whitespace-nowrap bg-gray-900 text-white text-sm px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transform transition-all duration-200 pointer-events-none shadow-lg"
             >
-                Hubungi Customer Service
+                Hubungi Admin
             </span>
         </div>
     );
