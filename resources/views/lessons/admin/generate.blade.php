@@ -561,13 +561,27 @@
   }
 
   .select2-container--bootstrap-5 .select2-selection__arrow b {
-    border-color: #2563eb transparent transparent transparent;
+    border-color: #6b7280 transparent transparent transparent;
     border-width: 6px 4px 0 4px;
   }
 
   .select2-container--bootstrap-5.select2-container--open .select2-selection__arrow b {
-    border-color: transparent transparent #2563eb transparent;
+    border-color: transparent transparent #6b7280 transparent;
     border-width: 0 4px 6px 4px;
+  }
+
+  /* Hide blue indicator icon from Select2 Bootstrap 5 theme */
+  .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered::before,
+  .select2-container--bootstrap-5 .select2-selection--single::before,
+  .select2-container--bootstrap-5 .select2-selection__placeholder::before {
+    display: none !important;
+    content: none !important;
+  }
+
+  /* Remove any blue checkmark/icon indicators */
+  .select2-container--bootstrap-5 .form-select-feedback-icon,
+  .select2-container--bootstrap-5 .select2-selection--single .form-select-feedback-icon {
+    display: none !important;
   }
 </style>
 
