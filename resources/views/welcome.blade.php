@@ -197,22 +197,22 @@
           <h2 class="text-2xl sm:text-3xl font-semibold sm:font-bold text-center text-[#3B63B5] heading-accent"><span class="heading-inline">Mengapa Alwi College ?</span></h2>
           <p class="text-center text-gray-600 text-base sm:text-lg mt-2 sm:mt-3 max-w-2xl mx-auto">Belajar jadi lebih fokus, menyenangkan, dan terarah dengan pendampingan intensif serta materi yang dirancang untuk hasil terbaik.</p>
           <div class="mt-5 sm:mt-6 grid gap-3 sm:gap-6 md:grid-cols-3">
-            <article class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 card-hover reveal show text-center">
-              <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-500 text-white mb-3 sm:mb-4 mx-auto">
+            <article class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 card-hover reveal show text-center md:text-left">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-500 text-white mb-2 sm:mb-4 mx-auto md:mx-0">
                 <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18s-3.332.477-4.5 1.253"/></svg>
               </div>
               <h3 class="font-semibold text-base sm:text-lg mb-1 sm:mb-2">Materi Lengkap & Terstruktur</h3>
               <p class="text-sm sm:text-base text-gray-600">Kurikulum up-to-date, ringkasan materi, latihan terarah, dan bank soal berlevel.</p>
             </article>
-            <article class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 card-hover reveal show text-center">
-              <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-emerald-500 to-teal-500 text-white mb-3 sm:mb-4 mx-auto">
+            <article class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 card-hover reveal show text-center md:text-left">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-emerald-500 to-teal-500 text-white mb-2 sm:mb-4 mx-auto md:mx-0">
                 <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-4-4h-1M7 20H2v-2a4 4 0 014-4h1m10-5a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
               </div>
               <h3 class="font-semibold text-base sm:text-lg mb-1 sm:mb-2">Pengajar Berpengalaman</h3>
               <p class="text-sm sm:text-base text-gray-600">Mentor berpengalaman, pendampingan personal, dan strategi belajar yang efektif.</p>
             </article>
-            <article class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 card-hover reveal show text-center">
-              <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-pink-500 to-rose-500 text-white mb-3 sm:mb-4 mx-auto">
+            <article class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 card-hover reveal show text-center md:text-left">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-pink-500 to-rose-500 text-white mb-2 sm:mb-4 mx-auto md:mx-0">
                 <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9 9 0 1021 12h-8V4a9 9 0 00-2-.945z"/></svg>
               </div>
               <h3 class="font-semibold text-base sm:text-lg mb-1 sm:mb-2">Monitoring Progres</h3>
@@ -237,14 +237,13 @@
 
                 <div class="mt-5 sm:mt-6 grid gap-3 sm:gap-6 md:grid-cols-3">
                   <article class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 card-hover reveal show">
-                    <div class="flex flex-col sm:flex-row items-start gap-4 h-full">
-                      <div class="w-24 sm:w-28 shrink-0 self-stretch">
-                        <div class="h-full w-full overflow-hidden rounded-2xl border border-gray-100 bg-gray-50">
-                          <img src="{{ asset('images/alumni/testimoni1.png') }}" alt="Foto alumni Rizky Pratama" class="w-full h-full object-cover object-top">
+                    <div class="flex flex-col sm:flex-row sm:items-stretch items-start gap-4">
+                      <div class="w-28 shrink-0">
+                        <div class="aspect-[3/4] w-full overflow-hidden rounded-2xl border border-gray-100 bg-gray-50">
+                          <img src="{{ asset('images/alumni/testimoni1.png') }}" alt="Foto alumni Rizky Pratama" class="w-full h-full object-cover">
                         </div>
                       </div>
-                      <div class="min-w-0 flex flex-col flex-1">
-                        <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-4 flex-1">
+                      <div class="min-w-0 flex flex-col flex-1"><p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-4 flex-1">
                           “Belajar di Alwi College membuat saya lebih disiplin dan percaya diri. Pola latihan yang terarah membantu saya membangun fondasi yang kuat.”
                         </p>
                         <div class="pt-4 border-t border-gray-100">
@@ -258,13 +257,11 @@
 
                   <article class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 card-hover reveal show">
                     <div class="flex flex-col sm:flex-row items-start gap-4 h-full">
-                      <div class="w-24 sm:w-28 shrink-0 self-stretch">
-                        <div class="h-full w-full overflow-hidden rounded-2xl border border-gray-100 bg-gray-50">
+                      <div class="w-24 sm:w-28 shrink-0 self-stretch"><div class="h-full w-full overflow-hidden rounded-2xl border border-gray-100 bg-gray-50">
                           <img src="{{ asset('images/alumni/testimoni2.png') }}" alt="Foto alumni Nadia Putri" class="w-full h-full object-cover object-top">
                         </div>
                       </div>
-                      <div class="min-w-0 flex flex-col flex-1">
-                        <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-4 flex-1">
+                      <div class="min-w-0 flex flex-col flex-1"><p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-4 flex-1">
                           “Pendampingan mentor dan pembahasan materi yang rapi membuat saya lebih mudah memahami konsep. Hasilnya terasa saat menghadapi ujian.”
                         </p>
                         <div class="pt-4 border-t border-gray-100">
@@ -278,13 +275,11 @@
 
                   <article class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 card-hover reveal show">
                     <div class="flex flex-col sm:flex-row items-start gap-4 h-full">
-                      <div class="w-24 sm:w-28 shrink-0 self-stretch">
-                        <div class="h-full w-full overflow-hidden rounded-2xl border border-gray-100 bg-gray-50">
+                      <div class="w-24 sm:w-28 shrink-0 self-stretch"><div class="h-full w-full overflow-hidden rounded-2xl border border-gray-100 bg-gray-50">
                           <img src="{{ asset('images/alumni/testimoni3.png') }}" alt="Foto alumni Jonathan William" class="w-full h-full object-cover object-top">
                         </div>
                       </div>
-                      <div class="min-w-0 flex flex-col flex-1">
-                        <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-4 flex-1">
+                      <div class="min-w-0 flex flex-col flex-1"><p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-4 flex-1">
                           “Lingkungan belajarnya suportif dan latihan soalnya bertahap. Saya jadi terbiasa menyusun strategi belajar dan mengelola waktu.”
                         </p>
                         <div class="pt-4 border-t border-gray-100">
