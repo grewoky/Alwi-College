@@ -138,7 +138,7 @@
                   📎 Pilih File
                 </label>
                 <p class="text-sm text-gray-500 mb-3">
-                  Format yang didukung: pdf, doc, docx, xls, xlsx, ppt, pptx, jpg, jpeg, png, gif, txt, zip, rar, 7z(maks. 10 MB).
+                  Format yang didukung: pdf, doc, docx, xls, xlsx, ppt, pptx, jpg, jpeg, png, gif, txt, zip, rar, 7z (maks. 10 MB).
                 </p>
                 <div class="flex flex-col sm:flex-row sm:items-center gap-3">
                   <button 
