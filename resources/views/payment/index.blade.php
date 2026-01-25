@@ -26,7 +26,7 @@
     </div>
     <div>
       <label class="block text-sm font-medium">Bukti (jpg/png/pdf)</label>
-      <p class="text-xs text-gray-500 mb-2">File dikirim langsung ke Cloudinary agar tidak terkena batas ukuran Vercel.</p>
+      <p class="text-xs text-gray-500 mb-2">Kirim format file yang sesuai.</p>
       <div class="space-y-2">
         <button type="button" id="paymentUploadButton" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">Pilih / Ambil File</button>
         <div id="paymentUploadPreview" class="hidden border border-blue-200 rounded p-3 bg-blue-50 flex items-center gap-3">
