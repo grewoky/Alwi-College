@@ -237,10 +237,9 @@
 
                 <div class="mt-5 sm:mt-6 grid gap-3 sm:gap-6 md:grid-cols-3">
                   <article class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 card-hover reveal show">
-                    <div class="flex flex-col sm:flex-row sm:items-stretch items-start gap-4">
-                      <div class="w-28 shrink-0">
-                        <div class="aspect-[3/4] w-full overflow-hidden rounded-2xl border border-gray-100 bg-gray-50">
-                          <img src="{{ asset('images/alumni/testimoni1.png') }}" alt="Foto alumni Rizky Pratama" class="w-full h-full object-cover">
+                    <div class="flex flex-col sm:flex-row items-start gap-4 h-full">
+                      <div class="w-24 sm:w-28 shrink-0 self-stretch"><div class="h-full w-full overflow-hidden rounded-2xl border border-gray-100 bg-gray-50">
+                          <img src="{{ asset('images/alumni/testimoni1.png') }}" alt="Foto alumni Rizky Pratama" class="w-full h-full object-cover object-top">
                         </div>
                       </div>
                       <div class="min-w-0 flex flex-col flex-1"><p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-4 flex-1">
