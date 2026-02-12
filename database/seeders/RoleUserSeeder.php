@@ -15,10 +15,20 @@ class RoleUserSeeder extends Seeder
             Role::firstOrCreate(['name' => $r, 'guard_name' => 'web']);
         }
 
-        $admin = User::updateOrCreate(
-            ['email' => 'admin@alwi.test'],
-            ['name' => 'Admin', 'password' => Hash::make('password')]
-        );
+        // Find old admin user and update, or create new one
+        $admin = User::where('email', 'admin@alwi.test')->first();
+        if ($admin) {
+            $admin->update([
+                'email' => 'siswa.alwicollege.x@gmail.com',
+                'password' => Hash::make('alwi88888')
+            ]);
+        } else {
+            $admin = User::create([
+                'email' => 'siswa.alwicollege.x@gmail.com',
+                'name' => 'Admin',
+                'password' => Hash::make('alwi88888')
+            ]);
+        }
         $teacher = User::updateOrCreate(
             ['email' => 'guru@alwi.test'],
             ['name' => 'Guru', 'password' => Hash::make('password')]
